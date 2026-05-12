@@ -349,7 +349,11 @@ function SetupWizard({ user, auth }) {
                 <label style={{ color:"rgba(255,255,255,0.7)", fontSize:13, fontWeight:600, display:"block", marginBottom:6 }}>GRADE</label>
                 <select value={grade} onChange={e => setGrade(e.target.value)}
                   style={{ width:"100%", padding:"14px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"#1e3a5f", color:"#fff", fontSize:15, outline:"none" }}>
-                  {["1","2","3","4","5","6","7","8","9","10","11","12"].map(g => <option key={g} value={g}>Grade {g}</option>)}
+                  {["1","2","3","4","5","6","7","8","9","10","11","12",
+  "1/2","2/3","3/4","4/5","5/6","6/7","7/8",
+  "K","K/1","Multi-grade"].map(g => (
+  <option key={g} value={g}>{g.includes("/")||g==="K"||g==="Multi-grade" ? g : `Grade ${g}`}</option>
+))}
                 </select>
               </div>
               <div style={{ flex:1 }}>
