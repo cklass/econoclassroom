@@ -206,22 +206,234 @@ function RegisterScreen({ auth, setScreen }) {
   );
 }
 
-// ── Dashboard (placeholder) ───────────────────────────────────────────────────
-function Dashboard({ user, auth, setScreen }) {
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function Dashboard({ user, auth }) {
+  const [classroom, setClassroom] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const unsub = subscribeToFirebase(`teachers/${user.uid}/classroom`, data => {
+      setClassroom(data);
+      setLoading(false);
+    });
+    return unsub;
+  }, [user.uid]);
+
+  if (loading) return (
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#f8fafc" }}>
+      <div style={{ fontSize:18, color:"#64748b", fontFamily:"'Segoe UI',sans-serif" }}>Loading your classroom...</div>
+    </div>
+  );
+
+  if (!classroom) return <SetupWizard user={user} auth={auth}/>;
+  return <ClassroomApp user={user} auth={auth} classroom={classroom}/>;
+}
+
+// ── Setup Wizard ──────────────────────────────────────────────────────────────
+const DINO_OPTIONS = [
+  { id:"trex",            name:"T-Rex",           emoji:"🦖", color:"#C0392B" },
+  { id:"triceratops",     name:"Triceratops",      emoji:"🦕", color:"#1E8449" },
+  { id:"stegosaurus",     name:"Stegosaurus",      emoji:"🦕", color:"#6C3483" },
+  { id:"brachiosaurus",   name:"Brachiosaurus",    emoji:"🦕", color:"#1A5276" },
+  { id:"pterodactyl",     name:"Pterodactyl",      emoji:"🦅", color:"#B7770D" },
+  { id:"ankylosaurus",    name:"Ankylosaurus",     emoji:"🦕", color:"#0E6655" },
+  { id:"spinosaurus",     name:"Spinosaurus",      emoji:"🦖", color:"#A04000" },
+  { id:"velociraptor",    name:"Velociraptor",     emoji:"🦕", color:"#6E4C1E" },
+  { id:"diplodocus",      name:"Diplodocus",       emoji:"🦕", color:"#2E4057" },
+  { id:"parasaurolophus", name:"Parasaurolophus",  emoji:"🦕", color:"#117A65" },
+];
+
+function SetupWizard({ user, auth }) {
+  const [step, setStep] = React.useState(1);
+  const [className, setClassName] = React.useState("");
+  const [currency, setCurrency] = React.useState("Dino Bucks");
+  const [currencyEmoji, setCurrencyEmoji] = React.useState("🦕");
+  const [grade, setGrade] = React.useState("6");
+  const [province, setProvince] = React.useState("Ontario");
+  const [students, setStudents] = React.useState([
+    { id:1, name:"", dino:"trex" },
+    { id:2, name:"", dino:"triceratops" },
+    { id:3, name:"", dino:"stegosaurus" },
+  ]);
+  const [saving, setSaving] = React.useState(false);
+
+  const addStudent = () => {
+    const dino = DINO_OPTIONS[students.length % DINO_OPTIONS.length].id;
+    setStudents(prev => [...prev, { id: Date.now(), name:"", dino }]);
+  };
+
+  const removeStudent = (id) => setStudents(prev => prev.filter(s => s.id !== id));
+
+  const updateStudent = (id, field, value) => {
+    setStudents(prev => prev.map(s => s.id === id ? { ...s, [field]:value } : s));
+  };
+
+  const finish = async () => {
+    const validStudents = students.filter(s => s.name.trim());
+    if (!className.trim()) { alert("Please enter a class name!"); return; }
+    if (validStudents.length === 0) { alert("Please add at least one student!"); return; }
+    setSaving(true);
+
+    const studentData = validStudents.map(s => ({
+      id: Math.random().toString(36).slice(2),
+      name: s.name.trim(),
+      dinoId: s.dino,
+      username: s.name.trim().toLowerCase().replace(/\s+/g,"").slice(0,10),
+      password: Math.random().toString(36).slice(2,8),
+    }));
+
+    const balances = {};
+    studentData.forEach(s => { balances[s.id] = 0; });
+
+    const classroom = {
+      name: className.trim(),
+      currency, currencyEmoji, grade, province,
+      students: studentData,
+      balances,
+      jobs: [],
+      assigned: {},
+      txLog: [],
+      storeItems: [],
+      purchases: [],
+      createdAt: new Date().toISOString(),
+    };
+
+    await saveToFirebase(`teachers/${user.uid}/classroom`, classroom);
+  };
+
+  const stepStyle = (n) => ({
+    width:32, height:32, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center",
+    background: step >= n ? "#22c55e" : "#e2e8f0",
+    color: step >= n ? "#fff" : "#94a3b8",
+    fontWeight:700, fontSize:14, flexShrink:0,
+  });
+
+  return (
+    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f172a,#1e3a5f)", fontFamily:"'Segoe UI',sans-serif", padding:"40px 20px" }}>
+      {/* Header */}
+      <div style={{ textAlign:"center", marginBottom:40 }}>
+        <span style={{ fontSize:48 }}>🦕</span>
+        <h1 style={{ color:"#fff", fontSize:28, fontWeight:800, margin:"12px 0 4px" }}>Set Up Your Classroom</h1>
+        <p style={{ color:"rgba(255,255,255,0.5)", fontSize:15 }}>Just 2 steps to get started!</p>
+      </div>
+
+      {/* Steps indicator */}
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8, marginBottom:40 }}>
+        <div style={stepStyle(1)}>1</div>
+        <div style={{ width:60, height:2, background: step >= 2 ? "#22c55e" : "#e2e8f0" }}/>
+        <div style={stepStyle(2)}>2</div>
+        <div style={{ width:60, height:2, background: step >= 3 ? "#22c55e" : "#e2e8f0" }}/>
+        <div style={stepStyle(3)}>✓</div>
+      </div>
+
+      <div style={{ maxWidth:600, margin:"0 auto", background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:24, padding:"40px 36px" }}>
+
+        {/* Step 1: Classroom details */}
+        {step === 1 && (
+          <div>
+            <h2 style={{ color:"#fff", fontSize:22, fontWeight:700, marginBottom:24 }}>📚 Classroom Details</h2>
+            <label style={{ color:"rgba(255,255,255,0.7)", fontSize:13, fontWeight:600, display:"block", marginBottom:6 }}>CLASS NAME</label>
+            <input value={className} onChange={e => setClassName(e.target.value)} placeholder="e.g. Mr. Klassen's Class 6A"
+              style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:15, outline:"none", marginBottom:20, boxSizing:"border-box" }}/>
+
+            <label style={{ color:"rgba(255,255,255,0.7)", fontSize:13, fontWeight:600, display:"block", marginBottom:6 }}>CURRENCY NAME</label>
+            <div style={{ display:"flex", gap:8, marginBottom:20 }}>
+              <input value={currencyEmoji} onChange={e => setCurrencyEmoji(e.target.value)} maxLength={2}
+                style={{ width:60, padding:"14px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:22, outline:"none", textAlign:"center" }}/>
+              <input value={currency} onChange={e => setCurrency(e.target.value)} placeholder="Dino Bucks"
+                style={{ flex:1, padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:15, outline:"none" }}/>
+            </div>
+
+            <div style={{ display:"flex", gap:16, marginBottom:20 }}>
+              <div style={{ flex:1 }}>
+                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:13, fontWeight:600, display:"block", marginBottom:6 }}>GRADE</label>
+                <select value={grade} onChange={e => setGrade(e.target.value)}
+                  style={{ width:"100%", padding:"14px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"#1e3a5f", color:"#fff", fontSize:15, outline:"none" }}>
+                  {["1","2","3","4","5","6","7","8","9","10","11","12"].map(g => <option key={g} value={g}>Grade {g}</option>)}
+                </select>
+              </div>
+              <div style={{ flex:1 }}>
+                <label style={{ color:"rgba(255,255,255,0.7)", fontSize:13, fontWeight:600, display:"block", marginBottom:6 }}>PROVINCE</label>
+                <select value={province} onChange={e => setProvince(e.target.value)}
+                  style={{ width:"100%", padding:"14px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"#1e3a5f", color:"#fff", fontSize:15, outline:"none" }}>
+                  {["Ontario","British Columbia","Alberta","Quebec","Manitoba","Saskatchewan","Nova Scotia","New Brunswick","Newfoundland","PEI"].map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <button onClick={() => { if (!className.trim()) { alert("Please enter a class name!"); return; } setStep(2); }}
+              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700 }}>
+              Next: Add Students →
+            </button>
+          </div>
+        )}
+
+        {/* Step 2: Add students */}
+        {step === 2 && (
+          <div>
+            <h2 style={{ color:"#fff", fontSize:22, fontWeight:700, marginBottom:8 }}>👨‍🎓 Add Your Students</h2>
+            <p style={{ color:"rgba(255,255,255,0.5)", fontSize:14, marginBottom:24 }}>Add students now or skip and add them later.</p>
+
+            <div style={{ maxHeight:400, overflowY:"auto", marginBottom:16 }}>
+              {students.map((s, i) => (
+                <div key={s.id} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:10 }}>
+                  <div style={{ color:"rgba(255,255,255,0.4)", fontSize:13, width:24, textAlign:"right", flexShrink:0 }}>{i+1}</div>
+                  <input value={s.name} onChange={e => updateStudent(s.id, "name", e.target.value)}
+                    placeholder={`Student ${i+1} name`}
+                    style={{ flex:1, padding:"11px 14px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:14, outline:"none" }}/>
+                  <select value={s.dino} onChange={e => updateStudent(s.id, "dino", e.target.value)}
+                    style={{ padding:"11px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"#1e3a5f", color:"#fff", fontSize:13, outline:"none" }}>
+                    {DINO_OPTIONS.map(d => <option key={d.id} value={d.id}>{d.emoji} {d.name}</option>)}
+                  </select>
+                  <button onClick={() => removeStudent(s.id)}
+                    style={{ padding:"8px 12px", background:"rgba(239,68,68,0.2)", color:"#f87171", border:"1px solid rgba(239,68,68,0.3)", borderRadius:8, cursor:"pointer", fontSize:16 }}>✕</button>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={addStudent}
+              style={{ width:"100%", padding:"12px", background:"rgba(255,255,255,0.08)", color:"rgba(255,255,255,0.7)", border:"1.5px dashed rgba(255,255,255,0.2)", borderRadius:10, cursor:"pointer", fontSize:15, marginBottom:20 }}>
+              + Add Another Student
+            </button>
+
+            <div style={{ display:"flex", gap:12 }}>
+              <button onClick={() => setStep(1)}
+                style={{ padding:"14px 24px", background:"rgba(255,255,255,0.08)", color:"#fff", border:"1.5px solid rgba(255,255,255,0.2)", borderRadius:10, cursor:"pointer", fontSize:15, fontWeight:600 }}>
+                ← Back
+              </button>
+              <button onClick={finish} disabled={saving}
+                style={{ flex:1, padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700 }}>
+                {saving ? "Creating classroom..." : "🦕 Launch My Classroom!"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ textAlign:"center", marginTop:20 }}>
+        <button onClick={() => signOut(auth)} style={{ background:"none", border:"none", color:"rgba(255,255,255,0.3)", cursor:"pointer", fontSize:13 }}>Sign out</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Classroom App (placeholder) ───────────────────────────────────────────────
+function ClassroomApp({ user, auth, classroom }) {
   return (
     <div style={{ minHeight:"100vh", background:"#f8fafc", fontFamily:"'Segoe UI',sans-serif" }}>
       <nav style={{ background:"#fff", borderBottom:"1px solid #e2e8f0", padding:"16px 32px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <span style={{ fontSize:28 }}>🦕</span>
-          <span style={{ fontSize:20, fontWeight:700, color:"#0f172a" }}>EconoClassroom</span>
+          <span style={{ fontSize:28 }}>{classroom.currencyEmoji}</span>
+          <span style={{ fontSize:20, fontWeight:700, color:"#0f172a" }}>{classroom.name}</span>
         </div>
         <button onClick={() => signOut(auth)} style={{ padding:"8px 20px", background:"#f1f5f9", color:"#64748b", border:"none", borderRadius:8, cursor:"pointer", fontSize:14, fontWeight:600 }}>
           Sign Out
         </button>
       </nav>
       <div style={{ padding:"48px 32px", textAlign:"center" }}>
-        <h2 style={{ fontSize:32, color:"#0f172a", marginBottom:8 }}>Welcome! 🦕</h2>
-        <p style={{ color:"#64748b", fontSize:16 }}>Your classroom dashboard is being built. Check back soon!</p>
+        <h2 style={{ fontSize:32, color:"#0f172a", marginBottom:8 }}>🎉 Your classroom is ready!</h2>
+        <p style={{ color:"#64748b", fontSize:16, marginBottom:8 }}>{classroom.students?.length || 0} students · Grade {classroom.grade} · {classroom.province}</p>
+        <p style={{ color:"#94a3b8", fontSize:14 }}>Full dashboard coming next!</p>
       </div>
     </div>
   );
