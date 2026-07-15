@@ -80,7 +80,7 @@ function LandingPage({ setScreen }) {
       </div>
 
       {/* Features */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:24, padding:"40px", maxWidth:1200, margin:"0 auto" }}>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:24, padding:"40px", maxWidth:1200, margin:"0 auto" }}>
         {[
           { emoji:"💰", title:"Classroom Economy", desc:"Students earn, save and spend a custom currency tied to jobs, behaviour and achievements." },
           { emoji:"📈", title:"Real Stock Market", desc:"Students invest in real TSX-linked stocks and watch their portfolio grow day by day." },
