@@ -604,7 +604,7 @@ function ClassroomApp({ user, auth, classroom }) {
 
         {/* ═══ PAY ═══ */}
         {tab==="pay" && (
-          <div style={{ maxWidth:640 }}>
+          <div style={{ maxWidth:800, margin:"0 auto" }}>
             <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>💵 Pay Students</h2>
             <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
               <div style={{ marginBottom:20 }}>
