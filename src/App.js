@@ -433,10 +433,27 @@ function ClassroomApp({ user, auth, classroom }) {
   const [deductModal, setDeductModal] = React.useState(false);
   const [deductAmt, setDeductAmt] = React.useState("");
   const [deductReason, setDeductReason] = React.useState("Deduction");
+  const [dinoPos, setDinoPos] = React.useState(-100);
+  const [showDino, setShowDino] = React.useState(true);
 
   const fmt = n => `${appState.currencyEmoji}${Number(n).toLocaleString()}`;
   const uuid = () => Math.random().toString(36).slice(2);
   const todayStr = () => new Date().toISOString().slice(0, 10);
+
+  // Startup dino animation
+  React.useEffect(() => {
+    if (!showDino) return;
+    let pos = -100;
+    const interval = setInterval(() => {
+      pos += 4;
+      setDinoPos(pos);
+      if (pos > window.innerWidth + 100) {
+        clearInterval(interval);
+        setShowDino(false);
+      }
+    }, 16);
+    return () => clearInterval(interval);
+  }, []);
 
   const showToast = (msg, color="#22c55e") => {
     setToast({ msg, color });
@@ -460,6 +477,7 @@ function ClassroomApp({ user, auth, classroom }) {
   const students = appState?.students || [];
   const balances = appState?.balances || {};
   const selStudent = students.find(s => s.id === selected);
+  const totalBalance = Object.values(balances).reduce((a,b) => a+b, 0);
 
   const tabs = [
     { id:"dashboard", label:"🏠 Class" },
@@ -469,89 +487,108 @@ function ClassroomApp({ user, auth, classroom }) {
     { id:"history",   label:"📋 History" },
   ];
 
+  const DINO_EMOJIS = ["🦕","🦖","🦕","🦖"];
+  const randDino = DINO_EMOJIS[Math.floor(Math.random() * DINO_EMOJIS.length)];
+
   return (
-    <div style={{ minHeight:"100vh", background:"#f8fafc", fontFamily:"'Segoe UI',sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:"#f1f5f9", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
+
+      {/* Startup dino animation */}
+      {showDino && (
+        <div style={{ position:"fixed", bottom:20, left:dinoPos, fontSize:48, zIndex:9999, pointerEvents:"none", filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.2))", transition:"none" }}>
+          {randDino}
+        </div>
+      )}
+
       {/* Toast */}
       {toast && (
-        <div style={{ position:"fixed", top:20, right:20, background:toast.color, color:"#fff", padding:"12px 24px", borderRadius:12, zIndex:9999, fontWeight:600, boxShadow:"0 8px 24px rgba(0,0,0,0.15)" }}>
+        <div style={{ position:"fixed", top:20, right:20, background:toast.color, color:"#fff", padding:"12px 24px", borderRadius:12, zIndex:9998, fontWeight:600, boxShadow:"0 8px 24px rgba(0,0,0,0.15)", fontSize:14 }}>
           {toast.msg}
         </div>
       )}
 
       {/* Nav */}
-      <nav style={{ background:"#fff", borderBottom:"1px solid #e2e8f0", padding:"0 32px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:16 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:8, padding:"16px 0", borderRight:"1px solid #e2e8f0", paddingRight:24, marginRight:8 }}>
-            <span style={{ fontSize:24 }}>{appState.currencyEmoji}</span>
+      <nav style={{ background:"#0f172a", padding:"0 32px", display:"flex", justifyContent:"space-between", alignItems:"center", boxShadow:"0 4px 16px rgba(0,0,0,0.3)" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:0 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, padding:"16px 24px 16px 0", marginRight:16, borderRight:"1px solid rgba(255,255,255,0.1)" }}>
+            <span style={{ fontSize:22 }}>{appState.currencyEmoji}</span>
             <div>
-              <div style={{ fontSize:16, fontWeight:700, color:"#0f172a" }}>{appState.name}</div>
-              <div style={{ fontSize:12, color:"#94a3b8" }}>Grade {appState.grade} · {appState.province}</div>
+              <div style={{ fontSize:15, fontWeight:700, color:"#fff" }}>{appState.name}</div>
+              <div style={{ fontSize:11, color:"#64748b" }}>Grade {appState.grade} · {appState.province}</div>
             </div>
           </div>
           {tabs.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
-              padding:"20px 16px", background:"none", border:"none", cursor:"pointer",
-              fontSize:14, fontWeight:600, color: tab===t.id ? "#22c55e" : "#64748b",
+              padding:"20px 18px", background:"none", border:"none", cursor:"pointer",
+              fontSize:13, fontWeight:600, color: tab===t.id ? "#22c55e" : "#94a3b8",
               borderBottom: tab===t.id ? "2px solid #22c55e" : "2px solid transparent",
-              transition:"all 0.2s"
+              transition:"all 0.15s", whiteSpace:"nowrap"
             }}>{t.label}</button>
           ))}
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <div style={{ fontSize:13, color:"#94a3b8" }}>{students.length} students</div>
-          <button onClick={() => signOut(auth)} style={{ padding:"8px 20px", background:"#f1f5f9", color:"#64748b", border:"none", borderRadius:8, cursor:"pointer", fontSize:14, fontWeight:600 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ fontSize:13, fontWeight:700, color:"#22c55e" }}>{fmt(totalBalance)}</div>
+            <div style={{ fontSize:11, color:"#64748b" }}>total in circulation</div>
+          </div>
+          <button onClick={() => signOut(auth)} style={{ padding:"8px 16px", background:"rgba(255,255,255,0.08)", color:"#94a3b8", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600 }}>
             Sign Out
           </button>
         </div>
       </nav>
 
-      <div style={{ padding:"32px", maxWidth:1400, margin:"0 auto" }}>
+      <div style={{ padding:"24px 32px", maxWidth:1600, margin:"0 auto" }}>
 
         {/* ═══ DASHBOARD ═══ */}
         {tab==="dashboard" && (
           <div>
-            {/* Stats row */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:16, marginBottom:32 }}>
+            {/* Stats strip */}
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
               {[
-                { label:"Total Students", value:students.length, icon:"👨‍🎓", color:"#3b82f6" },
-                { label:"Total Currency", value:fmt(Object.values(balances).reduce((a,b)=>a+b,0)), icon:"💰", color:"#22c55e" },
-                { label:"Avg Balance", value:fmt(Math.round(Object.values(balances).reduce((a,b)=>a+b,0)/(students.length||1))), icon:"📊", color:"#8b5cf6" },
-                { label:"Transactions", value:(appState?.txLog||[]).length, icon:"📋", color:"#f59e0b" },
+                { label:"Students", value:students.length, icon:"👨‍🎓", color:"#3b82f6", bg:"#eff6ff" },
+                { label:"In Circulation", value:fmt(totalBalance), icon:"💰", color:"#22c55e", bg:"#f0fdf4" },
+                { label:"Avg Balance", value:fmt(Math.round(totalBalance/(students.length||1))), icon:"📊", color:"#8b5cf6", bg:"#f5f3ff" },
+                { label:"Transactions", value:(appState?.txLog||[]).length, icon:"📋", color:"#f59e0b", bg:"#fffbeb" },
               ].map(stat => (
-                <div key={stat.label} style={{ background:"#fff", borderRadius:16, padding:20, boxShadow:"0 1px 3px rgba(0,0,0,0.1)", border:"1px solid #e2e8f0" }}>
-                  <div style={{ fontSize:28, marginBottom:8 }}>{stat.icon}</div>
-                  <div style={{ fontSize:24, fontWeight:800, color:stat.color, marginBottom:4 }}>{stat.value}</div>
-                  <div style={{ fontSize:13, color:"#94a3b8" }}>{stat.label}</div>
+                <div key={stat.label} style={{ background:"#fff", borderRadius:12, padding:"16px 20px", boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", display:"flex", alignItems:"center", gap:14 }}>
+                  <div style={{ width:44, height:44, borderRadius:12, background:stat.bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0 }}>{stat.icon}</div>
+                  <div>
+                    <div style={{ fontSize:22, fontWeight:800, color:stat.color }}>{stat.value}</div>
+                    <div style={{ fontSize:12, color:"#94a3b8", fontWeight:500 }}>{stat.label}</div>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Student grid */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:16 }}>
+            {/* Student grid - compact to fit all on screen */}
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))", gap:10 }}>
               {students.sort((a,b) => (balances[b.id]||0) - (balances[a.id]||0)).map(s => {
                 const bal = balances[s.id] || 0;
                 const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
                 const isSelected = selected === s.id;
+                const job = (appState?.jobs||[]).find(j => j.id === (appState?.assigned||{})[s.id]);
                 return (
                   <div key={s.id} onClick={() => setSelected(isSelected ? null : s.id)}
-                    style={{ background:"#fff", borderRadius:16, padding:20, cursor:"pointer", border:`2px solid ${isSelected?"#22c55e":"#e2e8f0"}`,
-                      boxShadow: isSelected?"0 4px 16px rgba(34,197,94,0.2)":"0 1px 3px rgba(0,0,0,0.1)", transition:"all 0.2s" }}>
-                    <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}>
-                      <div style={{ width:40, height:40, borderRadius:"50%", background:`${dino.color}22`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>
+                    style={{ background:"#fff", borderRadius:12, padding:"14px 12px", cursor:"pointer",
+                      border:`2px solid ${isSelected?"#22c55e":"#e2e8f0"}`,
+                      boxShadow: isSelected?"0 4px 16px rgba(34,197,94,0.15)":"0 1px 3px rgba(0,0,0,0.06)",
+                      transition:"all 0.15s" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                      <div style={{ width:32, height:32, borderRadius:8, background:`${dino.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>
                         {dino.emoji}
                       </div>
-                      <div>
-                        <div style={{ fontWeight:700, fontSize:14, color:"#0f172a" }}>{s.name}</div>
-                        <div style={{ fontSize:12, color:"#94a3b8" }}>{s.username}</div>
+                      <div style={{ overflow:"hidden" }}>
+                        <div style={{ fontWeight:700, fontSize:12, color:"#0f172a", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name}</div>
+                        <div style={{ fontSize:10, color:"#94a3b8", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{job ? `${job.emoji} ${job.name}` : "No job"}</div>
                       </div>
                     </div>
-                    <div style={{ fontSize:24, fontWeight:800, color:"#22c55e" }}>{fmt(bal)}</div>
+                    <div style={{ fontSize:20, fontWeight:800, color:"#22c55e" }}>{fmt(bal)}</div>
                     {isSelected && (
-                      <div style={{ display:"flex", gap:8, marginTop:12 }}>
+                      <div style={{ display:"flex", gap:6, marginTop:10 }}>
                         <button onClick={e => { e.stopPropagation(); setTab("pay"); }}
-                          style={{ flex:1, padding:"8px", background:"#22c55e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600 }}>💵 Pay</button>
+                          style={{ flex:1, padding:"6px", background:"#22c55e", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:700 }}>💵 Pay</button>
                         <button onClick={e => { e.stopPropagation(); setDeductModal(true); }}
-                          style={{ flex:1, padding:"8px", background:"#ef4444", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600 }}>− Deduct</button>
+                          style={{ flex:1, padding:"6px", background:"#ef4444", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:700 }}>− Deduct</button>
                       </div>
                     )}
                   </div>
@@ -563,50 +600,66 @@ function ClassroomApp({ user, auth, classroom }) {
 
         {/* ═══ PAY ═══ */}
         {tab==="pay" && (
-          <div style={{ maxWidth:600 }}>
-            <h2 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:24 }}>💵 Pay Students</h2>
-            <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.1)", border:"1px solid #e2e8f0", marginBottom:20 }}>
-              <label style={{ fontSize:13, fontWeight:600, color:"#64748b", display:"block", marginBottom:8 }}>SELECT STUDENTS</label>
-              <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:16 }}>
-                <button onClick={() => setSelected("all")}
-                  style={{ padding:"8px 16px", borderRadius:8, border:"none", cursor:"pointer", fontSize:13, fontWeight:600,
-                    background:selected==="all"?"#22c55e":"#f1f5f9", color:selected==="all"?"#fff":"#64748b" }}>
-                  🌍 Everyone
-                </button>
-                {students.map(s => (
-                  <button key={s.id} onClick={() => setSelected(s.id)}
-                    style={{ padding:"8px 16px", borderRadius:8, border:"none", cursor:"pointer", fontSize:13, fontWeight:600,
-                      background:selected===s.id?"#22c55e":"#f1f5f9", color:selected===s.id?"#fff":"#64748b" }}>
-                    {s.name.split(" ")[0]}
+          <div style={{ maxWidth:640 }}>
+            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>💵 Pay Students</h2>
+            <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
+              <div style={{ marginBottom:20 }}>
+                <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:8, letterSpacing:0.5 }}>SELECT RECIPIENT</label>
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                  <button onClick={() => setSelected("all")}
+                    style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${selected==="all"?"#22c55e":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
+                      background:selected==="all"?"#22c55e":"#fff", color:selected==="all"?"#fff":"#64748b" }}>
+                    🌍 Everyone
                   </button>
-                ))}
+                  {students.map(s => (
+                    <button key={s.id} onClick={() => setSelected(s.id)}
+                      style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${selected===s.id?"#22c55e":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
+                        background:selected===s.id?"#22c55e":"#fff", color:selected===s.id?"#fff":"#64748b" }}>
+                      {s.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <label style={{ fontSize:13, fontWeight:600, color:"#64748b", display:"block", marginBottom:8 }}>AMOUNT</label>
-              <input type="number" value={payAmt} onChange={e => setPayAmt(e.target.value)} placeholder="10"
-                style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:18, fontWeight:700, outline:"none", marginBottom:16, boxSizing:"border-box" }}/>
-              <label style={{ fontSize:13, fontWeight:600, color:"#64748b", display:"block", marginBottom:8 }}>REASON</label>
-              <input value={payReason} onChange={e => setPayReason(e.target.value)} placeholder="Job completed, bonus…"
-                style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", marginBottom:16, boxSizing:"border-box" }}/>
-              <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:20 }}>
-                {["Job completed","Great work!","Bonus","Homework done","Helped a classmate","Participation"].map(r => (
-                  <button key={r} onClick={() => setPayReason(r)}
-                    style={{ padding:"6px 12px", background: payReason===r?"#22c55e":"#f1f5f9", color:payReason===r?"#fff":"#64748b", border:"none", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>{r}</button>
-                ))}
+
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:20 }}>
+                <div>
+                  <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:8, letterSpacing:0.5 }}>AMOUNT</label>
+                  <input type="number" value={payAmt} onChange={e => setPayAmt(e.target.value)} placeholder="10"
+                    style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:20, fontWeight:800, outline:"none", boxSizing:"border-box" }}/>
+                  <div style={{ display:"flex", gap:6, marginTop:8, flexWrap:"wrap" }}>
+                    {[1,2,5,10,20,50].map(a => (
+                      <button key={a} onClick={() => setPayAmt(String(a))}
+                        style={{ padding:"4px 10px", background:"#f1f5f9", border:"none", borderRadius:6, cursor:"pointer", fontSize:12, fontWeight:600, color:"#64748b" }}>{fmt(a)}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:8, letterSpacing:0.5 }}>REASON</label>
+                  <input value={payReason} onChange={e => setPayReason(e.target.value)} placeholder="Job completed…"
+                    style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
+                  <div style={{ display:"flex", gap:6, marginTop:8, flexWrap:"wrap" }}>
+                    {["Job completed","Great work!","Bonus","Participation"].map(r => (
+                      <button key={r} onClick={() => setPayReason(r)}
+                        style={{ padding:"4px 10px", background: payReason===r?"#22c55e":"#f1f5f9", color:payReason===r?"#fff":"#64748b", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>{r}</button>
+                    ))}
+                  </div>
+                </div>
               </div>
+
               <button onClick={() => {
                 const amt = parseInt(payAmt);
                 if (!amt || amt <= 0) { showToast("Enter a valid amount!", "#ef4444"); return; }
                 if (!selected) { showToast("Select a student first!", "#ef4444"); return; }
                 if (selected === "all") {
                   students.forEach(s => addTx(s.id, amt, payReason));
-                  showToast(`Paid ${fmt(amt)} to all ${students.length} students!`);
+                  showToast(`Paid ${fmt(amt)} to all ${students.length} students! 🎉`);
                 } else {
                   addTx(selected, amt, payReason);
-                  showToast(`Paid ${fmt(amt)} to ${selStudent?.name}!`);
+                  showToast(`Paid ${fmt(amt)} to ${selStudent?.name}! 💰`);
                 }
                 setPayAmt("");
-              }} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:16, fontWeight:700 }}>
-                💸 Pay {selected === "all" ? "Everyone" : selStudent?.name || "..."}
+              }} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:16, fontWeight:700, boxShadow:"0 4px 12px rgba(34,197,94,0.3)" }}>
+                💸 Pay {selected === "all" ? `Everyone (${students.length})` : selStudent?.name || "..."}
               </button>
             </div>
           </div>
@@ -615,27 +668,31 @@ function ClassroomApp({ user, auth, classroom }) {
         {/* ═══ HISTORY ═══ */}
         {tab==="history" && (
           <div>
-            <h2 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:24 }}>📋 Transaction History</h2>
-            <div style={{ background:"#fff", borderRadius:16, boxShadow:"0 1px 3px rgba(0,0,0,0.1)", border:"1px solid #e2e8f0", overflow:"hidden" }}>
+            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>📋 Transaction History</h2>
+            <div style={{ background:"#fff", borderRadius:16, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", overflow:"hidden" }}>
               {(appState?.txLog||[]).slice(0,50).map((t,i) => {
                 const s = students.find(st => st.id === t.studentId);
+                const dino = DINO_OPTIONS.find(d => d.id === s?.dinoId) || DINO_OPTIONS[0];
                 return (
-                  <div key={t.id} style={{ display:"flex", alignItems:"center", gap:16, padding:"16px 24px", borderBottom:"1px solid #f1f5f9", background: i%2===0?"#fff":"#f8fafc" }}>
-                    <div style={{ width:36, height:36, borderRadius:"50%", background: t.amount>=0?"#dcfce7":"#fee2e2", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>
+                  <div key={t.id} style={{ display:"flex", alignItems:"center", gap:16, padding:"14px 24px", borderBottom:"1px solid #f8fafc" }}>
+                    <div style={{ width:36, height:36, borderRadius:10, background: t.amount>=0?"#f0fdf4":"#fef2f2", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>
                       {t.amount>=0?"💰":"💸"}
+                    </div>
+                    <div style={{ width:32, height:32, borderRadius:8, background:`${dino.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>
+                      {dino.emoji}
                     </div>
                     <div style={{ flex:1 }}>
                       <div style={{ fontWeight:600, fontSize:14, color:"#0f172a" }}>{s?.name || "Unknown"}</div>
                       <div style={{ fontSize:12, color:"#94a3b8" }}>{t.reason} · {t.date}</div>
                     </div>
-                    <div style={{ fontWeight:700, fontSize:16, color: t.amount>=0?"#22c55e":"#ef4444" }}>
+                    <div style={{ fontWeight:800, fontSize:16, color: t.amount>=0?"#22c55e":"#ef4444" }}>
                       {t.amount>=0?"+":""}{fmt(t.amount)}
                     </div>
                   </div>
                 );
               })}
               {(appState?.txLog||[]).length === 0 && (
-                <div style={{ padding:48, textAlign:"center", color:"#94a3b8" }}>No transactions yet!</div>
+                <div style={{ padding:48, textAlign:"center", color:"#94a3b8", fontSize:14 }}>No transactions yet!</div>
               )}
             </div>
           </div>
@@ -643,19 +700,19 @@ function ClassroomApp({ user, auth, classroom }) {
 
         {/* ═══ JOBS placeholder ═══ */}
         {tab==="jobs" && (
-          <div style={{ textAlign:"center", padding:48 }}>
-            <div style={{ fontSize:48, marginBottom:16 }}>👷</div>
-            <h2 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:8 }}>Jobs Coming Soon!</h2>
-            <p style={{ color:"#94a3b8" }}>Job management will be available here.</p>
+          <div style={{ textAlign:"center", padding:64 }}>
+            <div style={{ fontSize:64, marginBottom:16 }}>👷</div>
+            <h2 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:8 }}>Jobs Coming Soon</h2>
+            <p style={{ color:"#94a3b8", fontSize:15 }}>Assign classroom jobs and salaries to your students.</p>
           </div>
         )}
 
         {/* ═══ STORE placeholder ═══ */}
         {tab==="store" && (
-          <div style={{ textAlign:"center", padding:48 }}>
-            <div style={{ fontSize:48, marginBottom:16 }}>🏪</div>
-            <h2 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:8 }}>Store Coming Soon!</h2>
-            <p style={{ color:"#94a3b8" }}>The class store will be available here.</p>
+          <div style={{ textAlign:"center", padding:64 }}>
+            <div style={{ fontSize:64, marginBottom:16 }}>🏪</div>
+            <h2 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:8 }}>Store Coming Soon</h2>
+            <p style={{ color:"#94a3b8", fontSize:15 }}>Create a reward store for your students to spend their earnings.</p>
           </div>
         )}
 
@@ -663,21 +720,22 @@ function ClassroomApp({ user, auth, classroom }) {
 
       {/* Deduct Modal */}
       {deductModal && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:9998 }}>
+        <div style={{ position:"fixed", inset:0, background:"rgba(15,23,42,0.6)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:9998, backdropFilter:"blur(4px)" }}>
           <div style={{ background:"#fff", borderRadius:20, padding:32, width:"100%", maxWidth:400, boxShadow:"0 24px 64px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ fontSize:20, fontWeight:800, color:"#0f172a", marginBottom:20 }}>− Deduct from {selStudent?.name}</h3>
-            <input type="number" value={deductAmt} onChange={e => setDeductAmt(e.target.value)} placeholder="Amount" autoFocus
+            <h3 style={{ fontSize:18, fontWeight:800, color:"#0f172a", marginBottom:4 }}>Deduct from {selStudent?.name}</h3>
+            <p style={{ fontSize:13, color:"#94a3b8", marginBottom:20 }}>Current balance: {fmt(balances[selected]||0)}</p>
+            <input type="number" value={deductAmt} onChange={e => setDeductAmt(e.target.value)} placeholder="Amount to deduct" autoFocus
               style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:18, fontWeight:700, outline:"none", marginBottom:12, boxSizing:"border-box" }}/>
-            <input value={deductReason} onChange={e => setDeductReason(e.target.value)} placeholder="Reason"
+            <input value={deductReason} onChange={e => setDeductReason(e.target.value)} placeholder="Reason for deduction"
               style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", marginBottom:20, boxSizing:"border-box" }}/>
             <div style={{ display:"flex", gap:12 }}>
               <button onClick={() => {
                 const a = parseInt(deductAmt||"0");
                 if (a > 0 && selected) { addTx(selected, -a, deductReason); showToast(`-${fmt(a)} from ${selStudent?.name}`, "#ef4444"); }
                 setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction");
-              }} style={{ flex:1, padding:"12px", background:"#ef4444", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:16, fontWeight:700 }}>− Deduct</button>
+              }} style={{ flex:1, padding:"13px", background:"#ef4444", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:15, fontWeight:700 }}>− Deduct</button>
               <button onClick={() => { setDeductModal(false); setDeductAmt(""); }}
-                style={{ padding:"12px 20px", background:"#f1f5f9", color:"#64748b", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:600 }}>Cancel</button>
+                style={{ padding:"13px 20px", background:"#f1f5f9", color:"#64748b", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:600 }}>Cancel</button>
             </div>
           </div>
         </div>
