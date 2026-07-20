@@ -434,6 +434,7 @@ function ClassroomApp({ user, auth, classroom }) {
   const [deductAmt, setDeductAmt] = React.useState("");
   const [deductReason, setDeductReason] = React.useState("Deduction");
   const [dinoPos, setDinoPos] = React.useState(-100);
+  const [splashOpacity, setSplashOpacity] = React.useState(1);
   const [showDino, setShowDino] = React.useState(true);
 
   const fmt = n => `${appState.currencyEmoji}${Number(n).toLocaleString()}`;
@@ -442,8 +443,9 @@ function ClassroomApp({ user, auth, classroom }) {
 
   // Startup dino splash
   React.useEffect(() => {
-    const timer = setTimeout(() => setShowDino(false), 1800);
-    return () => clearTimeout(timer);
+    const fadeTimer = setTimeout(() => setSplashOpacity(0), 1500);
+    const hideTimer = setTimeout(() => setShowDino(false), 2100);
+    return () => { clearTimeout(fadeTimer); clearTimeout(hideTimer); };
   }, []);
 
   const showToast = (msg, color="#22c55e") => {
@@ -489,7 +491,7 @@ function ClassroomApp({ user, auth, classroom }) {
         <div style={{ position:"fixed", inset:0, zIndex:9999, pointerEvents:"none",
           background:"linear-gradient(135deg,#0f172a,#1e3a5f)",
           display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
-          opacity: showDino ? 1 : 0, transition:"opacity 0.5s ease" }}>
+          opacity:splashOpacity, transition:"opacity 0.6s ease" }}>
           <div style={{ fontSize:100 }}>🦕</div>
           <div style={{ color:"#fff", fontSize:32, fontWeight:800, marginTop:20, letterSpacing:2 }}>EconoClassroom</div>
           <div style={{ color:"#22c55e", fontSize:15, marginTop:8 }}>Real financial literacy. Real classroom fun.</div>
