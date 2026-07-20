@@ -492,7 +492,13 @@ function ClassroomApp({ user, auth, classroom }) {
           background:"linear-gradient(135deg,#0f172a,#1e3a5f)",
           display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
           opacity:splashOpacity, transition:"opacity 0.6s ease" }}>
-          <div style={{ fontSize:100 }}>🦕</div>
+          <style>{`
+            @keyframes wiggle { 0%{transform:rotate(0deg) scale(1)} 25%{transform:rotate(-15deg) scale(1.2)} 50%{transform:rotate(15deg) scale(0.9)} 75%{transform:rotate(-10deg) scale(1.3)} 100%{transform:rotate(0deg) scale(1)} }
+            @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+            @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-40px)} }
+            @keyframes grow { 0%{transform:scale(1)} 50%{transform:scale(1.8)} 100%{transform:scale(1)} }
+          `}</style>
+          <div style={{ fontSize:100, animation:`${["wiggle 0.6s ease 0.8s","spin 0.8s ease 0.8s","bounce 0.6s ease 0.8s","grow 0.6s ease 0.8s"][Math.floor(Math.random()*4)]}` }}>🦕</div>
           <div style={{ color:"#fff", fontSize:32, fontWeight:800, marginTop:20, letterSpacing:2 }}>EconoClassroom</div>
           <div style={{ color:"#22c55e", fontSize:15, marginTop:8 }}>Real financial literacy. Real classroom fun.</div>
         </div>
