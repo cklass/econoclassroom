@@ -436,6 +436,8 @@ function ClassroomApp({ user, auth, classroom }) {
   const [dinoPos, setDinoPos] = React.useState(-100);
   const [splashOpacity, setSplashOpacity] = React.useState(1);
   const [showDino, setShowDino] = React.useState(true);
+  const [payMulti, setPayMulti] = React.useState(false);
+  const [multiSelected, setMultiSelected] = React.useState([]);
 
   const fmt = n => `${appState.currencyEmoji}${Number(n).toLocaleString()}`;
   const uuid = () => Math.random().toString(36).slice(2);
@@ -602,27 +604,64 @@ function ClassroomApp({ user, auth, classroom }) {
           </div>
         )}
 
-        {/* ═══ PAY ═══ */}
+       {/* ═══ PAY ═══ */}
         {tab==="pay" && (
           <div style={{ maxWidth:800, margin:"0 auto" }}>
             <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>💵 Pay Students</h2>
             <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
               <div style={{ marginBottom:20 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:8, letterSpacing:0.5 }}>SELECT RECIPIENT</label>
-                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                  <button onClick={() => setSelected("all")}
+                <div style={{ display:"flex", gap:8, marginBottom:12 }}>
+                  <button onClick={() => { setSelected("all"); setMultiSelected([]); setPayMulti(false); }}
                     style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${selected==="all"?"#22c55e":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
                       background:selected==="all"?"#22c55e":"#fff", color:selected==="all"?"#fff":"#64748b" }}>
                     🌍 Everyone
                   </button>
-                  {students.map(s => (
-                    <button key={s.id} onClick={() => setSelected(s.id)}
-                      style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${selected===s.id?"#22c55e":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
-                        background:selected===s.id?"#22c55e":"#fff", color:selected===s.id?"#fff":"#64748b" }}>
-                      {s.name}
-                    </button>
-                  ))}
+                  <button onClick={() => { setPayMulti(!payMulti); setSelected(null); setMultiSelected([]); }}
+                    style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${payMulti?"#8b5cf6":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
+                      background:payMulti?"#8b5cf6":"#fff", color:payMulti?"#fff":"#64748b" }}>
+                    ☑️ Select Multiple
+                  </button>
+                  {payMulti && (
+                    <>
+                      <button onClick={() => setMultiSelected(students.map(s=>s.id))}
+                        style={{ padding:"8px 16px", borderRadius:8, border:"2px solid #e2e8f0", cursor:"pointer", fontSize:13, fontWeight:600, background:"#fff", color:"#64748b" }}>
+                        Select All
+                      </button>
+                      <button onClick={() => setMultiSelected([])}
+                        style={{ padding:"8px 16px", borderRadius:8, border:"2px solid #e2e8f0", cursor:"pointer", fontSize:13, fontWeight:600, background:"#fff", color:"#64748b" }}>
+                        Clear
+                      </button>
+                    </>
+                  )}
                 </div>
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                  {students.map(s => {
+                    const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
+                    const isMultiSel = multiSelected.includes(s.id);
+                    const isSingleSel = selected === s.id && !payMulti;
+                    return (
+                      <button key={s.id} onClick={() => {
+                        if (payMulti) {
+                          setMultiSelected(prev => prev.includes(s.id) ? prev.filter(id=>id!==s.id) : [...prev, s.id]);
+                        } else {
+                          setSelected(s.id); setPayMulti(false);
+                        }
+                      }} style={{ padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600,
+                        border:`2px solid ${payMulti?(isMultiSel?"#8b5cf6":"#e2e8f0"):(isSingleSel?"#22c55e":"#e2e8f0")}`,
+                        background:payMulti?(isMultiSel?"#8b5cf6":"#fff"):(isSingleSel?"#22c55e":"#fff"),
+                        color:payMulti?(isMultiSel?"#fff":"#64748b"):(isSingleSel?"#fff":"#64748b"),
+                        display:"flex", alignItems:"center", gap:6 }}>
+                        <span>{dino.emoji}</span>{s.name}
+                      </button>
+                    );
+                  })}
+                </div>
+                {payMulti && multiSelected.length > 0 && (
+                  <div style={{ marginTop:10, fontSize:13, color:"#8b5cf6", fontWeight:600 }}>
+                    {multiSelected.length} student{multiSelected.length>1?"s":""} selected
+                  </div>
+                )}
               </div>
 
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:20 }}>
@@ -653,17 +692,23 @@ function ClassroomApp({ user, auth, classroom }) {
               <button onClick={() => {
                 const amt = parseInt(payAmt);
                 if (!amt || amt <= 0) { showToast("Enter a valid amount!", "#ef4444"); return; }
-                if (!selected) { showToast("Select a student first!", "#ef4444"); return; }
-                if (selected === "all") {
+                if (payMulti) {
+                  if (multiSelected.length === 0) { showToast("Select at least one student!", "#ef4444"); return; }
+                  multiSelected.forEach(id => addTx(id, amt, payReason));
+                  showToast(`Paid ${fmt(amt)} to ${multiSelected.length} students! 🎉`);
+                  setMultiSelected([]);
+                } else if (selected === "all") {
                   students.forEach(s => addTx(s.id, amt, payReason));
                   showToast(`Paid ${fmt(amt)} to all ${students.length} students! 🎉`);
-                } else {
+                } else if (selected) {
                   addTx(selected, amt, payReason);
                   showToast(`Paid ${fmt(amt)} to ${selStudent?.name}! 💰`);
+                } else {
+                  showToast("Select a student first!", "#ef4444"); return;
                 }
                 setPayAmt("");
               }} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:16, fontWeight:700, boxShadow:"0 4px 12px rgba(34,197,94,0.3)" }}>
-                💸 Pay {selected === "all" ? `Everyone (${students.length})` : selStudent?.name || "..."}
+                💸 Pay {payMulti ? `${multiSelected.length} Students` : selected === "all" ? `Everyone (${students.length})` : selStudent?.name || "..."}
               </button>
             </div>
           </div>
