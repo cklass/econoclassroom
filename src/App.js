@@ -440,19 +440,10 @@ function ClassroomApp({ user, auth, classroom }) {
   const uuid = () => Math.random().toString(36).slice(2);
   const todayStr = () => new Date().toISOString().slice(0, 10);
 
-  // Startup dino animation
+  // Startup dino splash
   React.useEffect(() => {
-    if (!showDino) return;
-    let pos = -100;
-    const interval = setInterval(() => {
-      pos += 4;
-      setDinoPos(pos);
-      if (pos > window.innerWidth + 100) {
-        clearInterval(interval);
-        setShowDino(false);
-      }
-    }, 16);
-    return () => clearInterval(interval);
+    const timer = setTimeout(() => setShowDino(false), 1800);
+    return () => clearTimeout(timer);
   }, []);
 
   const showToast = (msg, color="#22c55e") => {
@@ -495,8 +486,13 @@ function ClassroomApp({ user, auth, classroom }) {
 
       {/* Startup dino animation */}
       {showDino && (
-        <div style={{ position:"fixed", bottom:20, left:dinoPos, fontSize:48, zIndex:9999, pointerEvents:"none", filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.2))", transition:"none" }}>
-          {randDino}
+        <div style={{ position:"fixed", inset:0, zIndex:9999, pointerEvents:"none",
+          background:"linear-gradient(135deg,#0f172a,#1e3a5f)",
+          display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
+          opacity: showDino ? 1 : 0, transition:"opacity 0.5s ease" }}>
+          <div style={{ fontSize:100 }}>🦕</div>
+          <div style={{ color:"#fff", fontSize:32, fontWeight:800, marginTop:20, letterSpacing:2 }}>EconoClassroom</div>
+          <div style={{ color:"#22c55e", fontSize:15, marginTop:8 }}>Real financial literacy. Real classroom fun.</div>
         </div>
       )}
 
