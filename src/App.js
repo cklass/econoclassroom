@@ -424,6 +424,9 @@ function SetupWizard({ user, auth }) {
 // ── Classroom App (placeholder) ───────────────────────────────────────────────
 // ── Classroom App ─────────────────────────────────────────────────────────────
 function ClassroomApp({ user, auth, classroom }) {
+  const [newJobName, setNewJobName] = React.useState("");
+  const [newJobPay, setNewJobPay] = React.useState("10");
+  const [newJobEmoji, setNewJobEmoji] = React.useState("⭐");
   const [tab, setTab] = React.useState("dashboard");
   const [appState, setAppState] = React.useState(classroom);
   const [selected, setSelected] = React.useState(null);
@@ -747,12 +750,97 @@ function ClassroomApp({ user, auth, classroom }) {
           </div>
         )}
 
-        {/* ═══ JOBS placeholder ═══ */}
+        {/* ═══ JOBS ═══ */}
         {tab==="jobs" && (
-          <div style={{ textAlign:"center", padding:64 }}>
-            <div style={{ fontSize:64, marginBottom:16 }}>👷</div>
-            <h2 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:8 }}>Jobs Coming Soon</h2>
-            <p style={{ color:"#94a3b8", fontSize:15 }}>Assign classroom jobs and salaries to your students.</p>
+          <div style={{ maxWidth:900, margin:"0 auto" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
+              <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", margin:0 }}>👷 Classroom Jobs</h2>
+              <button onClick={() => {
+                const salaries = (appState?.students||[]).map(s => {
+                  const job = (appState?.jobs||[]).find(j => j.id === (appState?.assigned||{})[s.id]);
+                  return { student:s, job };
+                }).filter(x => x.job);
+                if (salaries.length === 0) { showToast("No jobs assigned yet!", "#f59e0b"); return; }
+                salaries.forEach(({ student, job }) => addTx(student.id, job.pay, `${job.emoji} ${job.name} salary`));
+                showToast(`💰 Paid salaries to ${salaries.length} students!`);
+              }} style={{ padding:"12px 24px", background:"linear-gradient(135deg,#f59e0b,#d97706)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700, boxShadow:"0 4px 12px rgba(245,158,11,0.3)" }}>
+                💰 Run Payday
+              </button>
+            </div>
+
+            {/* Add new job */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+              <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:12, letterSpacing:0.5 }}>ADD NEW JOB</label>
+              <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+                <input value={newJobEmoji} onChange={e => setNewJobEmoji(e.target.value)} maxLength={2}
+                  style={{ width:56, padding:"10px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:22, textAlign:"center", outline:"none" }}/>
+                <input value={newJobName} onChange={e => setNewJobName(e.target.value)} placeholder="Job name"
+                  style={{ flex:1, minWidth:140, padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none" }}/>
+                <input value={newJobPay} onChange={e => setNewJobPay(e.target.value)} type="number" placeholder="Pay"
+                  style={{ width:90, padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none" }}/>
+                <button onClick={() => {
+                  if (!newJobName.trim()) return;
+                  const job = { id:uuid(), name:newJobName.trim(), pay:parseInt(newJobPay)||10, emoji:newJobEmoji };
+                  update(prev => ({ ...prev, jobs: [...(prev.jobs||[]), job] }));
+                  setNewJobName(""); setNewJobPay("10"); setNewJobEmoji("⭐");
+                  showToast(`Job "${job.name}" added!`);
+                }} style={{ padding:"10px 20px", background:"#22c55e", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:700 }}>
+                  + Add Job
+                </button>
+              </div>
+            </div>
+
+            {/* Jobs list */}
+            {(appState?.jobs||[]).length > 0 && (
+              <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+                <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:12, letterSpacing:0.5 }}>AVAILABLE JOBS</label>
+                <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+                  {(appState?.jobs||[]).map(job => (
+                    <div key={job.id} style={{ display:"flex", alignItems:"center", gap:8, background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"8px 14px" }}>
+                      <span style={{ fontSize:20 }}>{job.emoji}</span>
+                      <div>
+                        <div style={{ fontWeight:700, fontSize:13, color:"#0f172a" }}>{job.name}</div>
+                        <div style={{ fontSize:11, color:"#22c55e", fontWeight:600 }}>{fmt(job.pay)}/week</div>
+                      </div>
+                      <button onClick={() => update(prev => ({ ...prev, jobs: prev.jobs.filter(j => j.id !== job.id), assigned: Object.fromEntries(Object.entries(prev.assigned||{}).filter(([,v]) => v !== job.id)) }))}
+                        style={{ background:"none", border:"none", cursor:"pointer", color:"#ef4444", fontSize:16, padding:"0 4px" }}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Assign jobs to students */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
+              <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:16, letterSpacing:0.5 }}>ASSIGN JOBS TO STUDENTS</label>
+              {(appState?.jobs||[]).length === 0 ? (
+                <div style={{ textAlign:"center", padding:32, color:"#94a3b8", fontSize:14 }}>Add jobs above first!</div>
+              ) : (
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:12 }}>
+                  {students.map(s => {
+                    const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
+                    const assignedJobId = (appState?.assigned||{})[s.id];
+                    const assignedJob = (appState?.jobs||[]).find(j => j.id === assignedJobId);
+                    return (
+                      <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 16px", background:"#f8fafc", borderRadius:12, border:"1px solid #e2e8f0" }}>
+                        <div style={{ width:36, height:36, borderRadius:10, background:`${dino.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>
+                          {dino.emoji}
+                        </div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontWeight:700, fontSize:13, color:"#0f172a", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name}</div>
+                          {assignedJob && <div style={{ fontSize:11, color:"#22c55e", fontWeight:600 }}>{assignedJob.emoji} {assignedJob.name} · {fmt(assignedJob.pay)}/wk</div>}
+                        </div>
+                        <select value={assignedJobId||""} onChange={e => update(prev => ({ ...prev, assigned: { ...(prev.assigned||{}), [s.id]: e.target.value||null } }))}
+                          style={{ padding:"6px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff", color:"#0f172a", cursor:"pointer" }}>
+                          <option value="">No job</option>
+                          {(appState?.jobs||[]).map(j => <option key={j.id} value={j.id}>{j.emoji} {j.name}</option>)}
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
