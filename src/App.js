@@ -39,6 +39,7 @@ export default function App() {
   if (screen === "dashboard" && user) return <Dashboard user={user} auth={auth} setScreen={setScreen}/>;
   if (screen === "login") return <LoginScreen auth={auth} setScreen={setScreen}/>;
   if (screen === "register") return <RegisterScreen auth={auth} setScreen={setScreen}/>;
+  if (screen === "studentlogin") return <StudentLoginScreen setScreen={setScreen}/>;
   return <LandingPage setScreen={setScreen}/>;
 }
 
@@ -53,6 +54,7 @@ function LandingPage({ setScreen }) {
           <span style={{ fontSize:22, fontWeight:700, letterSpacing:1 }}>EconoClassroom</span>
         </div>
         <div style={{ display:"flex", gap:12 }}>
+          <button onClick={() => setScreen("studentlogin")} style={{ padding:"10px 24px", background:"transparent", color:"#a8d8b5", border:"2px solid rgba(168,216,181,0.4)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>🦕 Student Login</button>
           <button onClick={() => setScreen("login")} style={{ padding:"10px 24px", background:"transparent", color:"#fff", border:"2px solid rgba(255,255,255,0.3)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Log In</button>
           <button onClick={() => setScreen("register")} style={{ padding:"10px 24px", background:"#22c55e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Get Started Free</button>
         </div>
@@ -100,6 +102,169 @@ function LandingPage({ setScreen }) {
       {/* Footer */}
       <div style={{ textAlign:"center", padding:"40px", borderTop:"1px solid rgba(255,255,255,0.1)", color:"rgba(255,255,255,0.4)", fontSize:13 }}>
         © 2026 EconoClassroom · Built for Canadian teachers 🍁
+      </div>
+    </div>
+  );
+}
+
+// ── Student Login Screen ──────────────────────────────────────────────────────
+function StudentLoginScreen({ setScreen }) {
+  const [classCode, setClassCode] = React.useState("");
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [classroom, setClassroom] = React.useState(null);
+  const [studentUser, setStudentUser] = React.useState(null);
+
+  const findClassroom = async () => {
+    if (!classCode.trim()) { setError("Enter your class code!"); return; }
+    setLoading(true); setError("");
+    try {
+      // Search for classroom by code
+      const data = await new Promise((resolve) => {
+        const unsub = subscribeToFirebase(`classCodes/${classCode.trim().toUpperCase()}`, d => {
+          unsub();
+          resolve(d);
+        });
+      });
+      if (!data) { setError("Class code not found!"); setLoading(false); return; }
+      // Get classroom data
+      const classData = await new Promise((resolve) => {
+        const unsub = subscribeToFirebase(`teachers/${data.teacherId}/classroom`, d => {
+          unsub();
+          resolve(d);
+        });
+      });
+      setClassroom({ ...classData, teacherId: data.teacherId });
+      setLoading(false);
+    } catch(e) {
+      setError("Something went wrong. Try again!"); setLoading(false);
+    }
+  };
+
+  const login = () => {
+    if (!classroom) return;
+    const savedPw = classroom.passwords?.[username.trim().toLowerCase()];
+    const match = (classroom.students||[]).find(s => s.username === username.trim().toLowerCase());
+    if (!match) { setError("Username not found!"); return; }
+    const correctPw = savedPw || match.password;
+    if (correctPw !== password) { setError("Wrong password!"); return; }
+    setStudentUser({ ...match, teacherId: classroom.teacherId });
+  };
+
+  if (studentUser) return <StudentDashboard studentUser={studentUser} classroom={classroom} setScreen={setScreen}/>;
+
+  return (
+    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f172a,#1e3a5f)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Segoe UI',sans-serif", padding:20 }}>
+      <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:24, padding:"48px 40px", width:"100%", maxWidth:420, color:"#fff" }}>
+        <div style={{ textAlign:"center", marginBottom:32 }}>
+          <span style={{ fontSize:48 }}>🦕</span>
+          <h2 style={{ fontSize:28, fontWeight:800, margin:"12px 0 4px" }}>Student Login</h2>
+          <p style={{ color:"rgba(255,255,255,0.5)", fontSize:14 }}>Enter your class code to get started</p>
+        </div>
+
+        {!classroom ? (
+          <>
+            <label style={{ fontSize:12, fontWeight:700, color:"rgba(255,255,255,0.5)", display:"block", marginBottom:8, letterSpacing:1 }}>CLASS CODE</label>
+            <input value={classCode} onChange={e => setClassCode(e.target.value.toUpperCase())}
+              placeholder="e.g. ABC123" maxLength={6}
+              onKeyDown={e => e.key==="Enter" && findClassroom()}
+              style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:22, fontWeight:800, outline:"none", marginBottom:16, boxSizing:"border-box", textAlign:"center", letterSpacing:4 }}/>
+            {error && <div style={{ color:"#f87171", fontSize:13, marginBottom:12 }}>{error}</div>}
+            <button onClick={findClassroom} disabled={loading}
+              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:16 }}>
+              {loading ? "Finding class..." : "Find My Class →"}
+            </button>
+          </>
+        ) : (
+          <>
+            <div style={{ background:"rgba(34,197,94,0.15)", border:"1px solid rgba(34,197,94,0.3)", borderRadius:12, padding:"12px 16px", marginBottom:20, textAlign:"center" }}>
+              <div style={{ fontSize:13, color:"#22c55e", fontWeight:600 }}>✅ {classroom.name}</div>
+              <div style={{ fontSize:12, color:"rgba(255,255,255,0.5)" }}>Grade {classroom.grade} · {classroom.province}</div>
+            </div>
+            <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username"
+              style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:15, outline:"none", marginBottom:12, boxSizing:"border-box" }}/>
+            <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" type="password"
+              onKeyDown={e => e.key==="Enter" && login()}
+              style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:15, outline:"none", marginBottom:16, boxSizing:"border-box" }}/>
+            {error && <div style={{ color:"#f87171", fontSize:13, marginBottom:12 }}>{error}</div>}
+            <button onClick={login}
+              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:12 }}>
+              Log In 🦕
+            </button>
+            <button onClick={() => { setClassroom(null); setError(""); }}
+              style={{ width:"100%", padding:"10px", background:"transparent", color:"rgba(255,255,255,0.4)", border:"none", cursor:"pointer", fontSize:13 }}>
+              ← Different class code
+            </button>
+          </>
+        )}
+        <div style={{ textAlign:"center", marginTop:16 }}>
+          <span onClick={() => setScreen("landing")} style={{ color:"rgba(255,255,255,0.3)", cursor:"pointer", fontSize:13 }}>← Back to home</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Student Dashboard ─────────────────────────────────────────────────────────
+function StudentDashboard({ studentUser, classroom, setScreen }) {
+  const [appState, setAppState] = React.useState(classroom);
+  const fmt = n => `${appState.currencyEmoji}${Number(n).toLocaleString()}`;
+  const balance = appState?.balances?.[studentUser.id] || 0;
+  const myTx = (appState?.txLog||[]).filter(t => t.studentId === studentUser.id);
+  const dino = DINO_OPTIONS.find(d => d.id === studentUser.dinoId) || DINO_OPTIONS[0];
+
+  // Subscribe to live updates
+  React.useEffect(() => {
+    const unsub = subscribeToFirebase(`teachers/${studentUser.teacherId}/classroom`, data => {
+      if (data) setAppState(data);
+    });
+    return unsub;
+  }, [studentUser.teacherId]);
+
+  return (
+    <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#0f172a 0%,#1e3a5f 50%,#0f2a1a 100%)", fontFamily:"'Segoe UI',sans-serif", padding:20 }}>
+      {/* Header */}
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20, background:"rgba(255,255,255,0.05)", borderRadius:14, padding:"10px 16px" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:36, height:36, borderRadius:10, background:`${dino.color}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>{dino.emoji}</div>
+          <div>
+            <div style={{ color:"#fff", fontSize:15, fontWeight:700 }}>{studentUser.name}</div>
+            <div style={{ color:"#22c55e", fontSize:18, fontWeight:800 }}>{fmt(balance)}</div>
+          </div>
+        </div>
+        <button onClick={() => setScreen("landing")}
+          style={{ padding:"6px 14px", background:"rgba(255,255,255,0.1)", color:"#fff", border:"1px solid rgba(255,255,255,0.2)", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
+          🔒 Logout
+        </button>
+      </div>
+
+      {/* Balance card */}
+      <div style={{ background:"linear-gradient(135deg,#1a472a,#22c55e)", borderRadius:20, padding:24, marginBottom:20, textAlign:"center", boxShadow:"0 8px 24px rgba(34,197,94,0.3)" }}>
+        <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13, marginBottom:4 }}>My Balance</div>
+        <div style={{ color:"#fff", fontSize:52, fontWeight:800 }}>{fmt(balance)}</div>
+        <div style={{ color:"rgba(255,255,255,0.6)", fontSize:13, marginTop:4 }}>{appState.currency || "Dino Bucks"}</div>
+      </div>
+
+      {/* Recent transactions */}
+      <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:16, padding:20 }}>
+        <div style={{ color:"#fff", fontSize:16, fontWeight:700, marginBottom:16 }}>📋 Recent Transactions</div>
+        {myTx.length === 0 ? (
+          <div style={{ color:"rgba(255,255,255,0.4)", fontSize:14, textAlign:"center", padding:20 }}>No transactions yet!</div>
+        ) : (
+          myTx.slice(0,20).map(t => (
+            <div key={t.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
+              <div>
+                <div style={{ color:"#fff", fontSize:14, fontWeight:600 }}>{t.reason}</div>
+                <div style={{ color:"rgba(255,255,255,0.4)", fontSize:12 }}>{t.date}</div>
+              </div>
+              <div style={{ fontWeight:800, fontSize:16, color: t.amount>=0?"#22c55e":"#ef4444" }}>
+                {t.amount>=0?"+":""}{fmt(t.amount)}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
@@ -298,7 +463,9 @@ function SetupWizard({ user, auth }) {
       createdAt: new Date().toISOString(),
     };
 
-    await saveToFirebase(`teachers/${user.uid}/classroom`, classroom);
+    const code = Math.random().toString(36).slice(2,8).toUpperCase();
+    await saveToFirebase(`teachers/${user.uid}/classroom`, { ...classroom, classCode: code });
+    await saveToFirebase(`classCodes/${code}`, { teacherId: user.uid });
   };
 
   const stepStyle = (n) => ({
