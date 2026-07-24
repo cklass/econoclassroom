@@ -489,7 +489,7 @@ function ClassroomApp({ user, auth, classroom }) {
   const randDino = DINO_EMOJIS[Math.floor(Math.random() * DINO_EMOJIS.length)];
 
   return (
-    <div style={{ minHeight:"100vh", background:"#f1f5f9", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:"linear-gradient(180deg,#1e293b 0px,#f1f5f9 120px)", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
 
       {/* Startup dino animation */}
       {showDino && (
