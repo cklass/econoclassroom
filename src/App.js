@@ -591,6 +591,10 @@ function SetupWizard({ user, auth }) {
 // ── Classroom App (placeholder) ───────────────────────────────────────────────
 // ── Classroom App ─────────────────────────────────────────────────────────────
 function ClassroomApp({ user, auth, classroom }) {
+  const [newItemName, setNewItemName] = React.useState("");
+  const [newItemPrice, setNewItemPrice] = React.useState("");
+  const [newItemDesc, setNewItemDesc] = React.useState("");
+  const [newItemEmoji, setNewItemEmoji] = React.useState("🎁");
   const [newJobName, setNewJobName] = React.useState("");
   const [newJobPay, setNewJobPay] = React.useState("10");
   const [newJobEmoji, setNewJobEmoji] = React.useState("⭐");
@@ -1011,12 +1015,109 @@ function ClassroomApp({ user, auth, classroom }) {
           </div>
         )}
 
-        {/* ═══ STORE placeholder ═══ */}
+        {/* ═══ STORE ═══ */}
         {tab==="store" && (
-          <div style={{ textAlign:"center", padding:64 }}>
-            <div style={{ fontSize:64, marginBottom:16 }}>🏪</div>
-            <h2 style={{ fontSize:24, fontWeight:800, color:"#0f172a", marginBottom:8 }}>Store Coming Soon</h2>
-            <p style={{ color:"#94a3b8", fontSize:15 }}>Create a reward store for your students to spend their earnings.</p>
+          <div style={{ maxWidth:1000, margin:"0 auto" }}>
+            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>🏪 Class Store</h2>
+
+            {/* Add item */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+              <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:12, letterSpacing:0.5 }}>ADD STORE ITEM</label>
+              <div style={{ display:"flex", gap:10, flexWrap:"wrap", alignItems:"flex-end" }}>
+                <input value={newItemEmoji||"🎁"} onChange={e => setNewItemEmoji(e.target.value)} maxLength={2}
+                  style={{ width:56, padding:"10px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:22, textAlign:"center", outline:"none" }}/>
+                <div style={{ flex:2, minWidth:140 }}>
+                  <div style={{ fontSize:11, fontWeight:600, color:"#94a3b8", marginBottom:4 }}>ITEM NAME</div>
+                  <input value={newItemName||""} onChange={e => setNewItemName(e.target.value)} placeholder="e.g. Homework Pass"
+                    style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
+                </div>
+                <div style={{ flex:1, minWidth:100 }}>
+                  <div style={{ fontSize:11, fontWeight:600, color:"#94a3b8", marginBottom:4 }}>PRICE</div>
+                  <input value={newItemPrice||""} onChange={e => setNewItemPrice(e.target.value)} type="number" placeholder="10"
+                    style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
+                </div>
+                <div style={{ flex:2, minWidth:140 }}>
+                  <div style={{ fontSize:11, fontWeight:600, color:"#94a3b8", marginBottom:4 }}>DESCRIPTION</div>
+                  <input value={newItemDesc||""} onChange={e => setNewItemDesc(e.target.value)} placeholder="Skip one homework assignment"
+                    style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
+                </div>
+                <button onClick={() => {
+                  if (!newItemName?.trim()) return;
+                  const item = { id:uuid(), name:newItemName.trim(), price:parseInt(newItemPrice)||10, emoji:newItemEmoji||"🎁", description:newItemDesc||"", available:true };
+                  update(prev => ({ ...prev, storeItems: [...(prev.storeItems||[]), item] }));
+                  setNewItemName(""); setNewItemPrice(""); setNewItemDesc(""); setNewItemEmoji("🎁");
+                  showToast(`${item.emoji} "${item.name}" added to store!`);
+                }} style={{ padding:"10px 20px", background:"#22c55e", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:700, whiteSpace:"nowrap" }}>
+                  + Add Item
+                </button>
+              </div>
+            </div>
+
+            {/* Store items */}
+            {(appState?.storeItems||[]).length > 0 && (
+              <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+                <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:16, letterSpacing:0.5 }}>STORE ITEMS ({(appState?.storeItems||[]).length})</label>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:12 }}>
+                  {(appState?.storeItems||[]).map(item => (
+                    <div key={item.id} style={{ background:"#f8fafc", borderRadius:12, padding:16, border:"1px solid #e2e8f0", position:"relative" }}>
+                      <button onClick={() => update(prev => ({ ...prev, storeItems: prev.storeItems.filter(i => i.id !== item.id) }))}
+                        style={{ position:"absolute", top:8, right:8, background:"none", border:"none", cursor:"pointer", color:"#ef4444", fontSize:14 }}>✕</button>
+                      <div style={{ fontSize:32, marginBottom:8 }}>{item.emoji}</div>
+                      <div style={{ fontWeight:700, fontSize:14, color:"#0f172a", marginBottom:4 }}>{item.name}</div>
+                      <div style={{ fontSize:12, color:"#94a3b8", marginBottom:8 }}>{item.description}</div>
+                      <div style={{ fontWeight:800, fontSize:18, color:"#22c55e" }}>{fmt(item.price)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pending purchases */}
+            {(appState?.purchases||[]).filter(p => p.status==="pending").length > 0 && (
+              <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
+                <label style={{ fontSize:12, fontWeight:700, color:"#f59e0b", display:"block", marginBottom:16, letterSpacing:0.5 }}>
+                  ⏳ PENDING APPROVALS ({(appState?.purchases||[]).filter(p=>p.status==="pending").length})
+                </label>
+                {(appState?.purchases||[]).filter(p => p.status==="pending").map(p => {
+                  const student = students.find(s => s.id === p.studentId);
+                  const item = (appState?.storeItems||[]).find(i => i.id === p.itemId);
+                  const dino = DINO_OPTIONS.find(d => d.id === student?.dinoId) || DINO_OPTIONS[0];
+                  return (
+                    <div key={p.id} style={{ display:"flex", alignItems:"center", gap:16, padding:"14px 0", borderBottom:"1px solid #f1f5f9" }}>
+                      <div style={{ width:36, height:36, borderRadius:10, background:`${dino.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>
+                        {dino.emoji}
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontWeight:600, fontSize:14, color:"#0f172a" }}>{student?.name} wants {item?.emoji} {item?.name}</div>
+                        <div style={{ fontSize:12, color:"#94a3b8" }}>{fmt(item?.price)} · {p.date}</div>
+                      </div>
+                      <div style={{ display:"flex", gap:8 }}>
+                        <button onClick={() => {
+                          update(prev => ({
+                            ...prev,
+                            balances: { ...prev.balances, [p.studentId]: Math.max(0, (prev.balances[p.studentId]||0) - item.price) },
+                            purchases: prev.purchases.map(x => x.id===p.id ? {...x, status:"approved"} : x),
+                            txLog: [{ id:uuid(), studentId:p.studentId, amount:-item.price, reason:`Bought ${item.emoji} ${item.name}`, date:todayStr() }, ...(prev.txLog||[])],
+                          }));
+                          showToast(`✅ Approved ${student?.name}'s purchase!`);
+                        }} style={{ padding:"8px 16px", background:"#22c55e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>✅ Approve</button>
+                        <button onClick={() => {
+                          update(prev => ({ ...prev, purchases: prev.purchases.map(x => x.id===p.id ? {...x, status:"denied"} : x) }));
+                          showToast(`❌ Denied ${student?.name}'s purchase.`, "#ef4444");
+                        }} style={{ padding:"8px 16px", background:"#fee2e2", color:"#ef4444", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>❌ Deny</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {(appState?.storeItems||[]).length === 0 && (
+              <div style={{ textAlign:"center", padding:48, color:"#94a3b8", fontSize:14 }}>
+                <div style={{ fontSize:48, marginBottom:12 }}>🏪</div>
+                Add items above to stock your store!
+              </div>
+            )}
           </div>
         )}
 
