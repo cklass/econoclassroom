@@ -247,6 +247,43 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
         <div style={{ color:"rgba(255,255,255,0.6)", fontSize:13, marginTop:4 }}>{appState.currency || "Dino Bucks"}</div>
       </div>
 
+      {/* Store */}
+      {(appState?.storeItems||[]).filter(i => i.available !== false).length > 0 && (
+        <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:16, padding:20, marginBottom:16 }}>
+          <div style={{ color:"#fff", fontSize:16, fontWeight:700, marginBottom:16 }}>🏪 Class Store</div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))", gap:12 }}>
+            {(appState?.storeItems||[]).filter(i => i.available !== false).map(item => {
+              const canAfford = balance >= item.price;
+              const alreadyPending = (appState?.purchases||[]).some(p => p.studentId===studentUser.id && p.itemId===item.id && p.status==="pending");
+              return (
+                <div key={item.id} style={{ background:"rgba(255,255,255,0.07)", borderRadius:12, padding:16, border:`1px solid ${canAfford?"rgba(34,197,94,0.3)":"rgba(255,255,255,0.1)"}` }}>
+                  <div style={{ fontSize:32, marginBottom:8 }}>{item.emoji}</div>
+                  <div style={{ fontWeight:700, fontSize:13, color:"#fff", marginBottom:4 }}>{item.name}</div>
+                  <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)", marginBottom:8 }}>{item.description}</div>
+                  <div style={{ fontWeight:800, fontSize:16, color:"#22c55e", marginBottom:10 }}>{fmt(item.price)}</div>
+                  {alreadyPending ? (
+                    <div style={{ fontSize:11, color:"#f59e0b", fontWeight:600 }}>⏳ Pending approval</div>
+                  ) : (
+                    <button onClick={() => {
+                      if (!canAfford) return;
+                      const uuid = () => Math.random().toString(36).slice(2);
+                      const todayStr = () => new Date().toISOString().slice(0,10);
+                      const newPurchase = { id:uuid(), studentId:studentUser.id, studentName:studentUser.name, itemId:item.id, itemName:item.name, price:item.price, status:"pending", date:todayStr() };
+                      const next = { ...appState, purchases: [...(appState.purchases||[]), newPurchase] };
+                      setAppState(next);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom`, next);
+                    }} disabled={!canAfford}
+                      style={{ width:"100%", padding:"8px", background: canAfford?"linear-gradient(135deg,#22c55e,#16a34a)":"rgba(255,255,255,0.1)", color:"#fff", border:"none", borderRadius:8, cursor:canAfford?"pointer":"default", fontSize:12, fontWeight:700 }}>
+                      {canAfford ? "🛒 Request" : "Can't afford"}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Recent transactions */}
       <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:16, padding:20 }}>
         <div style={{ color:"#fff", fontSize:16, fontWeight:700, marginBottom:16 }}>📋 Recent Transactions</div>
