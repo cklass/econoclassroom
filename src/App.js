@@ -625,9 +625,16 @@ function SetupWizard({ user, auth }) {
   );
 }
 
-// ── Classroom App (placeholder) ───────────────────────────────────────────────
 // ── Classroom App ─────────────────────────────────────────────────────────────
 function ClassroomApp({ user, auth, classroom }) {
+  const [newExpenseName, setNewExpenseName] = React.useState("");
+  const [newExpenseAmount, setNewExpenseAmount] = React.useState("");
+  const [newExpenseEmoji, setNewExpenseEmoji] = React.useState("💸");
+  const [fineStudent, setFineStudent] = React.useState("");
+  const [fineAmount, setFineAmount] = React.useState("");
+  const [fineReason, setFineReason] = React.useState("");
+  const [paydayDone, setPaydayDone] = React.useState(false);
+  const [dailyEventsDone, setDailyEventsDone] = React.useState(false);
   const [newItemName, setNewItemName] = React.useState("");
   const [newItemPrice, setNewItemPrice] = React.useState("");
   const [newItemDesc, setNewItemDesc] = React.useState("");
@@ -690,6 +697,7 @@ function ClassroomApp({ user, auth, classroom }) {
     { id:"pay",       label:"💵 Pay" },
     { id:"jobs",      label:"👷 Jobs" },
     { id:"store",     label:"🏪 Store" },
+    { id:"economy",   label:"🌍 Economy" },
     { id:"history",   label:"📋 History" },
   ];
 
@@ -925,7 +933,211 @@ function ClassroomApp({ user, auth, classroom }) {
           </div>
         )}
 
-        {/* ═══ HISTORY ═══ */}
+
+
+{/* ═══ ECONOMY ═══ */}
+        {tab==="economy" && (
+          <div style={{ maxWidth:900, margin:"0 auto" }}>
+            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>🌍 Classroom Economy</h2>
+
+            {/* Morning Events Button */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16 }}>
+                <div>
+                  <div style={{ fontSize:16, fontWeight:800, color:"#0f172a", marginBottom:4 }}>🌅 Daily Dino Events</div>
+                  <div style={{ fontSize:13, color:"#94a3b8" }}>Fire one random event per student. Click every morning!</div>
+                </div>
+                <button onClick={() => {
+                  const GOOD_EVENTS = [
+                    { reason:"🥚 Found a dinosaur egg! Sold it to a museum", amount:12 },
+                    { reason:"🦕 Won the Dino Spelling Bee! Prize money", amount:8 },
+                    { reason:"🌿 Dino garden produced extra food. Sold at market", amount:6 },
+                    { reason:"🏆 Featured in Dino Times newspaper! Appearance fee", amount:10 },
+                    { reason:"🦷 Tooth fairy visited your dino!", amount:5 },
+                    { reason:"♻️ Recycled dino bones. Environmental bonus", amount:4 },
+                    { reason:"📸 Your dino went viral on DinoGram! Ad revenue", amount:9 },
+                    { reason:"🎵 Busked downtown as a dino musician", amount:6 },
+                    { reason:"🏠 Rented out your dino cave for the weekend", amount:11 },
+                    { reason:"🎰 Won the Dino Lottery! Lucky you", amount:15 },
+                  ];
+                  const BAD_EVENTS = [
+                    { reason:"☄️ Meteor cracked your Chromebook screen! Repair bill", amount:-10 },
+                    { reason:"🦖 Your T-Rex sneezed on a classmate. Apology flowers", amount:-5 },
+                    { reason:"🌋 Volcanic ash clogged the AC unit. Emergency repair fee", amount:-8 },
+                    { reason:"🦟 Dino mosquito infestation! Pest control", amount:-6 },
+                    { reason:"🌊 Flooded your desk area. Cleanup crew", amount:-7 },
+                    { reason:"🦴 Lost your Chromebook charger. Replacement", amount:-5 },
+                    { reason:"📱 Caught using your dino-phone in class! Fine", amount:-8 },
+                    { reason:"💤 Fell asleep in class! Coffee fine", amount:-5 },
+                    { reason:"🍕 Dropped lunch on the classroom floor. Cleaning fee", amount:-3 },
+                    { reason:"🦟 Dino mosquito bit you! Medical bill", amount:-4 },
+                  ];
+                  students.forEach(s => {
+                    const isGood = Math.random() > 0.5;
+                    const events = isGood ? GOOD_EVENTS : BAD_EVENTS;
+                    const event = events[Math.floor(Math.random()*events.length)];
+                    addTx(s.id, event.amount, event.reason);
+                  });
+                  setDailyEventsDone(true);
+                  showToast("🎲 Daily Dino Events fired for all students!");
+                }} style={{
+                  padding:"14px 28px", border:"none", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700,
+                  background: dailyEventsDone ? "linear-gradient(135deg,#22c55e,#16a34a)" : "linear-gradient(135deg,#f59e0b,#d97706)",
+                  color:"#fff", boxShadow: dailyEventsDone ? "0 4px 12px rgba(34,197,94,0.3)" : "0 4px 12px rgba(245,158,11,0.4)",
+                  animation: dailyEventsDone ? "none" : "pulse 2s infinite",
+                }}>
+                  {dailyEventsDone ? "✅ Events Fired Today!" : "🎲 Fire Daily Events"}
+                </button>
+              </div>
+              <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }`}</style>
+            </div>
+
+            {/* Payday Friday Button */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16 }}>
+                <div>
+                  <div style={{ fontSize:16, fontWeight:800, color:"#0f172a", marginBottom:4 }}>💰 Payday Friday</div>
+                  <div style={{ fontSize:13, color:"#94a3b8" }}>Pays all salaries, deducts all weekly expenses, and fires weekly awards.</div>
+                </div>
+                <button onClick={() => {
+                  // Pay salaries
+                  students.forEach(s => {
+                    const job = (appState?.jobs||[]).find(j => j.id === (appState?.assigned||{})[s.id]);
+                    if (job) addTx(s.id, job.pay, `${job.emoji} ${job.name} salary`);
+                  });
+                  // Deduct expenses
+                  (appState?.expenses||[]).forEach(exp => {
+                    students.forEach(s => addTx(s.id, -exp.amount, `${exp.emoji} ${exp.name}`));
+                  });
+                  // Weekly awards
+                  const topInvestor = [...students].sort((a,b) => (appState?.balances?.[b.id]||0) - (appState?.balances?.[a.id]||0))[0];
+                  if (topInvestor) addTx(topInvestor.id, 5, "🏆 Top Balance Award bonus!");
+                  setPaydayDone(true);
+                  showToast("💰 Payday complete! Salaries paid, expenses deducted!");
+                }} style={{
+                  padding:"14px 28px", border:"none", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700,
+                  background:"linear-gradient(135deg,#8b5cf6,#7c3aed)", color:"#fff",
+                  boxShadow:"0 4px 12px rgba(139,92,246,0.3)"
+                }}>
+                  💰 Run Payday Friday
+                </button>
+              </div>
+            </div>
+
+            {/* Weekly Expenses */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+              <div style={{ fontSize:16, fontWeight:800, color:"#0f172a", marginBottom:16 }}>📋 Weekly Expenses</div>
+              <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:16 }}>
+                <input value={newExpenseEmoji} onChange={e => setNewExpenseEmoji(e.target.value)} maxLength={2}
+                  style={{ width:56, padding:"10px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:22, textAlign:"center", outline:"none" }}/>
+                <input value={newExpenseName} onChange={e => setNewExpenseName(e.target.value)} placeholder="Expense name"
+                  style={{ flex:1, minWidth:140, padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none" }}/>
+                <input value={newExpenseAmount} onChange={e => setNewExpenseAmount(e.target.value)} type="number" placeholder="Amount"
+                  style={{ width:90, padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none" }}/>
+                <button onClick={() => {
+                  if (!newExpenseName.trim()) return;
+                  const exp = { id:uuid(), name:newExpenseName.trim(), amount:parseInt(newExpenseAmount)||5, emoji:newExpenseEmoji };
+                  update(prev => ({ ...prev, expenses: [...(prev.expenses||[]), exp] }));
+                  setNewExpenseName(""); setNewExpenseAmount(""); setNewExpenseEmoji("💸");
+                  showToast(`${exp.emoji} "${exp.name}" expense added!`);
+                }} style={{ padding:"10px 20px", background:"#ef4444", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:700 }}>
+                  + Add Expense
+                </button>
+              </div>
+              {/* Default expenses quick-add */}
+              <div style={{ marginBottom:16 }}>
+                <div style={{ fontSize:12, fontWeight:700, color:"#94a3b8", marginBottom:8 }}>QUICK ADD:</div>
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                  {[
+                    { emoji:"🪑", name:"Desk Rental", amount:8 },
+                    { emoji:"💡", name:"Electricity", amount:3 },
+                    { emoji:"💻", name:"Chromebook Fee", amount:4 },
+                    { emoji:"🌡️", name:"Climate Control", amount:2 },
+                    { emoji:"🚰", name:"Water & Facilities", amount:1 },
+                  ].map(exp => (
+                    <button key={exp.name} onClick={() => {
+                      update(prev => ({ ...prev, expenses: [...(prev.expenses||[]), { id:uuid(), ...exp }] }));
+                      showToast(`${exp.emoji} "${exp.name}" added!`);
+                    }} style={{ padding:"6px 12px", background:"#f8fafc", border:"2px solid #e2e8f0", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600, color:"#64748b" }}>
+                      {exp.emoji} {exp.name} (-{fmt(exp.amount)}/wk)
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {(appState?.expenses||[]).length > 0 ? (
+                <div>
+                  {(appState?.expenses||[]).map(exp => (
+                    <div key={exp.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f1f5f9" }}>
+                      <span style={{ fontSize:20 }}>{exp.emoji}</span>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontWeight:600, fontSize:14, color:"#0f172a" }}>{exp.name}</div>
+                        <div style={{ fontSize:12, color:"#ef4444", fontWeight:600 }}>-{fmt(exp.amount)} per student per week</div>
+                      </div>
+                      <button onClick={() => update(prev => ({ ...prev, expenses: prev.expenses.filter(e => e.id !== exp.id) }))}
+                        style={{ background:"none", border:"none", cursor:"pointer", color:"#ef4444", fontSize:16 }}>✕</button>
+                    </div>
+                  ))}
+                  <div style={{ marginTop:12, padding:"10px 14px", background:"#fef2f2", borderRadius:8, fontSize:13, fontWeight:700, color:"#ef4444" }}>
+                    Total weekly deduction per student: {fmt((appState?.expenses||[]).reduce((a,b) => a+b.amount, 0))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ textAlign:"center", padding:20, color:"#94a3b8", fontSize:13 }}>No expenses set yet. Use Quick Add above!</div>
+              )}
+            </div>
+
+            {/* Issue Fine */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
+              <div style={{ fontSize:16, fontWeight:800, color:"#0f172a", marginBottom:16 }}>🚨 Issue a Fine</div>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
+                <div>
+                  <div style={{ fontSize:12, fontWeight:700, color:"#64748b", marginBottom:6 }}>STUDENT</div>
+                  <select value={fineStudent} onChange={e => setFineStudent(e.target.value)}
+                    style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", background:"#fff" }}>
+                    <option value="">Select student...</option>
+                    {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <div style={{ fontSize:12, fontWeight:700, color:"#64748b", marginBottom:6 }}>FINE AMOUNT</div>
+                  <input value={fineAmount} onChange={e => setFineAmount(e.target.value)} type="number" placeholder="Amount"
+                    style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
+                </div>
+              </div>
+              <div style={{ marginBottom:12 }}>
+                <div style={{ fontSize:12, fontWeight:700, color:"#64748b", marginBottom:6 }}>REASON</div>
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:8 }}>
+                  {[
+                    { label:"📱 Phone out in class", amount:8 },
+                    { label:"💤 Not on task", amount:5 },
+                    { label:"🗣️ Disruptive behaviour", amount:6 },
+                    { label:"🦴 Missing materials", amount:4 },
+                    { label:"🦖 T-Rex attitude", amount:7 },
+                    { label:"☄️ Meteor-level mess", amount:5 },
+                  ].map(r => (
+                    <button key={r.label} onClick={() => { setFineReason(r.label); setFineAmount(String(r.amount)); }}
+                      style={{ padding:"6px 12px", background: fineReason===r.label?"#ef4444":"#f8fafc", color:fineReason===r.label?"#fff":"#64748b", border:`2px solid ${fineReason===r.label?"#ef4444":"#e2e8f0"}`, borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+                <input value={fineReason} onChange={e => setFineReason(e.target.value)} placeholder="Or type custom reason..."
+                  style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
+              </div>
+              <button onClick={() => {
+                if (!fineStudent || !fineAmount || !fineReason) { showToast("Fill in all fields!", "#ef4444"); return; }
+                const student = students.find(s => s.id === fineStudent);
+                addTx(fineStudent, -parseInt(fineAmount), `🚨 Fine: ${fineReason}`);
+                showToast(`🚨 Fined ${student?.name} ${fmt(fineAmount)} for ${fineReason}`, "#ef4444");
+                setFineStudent(""); setFineAmount(""); setFineReason("");
+              }} style={{ width:"100%", padding:"13px", background:"linear-gradient(135deg,#ef4444,#dc2626)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700 }}>
+                🚨 Issue Fine
+              </button>
+            </div>
+          </div>
+        )}
+        
+                {/* ═══ HISTORY ═══ */}
         {tab==="history" && (
           <div>
             <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>📋 Transaction History</h2>
