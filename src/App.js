@@ -222,7 +222,7 @@ function ParentPortal({ code, setScreen }) {
             {myMessages.map(msg => (
               <div key={msg.id} style={{ padding:"16px 0", borderBottom:"1px solid #f0f9f4" }}>
                 <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d", marginBottom:4 }}>{msg.subject}</div>
-                <div style={{ fontSize:12, color:"#7a9bb5", marginBottom:8 }}>{msg.date}</div>
+                <div style={{ fontSize:12, color:"#7a9bb5", marginBottom:8 }}>{formatFullDate(msg.date)}</div>
                 <div style={{ fontSize:13, color:"#4a6580", lineHeight:1.6, background:"#f8fafc", borderRadius:8, padding:"10px 14px", marginBottom:10 }}>{msg.message}</div>
                 {replyingTo === msg.id ? (
                   <div>
@@ -256,7 +256,7 @@ function ParentPortal({ code, setScreen }) {
               <div key={t.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid #f0f9f4" }}>
                 <div>
                   <div style={{ fontSize:14, fontWeight:500, color:"#0f1f3d" }}>{t.reason}</div>
-                  <div style={{ fontSize:12, color:"#7a9bb5" }}>{t.date}</div>
+                  <div style={{ fontSize:12, color:"#7a9bb5" }}>{formatFullDate(t.date)}</div>
                 </div>
                 <div style={{ fontWeight:700, fontSize:15, color:t.amount>=0?"#15803d":"#ef4444", fontFamily:"'Space Grotesk',sans-serif" }}>
                   {t.amount>=0?"+":""}{fmt(t.amount)}
@@ -457,7 +457,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
             <div key={t.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid rgba(255,255,255,0.06)" }}>
               <div>
                 <div style={{ color:"#fff", fontSize:14, fontWeight:600 }}>{t.reason}</div>
-                <div style={{ color:"rgba(255,255,255,0.4)", fontSize:12 }}>{t.date}</div>
+                <div style={{ color:"rgba(255,255,255,0.4)", fontSize:12 }}>{formatFullDate(t.date)}</div>
               </div>
               <div style={{ fontWeight:800, fontSize:16, color: t.amount>=0?"#15803d":"#ef4444" }}>
                 {t.amount>=0?"+":""}{fmt(t.amount)}
@@ -786,6 +786,59 @@ function SetupWizard({ user, auth }) {
       </div>
     </div>
   );
+}
+
+// ── SCDSB 5-Day Cycle Calculator 2026-27 ─────────────────────────────────────
+const SCDSB_NON_INSTRUCTIONAL = new Set([
+  // EP Days
+  "2026-09-02","2026-09-03","2026-11-20",
+  "2027-01-29","2027-04-30","2027-06-04","2027-06-30",
+  // Holidays
+  "2026-09-07","2026-10-12",
+  "2026-12-21","2026-12-22","2026-12-23","2026-12-24","2026-12-25",
+  "2026-12-26","2026-12-27","2026-12-28","2026-12-29","2026-12-30","2026-12-31",
+  "2027-01-01","2027-02-15",
+  "2027-03-15","2027-03-16","2027-03-17","2027-03-18","2027-03-19",
+  "2027-03-26","2027-03-29","2027-05-24",
+  // ETD (no students)
+  "2026-09-29",
+  // RC Days
+  "2026-11-13","2027-02-18","2027-06-25",
+]);
+
+const SCHOOL_START = "2026-09-08";
+
+function getSCDSBCycleDay(dateStr) {
+  if (!dateStr) return null;
+  const date = new Date(dateStr + "T12:00:00");
+  const dayOfWeek = date.getDay();
+  if (dayOfWeek === 0 || dayOfWeek === 6) return null; // weekend
+  if (SCDSB_NON_INSTRUCTIONAL.has(dateStr)) return null; // non-instructional
+
+  // Count instructional days from start
+  const start = new Date(SCHOOL_START + "T12:00:00");
+  if (date < start) return null;
+
+  let count = 0;
+  const d = new Date(start);
+  while (d <= date) {
+    const ds = d.toISOString().slice(0,10);
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6 && !SCDSB_NON_INSTRUCTIONAL.has(ds)) {
+      count++;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return ((count - 1) % 5) + 1;
+}
+
+function formatFullDate(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr + "T12:00:00");
+  const dayName = date.toLocaleDateString("en-CA", { weekday:"long" });
+  const fullDate = date.toLocaleDateString("en-CA", { month:"long", day:"numeric", year:"numeric" });
+  const cycleDay = getSCDSBCycleDay(dateStr);
+  return `${dayName}, ${fullDate}${cycleDay ? ` · Day ${cycleDay}` : ""}`;
 }
 
 // ── Classroom App ─────────────────────────────────────────────────────────────
@@ -1407,7 +1460,7 @@ function ClassroomApp({ user, auth, classroom }) {
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
                         <div>
                           <div style={{ fontWeight:700, fontSize:15, color:"#0f1f3d" }}>{msg.subject}</div>
-                          <div style={{ fontSize:12, color:"#7a9bb5" }}>To: {recipient} · {msg.date}</div>
+                          <div style={{ fontSize:12, color:"#7a9bb5" }}>To: {recipient} · {formatFullDate(msg.date)}</div>
                         </div>
                         {(msg.replies||[]).length > 0 && (
                           <div style={{ background:"#f0fdf4", border:"1px solid #d4e8dd", borderRadius:20, padding:"3px 10px", fontSize:11, color:"#15803d", fontWeight:600 }}>
@@ -1448,7 +1501,7 @@ function ClassroomApp({ user, auth, classroom }) {
                     </div>
                     <div style={{ flex:1 }}>
                       <div style={{ fontWeight:600, fontSize:14, color:"#0f1f3d" }}>{s?.name || "Unknown"}</div>
-                      <div style={{ fontSize:12, color:"#7a9bb5" }}>{t.reason} · {t.date}</div>
+                      <div style={{ fontSize:12, color:"#7a9bb5" }}>{t.reason} · {formatFullDate(t.date)}</div>
                     </div>
                     <div style={{ fontWeight:800, fontSize:16, color: t.amount>=0?"#15803d":"#ef4444" }}>
                       {t.amount>=0?"+":""}{fmt(t.amount)}
