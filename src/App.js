@@ -384,6 +384,40 @@ function ParentPortal({ code, setScreen }) {
           )}
         </div>
 
+{/* School Calendar */}
+        <div style={{ background:"#fff", borderRadius:16, padding:24, marginBottom:20, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+          <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:4, fontFamily:"'Space Grotesk',sans-serif" }}>📅 SCDSB School Calendar</div>
+          <div style={{ fontSize:13, color:"#7a9bb5", marginBottom:16 }}>
+            {(() => {
+              const today = new Date().toISOString().slice(0,10);
+              const cycleDay = getSCDSBCycleDay(today);
+              const fullDate = formatFullDate(today);
+              return cycleDay 
+                ? `Today is ${fullDate}` 
+                : `Today is ${new Date().toLocaleDateString("en-CA",{weekday:"long",month:"long",day:"numeric",year:"numeric"})} — no school today`;
+            })()}
+          </div>
+          <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+            <a href="https://cdnsm5-ss14.sharpschool.com/UserFiles/Servers/Server_210898/File/Elementary/Planning%20for%20School/School%20Year%20Calendar/2026-27-School-Year-Calendar-elementary-5-day-cycle.pdf" target="_blank" rel="noopener noreferrer"
+              style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"10px 18px", background:"#f0f9f4", border:"1px solid #d4e8dd", borderRadius:10, color:"#15803d", fontSize:13, fontWeight:600, textDecoration:"none" }}>
+              🌐 View Calendar PDF
+            </a>
+            <a href="https://cdnsm5-ss14.sharpschool.com/UserFiles/Servers/Server_210898/File/Elementary/Planning%20for%20School/School%20Year%20Calendar/2026-27-School-Year-Calendar-elementary-5-day-cycle.pdf" download target="_blank" rel="noopener noreferrer"
+              style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"10px 18px", background:"#0f1f3d", border:"none", borderRadius:10, color:"#fff", fontSize:13, fontWeight:600, textDecoration:"none" }}>
+              📥 Download PDF
+            </a>
+          </div>
+          {/* Significant dates */}
+          <div style={{ marginTop:16, padding:"12px 16px", background:"#f8fafc", borderRadius:10, fontSize:12, color:"#4a6580", lineHeight:1.8 }}>
+            <div style={{ fontWeight:700, color:"#0f1f3d", marginBottom:6 }}>Key Dates 2026-27:</div>
+            <div>📚 First Day: September 8, 2026</div>
+            <div>🏫 PA Days: Sept 2-3, Nov 20, Jan 29, Apr 30, Jun 4, Jun 30</div>
+            <div>🎄 Winter Break: Dec 21, 2026 – Jan 1, 2027</div>
+            <div>🌱 March Break: March 15-19, 2027</div>
+            <div>🎓 Last Day: June 30, 2027</div>
+          </div>
+        </div>
+
         {/* About EconoClassroom */}
         <div style={{ background:"linear-gradient(135deg,#0a1628,#0f1f3d)", borderRadius:16, padding:24, color:"#fff", textAlign:"center" }}>
           <div style={{ fontSize:28, marginBottom:12 }}>🦕</div>
