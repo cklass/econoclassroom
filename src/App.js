@@ -244,6 +244,65 @@ function ParentPortal({ code, setScreen }) {
           </div>
         </div>
 
+{/* Balance graph */}
+        {myTx.length >= 2 && (
+          <div style={{ background:"#fff", borderRadius:16, padding:24, marginBottom:20, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+            <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:4, fontFamily:"'Space Grotesk',sans-serif" }}>📈 Balance History</div>
+            <div style={{ fontSize:12, color:"#7a9bb5", marginBottom:16 }}>How {student.name.split(" ")[0]}'s balance has changed over time</div>
+            {(() => {
+              // Build running balance from oldest to newest
+              const sorted = [...myTx].sort((a,b) => a.date.localeCompare(b.date));
+              let running = 0;
+              const points = sorted.map(t => {
+                running += t.amount;
+                return { date:t.date, balance:Math.max(0,running) };
+              });
+              // Dedupe by date — take last balance per day
+              const byDate = {};
+              points.forEach(p => { byDate[p.date] = p.balance; });
+              const data2 = Object.entries(byDate).sort((a,b) => a[0].localeCompare(b[0]));
+              if (data2.length < 2) return null;
+              const W = 580, H = 140, padL = 48, padR = 16, padT = 16, padB = 28;
+              const vals = data2.map(d => d[1]);
+              const minV = Math.min(...vals) * 0.9;
+              const maxV = Math.max(...vals) * 1.1 || 10;
+              const x = i => padL + (i / (data2.length-1)) * (W - padL - padR);
+              const y = v => padT + ((maxV - v) / (maxV - minV || 1)) * (H - padT - padB);
+              const points2 = data2.map((d,i) => `${x(i)},${y(d[1])}`).join(" ");
+              const area = `${x(0)},${H-padB} ${points2} ${x(data2.length-1)},${H-padB}`;
+              const isUp = vals[vals.length-1] >= vals[0];
+              const lineColor = isUp ? "#15803d" : "#dc2626";
+              const fillColor = isUp ? "#f0fdf4" : "#fef2f2";
+              // Y axis ticks
+              const ticks = [minV, (minV+maxV)/2, maxV].map(v => Math.round(v));
+              return (
+                <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:140 }}>
+                  {/* Grid lines */}
+                  {ticks.map(v => (
+                    <line key={v} x1={padL} y1={y(v)} x2={W-padR} y2={y(v)} stroke="#f0f0f0" strokeWidth="1"/>
+                  ))}
+                  {/* Y axis labels */}
+                  {ticks.map(v => (
+                    <text key={v} x={padL-6} y={y(v)+4} textAnchor="end" fontSize="9" fill="#94a3b8">{fmt(v)}</text>
+                  ))}
+                  {/* Area fill */}
+                  <polygon points={area} fill={fillColor}/>
+                  {/* Line */}
+                  <polyline points={points2} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
+                  {/* Current value dot */}
+                  <circle cx={x(data2.length-1)} cy={y(vals[vals.length-1])} r={5} fill={lineColor}/>
+                  {/* X axis date labels */}
+                  {data2.filter((_,i) => i===0 || i===data2.length-1 || i===Math.floor(data2.length/2)).map(([date],i) => (
+                    <text key={date} x={x(data2.indexOf(data2.find(d=>d[0]===date)))} y={H-4} textAnchor="middle" fontSize="9" fill="#94a3b8">
+                      {new Date(date+"T12:00:00").toLocaleDateString("en-CA",{month:"short",day:"numeric"})}
+                    </text>
+                  ))}
+                </svg>
+              );
+            })()}
+          </div>
+        )}
+
         {/* This week breakdown */}
         <div style={{ background:"#fff", borderRadius:16, padding:24, marginBottom:20, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
           <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:16, fontFamily:"'Space Grotesk',sans-serif" }}>📊 This Week's Activity</div>
