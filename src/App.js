@@ -120,113 +120,167 @@ function ParentPortal({ code, setScreen }) {
   const [reply, setReply] = React.useState("");
   const [replyingTo, setReplyingTo] = React.useState(null);
   const [error, setError] = React.useState("");
+  const [teacherId, setTeacherId] = React.useState(null);
 
   React.useEffect(() => {
-    // Find classroom by searching for student with matching parentCode
-    subscribeToFirebase(`classCodes`, async codes => {
+    subscribeToFirebase(`classCodes`, codes => {
       if (!codes) { setError("Invalid link."); setLoading(false); return; }
       let found = false;
-      for (const [codeKey, val] of Object.entries(codes)) {
-        const unsub = subscribeToFirebase(`teachers/${val.teacherId}/classroom`, classroom => {
-          if (!classroom) return;
-          const stu = (classroom.students||[]).find(s => 
+      Object.entries(codes).forEach(([, val]) => {
+        subscribeToFirebase(`teachers/${val.teacherId}/classroom`, classroom => {
+          if (!classroom || found) return;
+          const stu = (classroom.students||[]).find(s =>
             (s.parentCode || s.id.slice(0,8).toUpperCase()) === code.toUpperCase()
           );
-          if (stu && !found) {
+          if (stu) {
             found = true;
             setData(classroom);
             setStudent(stu);
+            setTeacherId(val.teacherId);
             setLoading(false);
           }
         });
-      }
+      });
       setTimeout(() => { if (!found) { setError("Link not found."); setLoading(false); } }, 3000);
     });
   }, [code]);
 
   if (loading) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(135deg,#0a1628,#0f1f3d)", fontFamily:"'Inter',sans-serif" }}>
-      <div style={{ color:"#fff", fontSize:18 }}>Loading... 🦕</div>
+      <div style={{ textAlign:"center", color:"#fff" }}>
+        <div style={{ fontSize:64, marginBottom:16 }}>🦕</div>
+        <div style={{ fontSize:18, fontWeight:600 }}>Loading your child's profile...</div>
+      </div>
     </div>
   );
 
   if (error || !data || !student) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(135deg,#0a1628,#0f1f3d)", fontFamily:"'Inter',sans-serif" }}>
-      <div style={{ color:"#fff", textAlign:"center" }}>
-        <div style={{ fontSize:48, marginBottom:16 }}>🦕</div>
-        <div style={{ fontSize:18, marginBottom:8 }}>Link not found!</div>
-        <div style={{ fontSize:14, color:"rgba(255,255,255,0.5)" }}>Please ask your teacher for the correct link.</div>
+      <div style={{ color:"#fff", textAlign:"center", padding:24 }}>
+        <div style={{ fontSize:64, marginBottom:16 }}>🦕</div>
+        <div style={{ fontSize:20, fontWeight:700, marginBottom:8 }}>Link not found!</div>
+        <div style={{ fontSize:14, color:"rgba(255,255,255,0.5)" }}>Please ask your teacher for the correct parent portal link.</div>
       </div>
     </div>
   );
 
   const fmt = n => `${data.currencyEmoji||"🦕"}${Number(n).toLocaleString()}`;
   const balance = data?.balances?.[student.id] || 0;
-  const myTx = (data?.txLog||[]).filter(t => t.studentId === student.id).slice(0,10);
+  const myTx = (data?.txLog||[]).filter(t => t.studentId === student.id);
   const myMessages = (data?.parentMessages||[]).filter(m => m.to === "all" || m.to === student.id);
   const dino = DINO_OPTIONS.find(d => d.id === student.dinoId) || DINO_OPTIONS[0];
+  const job = (data?.jobs||[]).find(j => j.id === (data?.assigned||{})[student.id]);
+
+  // This week's stats
+  const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const weekTx = myTx.filter(t => new Date(t.date) >= oneWeekAgo);
+  const weekEarned = weekTx.filter(t => t.amount > 0).reduce((a,b) => a + b.amount, 0);
+  const weekSpent = weekTx.filter(t => t.amount < 0).reduce((a,b) => a + Math.abs(b.amount), 0);
+  const weekNet = weekEarned - weekSpent;
+
+  // Portfolio value
+  const portfolioValue = (data?.stockPrices && data?.portfolios?.[student.id]) ?
+    Object.entries(data.portfolios[student.id]).reduce((sum, [stockId, shares]) => {
+      return sum + shares * (data.stockPrices[stockId] || 0);
+    }, 0) : 0;
 
   const sendReply = (msgId) => {
     if (!reply.trim()) return;
-    // Note: in production this would save to Firebase
-    showToast("Reply sent! (Demo mode)");
+    saveToFirebase(`teachers/${teacherId}/classroom/parentMessages`, 
+      (data.parentMessages||[]).map(m => m.id === msgId ? 
+        { ...m, replies: [...(m.replies||[]), { message:reply, date:new Date().toISOString().slice(0,10), from:"parent" }] } : m
+      )
+    );
     setReply(""); setReplyingTo(null);
   };
-
-  const showToast = (msg) => alert(msg);
 
   return (
     <div style={{ minHeight:"100vh", background:"#f0f9f4", fontFamily:"'Inter',sans-serif" }}>
       {/* Header */}
-      <div style={{ background:"linear-gradient(135deg,#0a1628,#0f1f3d)", padding:"20px 24px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <span style={{ fontSize:28 }}>🦕</span>
-          <div>
-            <div style={{ color:"#fff", fontSize:16, fontWeight:700 }}>EconoClassroom</div>
-            <div style={{ color:"#7a9bb5", fontSize:12 }}>{data.name}</div>
+      <div style={{ background:"linear-gradient(135deg,#0a1628,#0f1f3d)", padding:"20px 24px" }}>
+        <div style={{ maxWidth:680, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <span style={{ fontSize:28 }}>🦕</span>
+            <div>
+              <div style={{ color:"#fff", fontSize:16, fontWeight:700, fontFamily:"'Space Grotesk',sans-serif" }}>EconoClassroom</div>
+              <div style={{ color:"#7a9bb5", fontSize:12 }}>Parent Portal · {data.name}</div>
+            </div>
           </div>
-        </div>
-        <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:10, padding:"6px 14px", fontSize:12, color:"#fff" }}>
-          Parent Portal
+          <div style={{ background:"rgba(21,128,61,0.3)", border:"1px solid rgba(21,128,61,0.5)", borderRadius:20, padding:"4px 14px", fontSize:12, color:"#a8f0c0", fontWeight:600 }}>
+            🔒 Secure View
+          </div>
         </div>
       </div>
 
-      <div style={{ maxWidth:700, margin:"0 auto", padding:"24px 20px" }}>
-        {/* Student card */}
-        <div style={{ background:"linear-gradient(135deg,#15803d,#0f1f3d)", borderRadius:20, padding:24, marginBottom:20, color:"#fff" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:16 }}>
-            <div style={{ width:56, height:56, borderRadius:16, background:`${dino.color}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:32 }}>
+      <div style={{ maxWidth:680, margin:"0 auto", padding:"24px 20px" }}>
+
+        {/* Child's dino card */}
+        <div style={{ background:"linear-gradient(135deg,#0f1f3d,#15803d)", borderRadius:20, padding:28, marginBottom:20, color:"#fff", boxShadow:"0 8px 32px rgba(15,31,61,0.3)" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:20 }}>
+            <div style={{ width:64, height:64, borderRadius:18, background:`${dino.color}33`, border:`2px solid ${dino.color}66`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:36 }}>
               {dino.emoji}
             </div>
             <div>
-              <div style={{ fontSize:22, fontWeight:800 }}>{student.name}</div>
-              <div style={{ fontSize:13, color:"rgba(255,255,255,0.6)" }}>Grade {data.grade} · {data.province}</div>
+              <div style={{ fontSize:26, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif" }}>{student.name}</div>
+              <div style={{ fontSize:13, color:"rgba(255,255,255,0.6)", marginTop:2 }}>Grade {data.grade} · {data.province}</div>
+              {job && <div style={{ fontSize:13, color:"#a8f0c0", marginTop:4 }}>{job.emoji} {job.name} — {fmt(job.pay)}/week</div>}
             </div>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-            <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:12, padding:"12px 16px" }}>
-              <div style={{ fontSize:12, color:"rgba(255,255,255,0.6)", marginBottom:4 }}>Current Balance</div>
-              <div style={{ fontSize:28, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(balance)}</div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12 }}>
+            <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:14, padding:"14px 16px", textAlign:"center" }}>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,0.6)", marginBottom:6, letterSpacing:0.5 }}>BALANCE</div>
+              <div style={{ fontSize:24, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(balance)}</div>
             </div>
-            <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:12, padding:"12px 16px" }}>
-              <div style={{ fontSize:12, color:"rgba(255,255,255,0.6)", marginBottom:4 }}>Transactions</div>
-              <div style={{ fontSize:28, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif" }}>{myTx.length}</div>
+            <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:14, padding:"14px 16px", textAlign:"center" }}>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,0.6)", marginBottom:6, letterSpacing:0.5 }}>THIS WEEK</div>
+              <div style={{ fontSize:24, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif", color: weekNet>=0?"#a8f0c0":"#fca5a5" }}>
+                {weekNet>=0?"+":""}{fmt(weekNet)}
+              </div>
+            </div>
+            <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:14, padding:"14px 16px", textAlign:"center" }}>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,0.6)", marginBottom:6, letterSpacing:0.5 }}>INVESTED</div>
+              <div style={{ fontSize:24, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(Math.round(portfolioValue))}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* This week breakdown */}
+        <div style={{ background:"#fff", borderRadius:16, padding:24, marginBottom:20, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+          <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:16, fontFamily:"'Space Grotesk',sans-serif" }}>📊 This Week's Activity</div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+            <div style={{ background:"#f0fdf4", borderRadius:12, padding:"14px 16px", border:"1px solid #d4e8dd" }}>
+              <div style={{ fontSize:12, color:"#15803d", fontWeight:600, marginBottom:4 }}>💰 Earned</div>
+              <div style={{ fontSize:22, fontWeight:800, color:"#15803d", fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(weekEarned)}</div>
+              <div style={{ fontSize:11, color:"#7a9bb5", marginTop:4 }}>{weekTx.filter(t=>t.amount>0).length} transactions</div>
+            </div>
+            <div style={{ background:"#fef2f2", borderRadius:12, padding:"14px 16px", border:"1px solid #fecaca" }}>
+              <div style={{ fontSize:12, color:"#dc2626", fontWeight:600, marginBottom:4 }}>💸 Spent/Deducted</div>
+              <div style={{ fontSize:22, fontWeight:800, color:"#dc2626", fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(weekSpent)}</div>
+              <div style={{ fontSize:11, color:"#7a9bb5", marginTop:4 }}>{weekTx.filter(t=>t.amount<0).length} transactions</div>
             </div>
           </div>
         </div>
 
         {/* Messages from teacher */}
         {myMessages.length > 0 && (
-          <div style={{ background:"#fff", borderRadius:16, padding:24, marginBottom:20, border:"1px solid #e2e8f0" }}>
-            <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:16 }}>✉️ Messages from your teacher</div>
+          <div style={{ background:"#fff", borderRadius:16, padding:24, marginBottom:20, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+            <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:16, fontFamily:"'Space Grotesk',sans-serif" }}>✉️ Messages from {data.name.split("'")[0]}</div>
             {myMessages.map(msg => (
               <div key={msg.id} style={{ padding:"16px 0", borderBottom:"1px solid #f0f9f4" }}>
-                <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d", marginBottom:4 }}>{msg.subject}</div>
-                <div style={{ fontSize:12, color:"#7a9bb5", marginBottom:8 }}>{formatFullDate(msg.date)}</div>
-                <div style={{ fontSize:13, color:"#4a6580", lineHeight:1.6, background:"#f8fafc", borderRadius:8, padding:"10px 14px", marginBottom:10 }}>{msg.message}</div>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
+                  <div style={{ fontWeight:700, fontSize:15, color:"#0f1f3d" }}>{msg.subject}</div>
+                  <div style={{ fontSize:11, color:"#7a9bb5", whiteSpace:"nowrap", marginLeft:12 }}>{formatFullDate(msg.date)}</div>
+                </div>
+                <div style={{ fontSize:13, color:"#4a6580", lineHeight:1.7, background:"#f8fafc", borderRadius:10, padding:"12px 16px", marginBottom:12 }}>{msg.message}</div>
+                {(msg.replies||[]).map((r,i) => (
+                  <div key={i} style={{ marginLeft:20, background:"#f0f9f4", borderRadius:10, padding:"10px 14px", border:"1px solid #d4e8dd", marginBottom:8 }}>
+                    <div style={{ fontSize:11, color:"#7a9bb5", marginBottom:4 }}>💬 Your reply · {formatFullDate(r.date)}</div>
+                    <div style={{ fontSize:13, color:"#0f1f3d" }}>{r.message}</div>
+                  </div>
+                ))}
                 {replyingTo === msg.id ? (
                   <div>
-                    <textarea value={reply} onChange={e => setReply(e.target.value)} placeholder="Type your reply..." rows={3}
+                    <textarea value={reply} onChange={e => setReply(e.target.value)} placeholder="Type your reply to the teacher..." rows={3}
                       style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:13, outline:"none", boxSizing:"border-box", resize:"none", fontFamily:"'Inter',sans-serif", marginBottom:8 }}/>
                     <div style={{ display:"flex", gap:8 }}>
                       <button onClick={() => sendReply(msg.id)}
@@ -237,8 +291,8 @@ function ParentPortal({ code, setScreen }) {
                   </div>
                 ) : (
                   <button onClick={() => setReplyingTo(msg.id)}
-                    style={{ padding:"6px 14px", background:"#f0f9f4", color:"#15803d", border:"1px solid #d4e8dd", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
-                    💬 Reply
+                    style={{ padding:"6px 16px", background:"#f0f9f4", color:"#15803d", border:"1px solid #d4e8dd", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
+                    💬 Reply to teacher
                   </button>
                 )}
               </div>
@@ -247,24 +301,40 @@ function ParentPortal({ code, setScreen }) {
         )}
 
         {/* Recent transactions */}
-        <div style={{ background:"#fff", borderRadius:16, padding:24, border:"1px solid #e2e8f0" }}>
-          <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:16 }}>📋 Recent Activity</div>
+        <div style={{ background:"#fff", borderRadius:16, padding:24, marginBottom:20, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+          <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:16, fontFamily:"'Space Grotesk',sans-serif" }}>📋 Recent Transactions</div>
           {myTx.length === 0 ? (
             <div style={{ textAlign:"center", padding:24, color:"#7a9bb5", fontSize:14 }}>No transactions yet!</div>
           ) : (
-            myTx.map(t => (
-              <div key={t.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid #f0f9f4" }}>
-                <div>
-                  <div style={{ fontSize:14, fontWeight:500, color:"#0f1f3d" }}>{t.reason}</div>
-                  <div style={{ fontSize:12, color:"#7a9bb5" }}>{formatFullDate(t.date)}</div>
+            myTx.slice(0,15).map(t => (
+              <div key={t.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 0", borderBottom:"1px solid #f8fafc" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  <div style={{ width:36, height:36, borderRadius:10, background:t.amount>=0?"#f0fdf4":"#fef2f2", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>
+                    {t.amount>=0?"💰":"💸"}
+                  </div>
+                  <div>
+                    <div style={{ fontSize:14, fontWeight:500, color:"#0f1f3d" }}>{t.reason}</div>
+                    <div style={{ fontSize:11, color:"#7a9bb5" }}>{formatFullDate(t.date)}</div>
+                  </div>
                 </div>
-                <div style={{ fontWeight:700, fontSize:15, color:t.amount>=0?"#15803d":"#ef4444", fontFamily:"'Space Grotesk',sans-serif" }}>
+                <div style={{ fontWeight:700, fontSize:15, color:t.amount>=0?"#15803d":"#dc2626", fontFamily:"'Space Grotesk',sans-serif", whiteSpace:"nowrap", marginLeft:12 }}>
                   {t.amount>=0?"+":""}{fmt(t.amount)}
                 </div>
               </div>
             ))
           )}
         </div>
+
+        {/* About EconoClassroom */}
+        <div style={{ background:"linear-gradient(135deg,#0a1628,#0f1f3d)", borderRadius:16, padding:24, color:"#fff", textAlign:"center" }}>
+          <div style={{ fontSize:28, marginBottom:12 }}>🦕</div>
+          <div style={{ fontSize:15, fontWeight:700, marginBottom:8, fontFamily:"'Space Grotesk',sans-serif" }}>About EconoClassroom</div>
+          <div style={{ fontSize:13, color:"rgba(255,255,255,0.6)", lineHeight:1.7, maxWidth:480, margin:"0 auto" }}>
+            EconoClassroom teaches financial literacy through a real classroom economy. Your child earns currency through their classroom job, manages weekly expenses, and learns to save and invest — all in a fun, dinosaur-themed environment aligned with the Ontario curriculum.
+          </div>
+          <div style={{ marginTop:16, fontSize:12, color:"rgba(255,255,255,0.3)" }}>econoclassroom.ca</div>
+        </div>
+
       </div>
     </div>
   );
