@@ -806,7 +806,7 @@ const SCDSB_NON_INSTRUCTIONAL = new Set([
   "2026-11-13","2027-02-18","2027-06-25",
 ]);
 
-const SCHOOL_START = "2026-09-08";
+const SCHOOL_START = "2026-08-01";
 
 function getSCDSBCycleDay(dateStr) {
   if (!dateStr) return null;
