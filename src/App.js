@@ -22,10 +22,14 @@ export default function App() {
   const [screen, setScreen] = useState("landing"); // landing, login, register, dashboard
 
   useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith("#parent-")) {
+      setScreen(hash.slice(1));
+    }
     const unsub = onAuthStateChanged(auth, u => {
       setUser(u);
       setLoading(false);
-      if (u) setScreen("dashboard");
+      if (u && !window.location.hash.startsWith("#parent-")) setScreen("dashboard");
     });
     return unsub;
   }, []);
@@ -40,6 +44,7 @@ export default function App() {
   if (screen === "login") return <LoginScreen auth={auth} setScreen={setScreen}/>;
   if (screen === "register") return <RegisterScreen auth={auth} setScreen={setScreen}/>;
   if (screen === "studentlogin") return <StudentLoginScreen setScreen={setScreen}/>;
+  if (screen.startsWith("parent-")) return <ParentPortal code={screen.replace("parent-","")} setScreen={setScreen}/>;
   return <LandingPage setScreen={setScreen}/>;
 }
 
@@ -102,6 +107,164 @@ function LandingPage({ setScreen }) {
       {/* Footer */}
       <div style={{ textAlign:"center", padding:"40px", borderTop:"1px solid rgba(255,255,255,0.1)", color:"rgba(255,255,255,0.4)", fontSize:13 }}>
         © 2026 EconoClassroom · Built for Canadian teachers 🍁
+      </div>
+    </div>
+  );
+}
+
+// ── Parent Portal ─────────────────────────────────────────────────────────────
+function ParentPortal({ code, setScreen }) {
+  const [data, setData] = React.useState(null);
+  const [student, setStudent] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [reply, setReply] = React.useState("");
+  const [replyingTo, setReplyingTo] = React.useState(null);
+  const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    // Find classroom by searching for student with matching parentCode
+    subscribeToFirebase(`classCodes`, async codes => {
+      if (!codes) { setError("Invalid link."); setLoading(false); return; }
+      let found = false;
+      for (const [codeKey, val] of Object.entries(codes)) {
+        const unsub = subscribeToFirebase(`teachers/${val.teacherId}/classroom`, classroom => {
+          if (!classroom) return;
+          const stu = (classroom.students||[]).find(s => 
+            (s.parentCode || s.id.slice(0,8).toUpperCase()) === code.toUpperCase()
+          );
+          if (stu && !found) {
+            found = true;
+            setData(classroom);
+            setStudent(stu);
+            setLoading(false);
+          }
+        });
+      }
+      setTimeout(() => { if (!found) { setError("Link not found."); setLoading(false); } }, 3000);
+    });
+  }, [code]);
+
+  if (loading) return (
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(135deg,#0a1628,#0f1f3d)", fontFamily:"'Inter',sans-serif" }}>
+      <div style={{ color:"#fff", fontSize:18 }}>Loading... 🦕</div>
+    </div>
+  );
+
+  if (error || !data || !student) return (
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(135deg,#0a1628,#0f1f3d)", fontFamily:"'Inter',sans-serif" }}>
+      <div style={{ color:"#fff", textAlign:"center" }}>
+        <div style={{ fontSize:48, marginBottom:16 }}>🦕</div>
+        <div style={{ fontSize:18, marginBottom:8 }}>Link not found!</div>
+        <div style={{ fontSize:14, color:"rgba(255,255,255,0.5)" }}>Please ask your teacher for the correct link.</div>
+      </div>
+    </div>
+  );
+
+  const fmt = n => `${data.currencyEmoji||"🦕"}${Number(n).toLocaleString()}`;
+  const balance = data?.balances?.[student.id] || 0;
+  const myTx = (data?.txLog||[]).filter(t => t.studentId === student.id).slice(0,10);
+  const myMessages = (data?.parentMessages||[]).filter(m => m.to === "all" || m.to === student.id);
+  const dino = DINO_OPTIONS.find(d => d.id === student.dinoId) || DINO_OPTIONS[0];
+
+  const sendReply = (msgId) => {
+    if (!reply.trim()) return;
+    // Note: in production this would save to Firebase
+    showToast("Reply sent! (Demo mode)");
+    setReply(""); setReplyingTo(null);
+  };
+
+  const showToast = (msg) => alert(msg);
+
+  return (
+    <div style={{ minHeight:"100vh", background:"#f0f9f4", fontFamily:"'Inter',sans-serif" }}>
+      {/* Header */}
+      <div style={{ background:"linear-gradient(135deg,#0a1628,#0f1f3d)", padding:"20px 24px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+          <span style={{ fontSize:28 }}>🦕</span>
+          <div>
+            <div style={{ color:"#fff", fontSize:16, fontWeight:700 }}>EconoClassroom</div>
+            <div style={{ color:"#7a9bb5", fontSize:12 }}>{data.name}</div>
+          </div>
+        </div>
+        <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:10, padding:"6px 14px", fontSize:12, color:"#fff" }}>
+          Parent Portal
+        </div>
+      </div>
+
+      <div style={{ maxWidth:700, margin:"0 auto", padding:"24px 20px" }}>
+        {/* Student card */}
+        <div style={{ background:"linear-gradient(135deg,#15803d,#0f1f3d)", borderRadius:20, padding:24, marginBottom:20, color:"#fff" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:16 }}>
+            <div style={{ width:56, height:56, borderRadius:16, background:`${dino.color}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:32 }}>
+              {dino.emoji}
+            </div>
+            <div>
+              <div style={{ fontSize:22, fontWeight:800 }}>{student.name}</div>
+              <div style={{ fontSize:13, color:"rgba(255,255,255,0.6)" }}>Grade {data.grade} · {data.province}</div>
+            </div>
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+            <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:12, padding:"12px 16px" }}>
+              <div style={{ fontSize:12, color:"rgba(255,255,255,0.6)", marginBottom:4 }}>Current Balance</div>
+              <div style={{ fontSize:28, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(balance)}</div>
+            </div>
+            <div style={{ background:"rgba(255,255,255,0.1)", borderRadius:12, padding:"12px 16px" }}>
+              <div style={{ fontSize:12, color:"rgba(255,255,255,0.6)", marginBottom:4 }}>Transactions</div>
+              <div style={{ fontSize:28, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif" }}>{myTx.length}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Messages from teacher */}
+        {myMessages.length > 0 && (
+          <div style={{ background:"#fff", borderRadius:16, padding:24, marginBottom:20, border:"1px solid #e2e8f0" }}>
+            <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:16 }}>✉️ Messages from your teacher</div>
+            {myMessages.map(msg => (
+              <div key={msg.id} style={{ padding:"16px 0", borderBottom:"1px solid #f0f9f4" }}>
+                <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d", marginBottom:4 }}>{msg.subject}</div>
+                <div style={{ fontSize:12, color:"#7a9bb5", marginBottom:8 }}>{msg.date}</div>
+                <div style={{ fontSize:13, color:"#4a6580", lineHeight:1.6, background:"#f8fafc", borderRadius:8, padding:"10px 14px", marginBottom:10 }}>{msg.message}</div>
+                {replyingTo === msg.id ? (
+                  <div>
+                    <textarea value={reply} onChange={e => setReply(e.target.value)} placeholder="Type your reply..." rows={3}
+                      style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:13, outline:"none", boxSizing:"border-box", resize:"none", fontFamily:"'Inter',sans-serif", marginBottom:8 }}/>
+                    <div style={{ display:"flex", gap:8 }}>
+                      <button onClick={() => sendReply(msg.id)}
+                        style={{ padding:"8px 20px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600 }}>Send Reply</button>
+                      <button onClick={() => { setReplyingTo(null); setReply(""); }}
+                        style={{ padding:"8px 16px", background:"#f1f5f9", color:"#4a6580", border:"none", borderRadius:8, cursor:"pointer", fontSize:13 }}>Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={() => setReplyingTo(msg.id)}
+                    style={{ padding:"6px 14px", background:"#f0f9f4", color:"#15803d", border:"1px solid #d4e8dd", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
+                    💬 Reply
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Recent transactions */}
+        <div style={{ background:"#fff", borderRadius:16, padding:24, border:"1px solid #e2e8f0" }}>
+          <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:16 }}>📋 Recent Activity</div>
+          {myTx.length === 0 ? (
+            <div style={{ textAlign:"center", padding:24, color:"#7a9bb5", fontSize:14 }}>No transactions yet!</div>
+          ) : (
+            myTx.map(t => (
+              <div key={t.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid #f0f9f4" }}>
+                <div>
+                  <div style={{ fontSize:14, fontWeight:500, color:"#0f1f3d" }}>{t.reason}</div>
+                  <div style={{ fontSize:12, color:"#7a9bb5" }}>{t.date}</div>
+                </div>
+                <div style={{ fontWeight:700, fontSize:15, color:t.amount>=0?"#15803d":"#ef4444", fontFamily:"'Space Grotesk',sans-serif" }}>
+                  {t.amount>=0?"+":""}{fmt(t.amount)}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
@@ -627,6 +790,9 @@ function SetupWizard({ user, auth }) {
 
 // ── Classroom App ─────────────────────────────────────────────────────────────
 function ClassroomApp({ user, auth, classroom }) {
+  const [parentMessage, setParentMessage] = React.useState("");
+  const [parentMessageStudent, setParentMessageStudent] = React.useState("all");
+  const [parentSubject, setParentSubject] = React.useState("");
   const [newExpenseName, setNewExpenseName] = React.useState("");
   const [newExpenseAmount, setNewExpenseAmount] = React.useState("");
   const [newExpenseEmoji, setNewExpenseEmoji] = React.useState("💸");
@@ -698,6 +864,7 @@ function ClassroomApp({ user, auth, classroom }) {
     { id:"jobs",      label:"👷 Jobs" },
     { id:"store",     label:"🏪 Store" },
     { id:"economy",   label:"🌍 Economy" },
+    { id:"parents",   label:"👨‍👩‍👧 Parents" },
     { id:"history",   label:"📋 History" },
   ];
 
@@ -1137,6 +1304,132 @@ function ClassroomApp({ user, auth, classroom }) {
           </div>
         )}
         
+{/* ═══ PARENTS ═══ */}
+        {tab==="parents" && (
+          <div style={{ maxWidth:900, margin:"0 auto" }}>
+            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", marginBottom:8 }}>👨‍👩‍👧 Parent Communication</h2>
+            <p style={{ fontSize:14, color:"#7a9bb5", marginBottom:24 }}>Send messages to parents and share their child's progress. Parents access via a unique link — no account needed.</p>
+
+            {/* Send Message */}
+            <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+              <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:20 }}>✉️ Send a Message</div>
+              
+              <div style={{ marginBottom:16 }}>
+                <label style={{ fontSize:12, fontWeight:700, color:"#7a9bb5", display:"block", marginBottom:8, letterSpacing:0.5 }}>SEND TO</label>
+                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                  <button onClick={() => setParentMessageStudent("all")}
+                    style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${parentMessageStudent==="all"?"#15803d":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
+                      background:parentMessageStudent==="all"?"#15803d":"#fff", color:parentMessageStudent==="all"?"#fff":"#4a6580" }}>
+                    🌍 All Parents
+                  </button>
+                  {students.map(s => (
+                    <button key={s.id} onClick={() => setParentMessageStudent(s.id)}
+                      style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${parentMessageStudent===s.id?"#15803d":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
+                        background:parentMessageStudent===s.id?"#15803d":"#fff", color:parentMessageStudent===s.id?"#fff":"#4a6580" }}>
+                      {s.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginBottom:16 }}>
+                <label style={{ fontSize:12, fontWeight:700, color:"#7a9bb5", display:"block", marginBottom:8, letterSpacing:0.5 }}>SUBJECT</label>
+                <input value={parentSubject} onChange={e => setParentSubject(e.target.value)} placeholder="e.g. Weekly Update, Important Notice..."
+                  style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
+                <div style={{ display:"flex", gap:6, marginTop:8, flexWrap:"wrap" }}>
+                  {["Weekly Update","Important Notice","Great News!","Reminder","Monthly Report"].map(s => (
+                    <button key={s} onClick={() => setParentSubject(s)}
+                      style={{ padding:"4px 10px", background:parentSubject===s?"#15803d":"#f0f9f4", color:parentSubject===s?"#fff":"#4a6580", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>{s}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginBottom:20 }}>
+                <label style={{ fontSize:12, fontWeight:700, color:"#7a9bb5", display:"block", marginBottom:8, letterSpacing:0.5 }}>MESSAGE</label>
+                <textarea value={parentMessage} onChange={e => setParentMessage(e.target.value)} placeholder="Type your message to parents here..." rows={5}
+                  style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box", resize:"vertical", fontFamily:"'Inter',sans-serif" }}/>
+              </div>
+
+              <button onClick={() => {
+                if (!parentSubject.trim() || !parentMessage.trim()) { showToast("Please add a subject and message!", "#ef4444"); return; }
+                const msg = {
+                  id: uuid(),
+                  subject: parentSubject,
+                  message: parentMessage,
+                  to: parentMessageStudent,
+                  date: todayStr(),
+                  timestamp: Date.now(),
+                  replies: [],
+                };
+                update(prev => ({
+                  ...prev,
+                  parentMessages: [msg, ...(prev.parentMessages||[])],
+                }));
+                showToast(`✉️ Message sent to ${parentMessageStudent==="all"?"all parents":students.find(s=>s.id===parentMessageStudent)?.name+"'s parents"}!`);
+                setParentMessage(""); setParentSubject("");
+              }} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#0f1f3d)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:16, fontWeight:700, fontFamily:"'Space Grotesk',sans-serif" }}>
+                ✉️ Send Message
+              </button>
+            </div>
+
+            {/* Parent Portal Links */}
+            <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+              <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:8 }}>🔗 Parent Portal Links</div>
+              <p style={{ fontSize:13, color:"#7a9bb5", marginBottom:16 }}>Share these links with parents. Each link is unique to their child and requires no login.</p>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:10 }}>
+                {students.map(s => {
+                  const parentCode = s.parentCode || s.id.slice(0,8).toUpperCase();
+                  const link = `${window.location.origin}${window.location.pathname}#parent-${parentCode}`;
+                  return (
+                    <div key={s.id} style={{ background:"#f0f9f4", borderRadius:12, padding:"12px 16px", border:"1px solid #d4e8dd" }}>
+                      <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d", marginBottom:4 }}>{s.name}</div>
+                      <div style={{ fontSize:11, color:"#7a9bb5", marginBottom:8, wordBreak:"break-all" }}>{link}</div>
+                      <button onClick={() => { navigator.clipboard.writeText(link); showToast(`📋 Copied ${s.name}'s parent link!`); }}
+                        style={{ padding:"6px 12px", background:"#15803d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>
+                        📋 Copy Link
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Message History */}
+            <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
+              <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:16 }}>📬 Message History</div>
+              {(appState?.parentMessages||[]).length === 0 ? (
+                <div style={{ textAlign:"center", padding:32, color:"#7a9bb5", fontSize:14 }}>No messages sent yet!</div>
+              ) : (
+                (appState?.parentMessages||[]).map(msg => {
+                  const recipient = msg.to === "all" ? "All Parents" : students.find(s=>s.id===msg.to)?.name + "'s Parents";
+                  return (
+                    <div key={msg.id} style={{ padding:"16px 0", borderBottom:"1px solid #f0f9f4" }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                        <div>
+                          <div style={{ fontWeight:700, fontSize:15, color:"#0f1f3d" }}>{msg.subject}</div>
+                          <div style={{ fontSize:12, color:"#7a9bb5" }}>To: {recipient} · {msg.date}</div>
+                        </div>
+                        {(msg.replies||[]).length > 0 && (
+                          <div style={{ background:"#f0fdf4", border:"1px solid #d4e8dd", borderRadius:20, padding:"3px 10px", fontSize:11, color:"#15803d", fontWeight:600 }}>
+                            {msg.replies.length} repl{msg.replies.length===1?"y":"ies"}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ fontSize:13, color:"#4a6580", lineHeight:1.6, background:"#f8fafc", borderRadius:8, padding:"10px 14px" }}>{msg.message}</div>
+                      {(msg.replies||[]).map((r,i) => (
+                        <div key={i} style={{ marginTop:8, marginLeft:24, background:"#f0f9f4", borderRadius:8, padding:"10px 14px", border:"1px solid #d4e8dd" }}>
+                          <div style={{ fontSize:11, color:"#7a9bb5", marginBottom:4 }}>💬 Parent reply · {r.date}</div>
+                          <div style={{ fontSize:13, color:"#0f1f3d" }}>{r.message}</div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
                 {/* ═══ HISTORY ═══ */}
         {tab==="history" && (
           <div>
