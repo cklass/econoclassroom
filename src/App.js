@@ -31,7 +31,7 @@ export default function App() {
   }, []);
 
   if (loading) return (
-    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#0f172a" }}>
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#0f1f3d" }}>
       <div style={{ color:"#fff", fontSize:24, fontFamily:"sans-serif" }}>Loading...</div>
     </div>
   );
@@ -46,7 +46,7 @@ export default function App() {
 // ── Landing Page ──────────────────────────────────────────────────────────────
 function LandingPage({ setScreen }) {
   return (
-    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0f2a1a 100%)", fontFamily:"'Segoe UI',sans-serif", color:"#fff" }}>
+    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f1f3d 0%,#1e3a5f 50%,#0f2a1a 100%)", fontFamily:"'Inter',sans-serif", color:"#fff" }}>
       {/* Nav */}
       <nav style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"20px 40px", borderBottom:"1px solid rgba(255,255,255,0.1)" }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
@@ -56,13 +56,13 @@ function LandingPage({ setScreen }) {
         <div style={{ display:"flex", gap:12 }}>
           <button onClick={() => setScreen("studentlogin")} style={{ padding:"10px 24px", background:"transparent", color:"#a8d8b5", border:"2px solid rgba(168,216,181,0.4)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>🦕 Student Login</button>
           <button onClick={() => setScreen("login")} style={{ padding:"10px 24px", background:"transparent", color:"#fff", border:"2px solid rgba(255,255,255,0.3)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Log In</button>
-          <button onClick={() => setScreen("register")} style={{ padding:"10px 24px", background:"#22c55e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Get Started Free</button>
+          <button onClick={() => setScreen("register")} style={{ padding:"10px 24px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Get Started Free</button>
         </div>
       </nav>
 
       {/* Hero */}
       <div style={{ textAlign:"center", padding:"80px 40px 60px" }}>
-        <div style={{ display:"inline-block", background:"rgba(34,197,94,0.15)", border:"1px solid rgba(34,197,94,0.3)", borderRadius:20, padding:"6px 16px", fontSize:13, color:"#22c55e", marginBottom:24, letterSpacing:1 }}>
+        <div style={{ display:"inline-block", background:"rgba(34,197,94,0.15)", border:"1px solid rgba(34,197,94,0.3)", borderRadius:20, padding:"6px 16px", fontSize:13, color:"#15803d", marginBottom:24, letterSpacing:1 }}>
           🎉 FREE FOR TEACHERS — NO CREDIT CARD REQUIRED
         </div>
         <h1 style={{ fontSize:"clamp(2.5rem,6vw,4.5rem)", fontWeight:800, margin:"0 0 24px", lineHeight:1.1, background:"linear-gradient(135deg,#fff,#a8d8b5)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
@@ -72,7 +72,7 @@ function LandingPage({ setScreen }) {
           The classroom economy platform that teaches students to earn, save, invest, and spend — with real stock market data and curriculum-aligned activities.
         </p>
         <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap" }}>
-          <button onClick={() => setScreen("register")} style={{ padding:"16px 36px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:18, fontWeight:700, boxShadow:"0 8px 24px rgba(34,197,94,0.4)" }}>
+          <button onClick={() => setScreen("register")} style={{ padding:"16px 36px", background:"linear-gradient(135deg,#15803d,#15803d)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:18, fontWeight:700, boxShadow:"0 8px 24px rgba(34,197,94,0.4)" }}>
             Start Your Free Classroom 🦕
           </button>
           <button style={{ padding:"16px 36px", background:"rgba(255,255,255,0.1)", color:"#fff", border:"2px solid rgba(255,255,255,0.2)", borderRadius:12, cursor:"pointer", fontSize:18, fontWeight:600 }}>
@@ -156,7 +156,7 @@ function StudentLoginScreen({ setScreen }) {
   if (studentUser) return <StudentDashboard studentUser={studentUser} classroom={classroom} setScreen={setScreen}/>;
 
   return (
-    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f172a,#1e3a5f)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Segoe UI',sans-serif", padding:20 }}>
+    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f1f3d,#1e3a5f)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", padding:20 }}>
       <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:24, padding:"48px 40px", width:"100%", maxWidth:420, color:"#fff" }}>
         <div style={{ textAlign:"center", marginBottom:32 }}>
           <span style={{ fontSize:48 }}>🦕</span>
@@ -173,14 +173,14 @@ function StudentLoginScreen({ setScreen }) {
               style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:22, fontWeight:800, outline:"none", marginBottom:16, boxSizing:"border-box", textAlign:"center", letterSpacing:4 }}/>
             {error && <div style={{ color:"#f87171", fontSize:13, marginBottom:12 }}>{error}</div>}
             <button onClick={findClassroom} disabled={loading}
-              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:16 }}>
+              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#15803d)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:16 }}>
               {loading ? "Finding class..." : "Find My Class →"}
             </button>
           </>
         ) : (
           <>
             <div style={{ background:"rgba(34,197,94,0.15)", border:"1px solid rgba(34,197,94,0.3)", borderRadius:12, padding:"12px 16px", marginBottom:20, textAlign:"center" }}>
-              <div style={{ fontSize:13, color:"#22c55e", fontWeight:600 }}>✅ {classroom.name}</div>
+              <div style={{ fontSize:13, color:"#15803d", fontWeight:600 }}>✅ {classroom.name}</div>
               <div style={{ fontSize:12, color:"rgba(255,255,255,0.5)" }}>Grade {classroom.grade} · {classroom.province}</div>
             </div>
             <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username"
@@ -190,7 +190,7 @@ function StudentLoginScreen({ setScreen }) {
               style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:15, outline:"none", marginBottom:16, boxSizing:"border-box" }}/>
             {error && <div style={{ color:"#f87171", fontSize:13, marginBottom:12 }}>{error}</div>}
             <button onClick={login}
-              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:12 }}>
+              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#15803d)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:12 }}>
               Log In 🦕
             </button>
             <button onClick={() => { setClassroom(null); setError(""); }}
@@ -224,14 +224,14 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
   }, [studentUser.teacherId]);
 
   return (
-    <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#0f172a 0%,#1e3a5f 50%,#0f2a1a 100%)", fontFamily:"'Segoe UI',sans-serif", padding:20 }}>
+    <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#0f1f3d 0%,#1e3a5f 50%,#0f2a1a 100%)", fontFamily:"'Inter',sans-serif", padding:20 }}>
       {/* Header */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20, background:"rgba(255,255,255,0.05)", borderRadius:14, padding:"10px 16px" }}>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           <div style={{ width:36, height:36, borderRadius:10, background:`${dino.color}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>{dino.emoji}</div>
           <div>
             <div style={{ color:"#fff", fontSize:15, fontWeight:700 }}>{studentUser.name}</div>
-            <div style={{ color:"#22c55e", fontSize:18, fontWeight:800 }}>{fmt(balance)}</div>
+            <div style={{ color:"#15803d", fontSize:18, fontWeight:800 }}>{fmt(balance)}</div>
           </div>
         </div>
         <button onClick={() => setScreen("landing")}
@@ -241,7 +241,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
       </div>
 
       {/* Balance card */}
-      <div style={{ background:"linear-gradient(135deg,#1a472a,#22c55e)", borderRadius:20, padding:24, marginBottom:20, textAlign:"center", boxShadow:"0 8px 24px rgba(34,197,94,0.3)" }}>
+      <div style={{ background:"linear-gradient(135deg,#1a472a,#15803d)", borderRadius:20, padding:24, marginBottom:20, textAlign:"center", boxShadow:"0 8px 24px rgba(34,197,94,0.3)" }}>
         <div style={{ color:"rgba(255,255,255,0.7)", fontSize:13, marginBottom:4 }}>My Balance</div>
         <div style={{ color:"#fff", fontSize:52, fontWeight:800 }}>{fmt(balance)}</div>
         <div style={{ color:"rgba(255,255,255,0.6)", fontSize:13, marginTop:4 }}>{appState.currency || "Dino Bucks"}</div>
@@ -260,7 +260,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                   <div style={{ fontSize:32, marginBottom:8 }}>{item.emoji}</div>
                   <div style={{ fontWeight:700, fontSize:13, color:"#fff", marginBottom:4 }}>{item.name}</div>
                   <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)", marginBottom:8 }}>{item.description}</div>
-                  <div style={{ fontWeight:800, fontSize:16, color:"#22c55e", marginBottom:10 }}>{fmt(item.price)}</div>
+                  <div style={{ fontWeight:800, fontSize:16, color:"#15803d", marginBottom:10 }}>{fmt(item.price)}</div>
                   {alreadyPending ? (
                     <div style={{ fontSize:11, color:"#f59e0b", fontWeight:600 }}>⏳ Pending approval</div>
                   ) : (
@@ -273,7 +273,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                       setAppState(next);
                       saveToFirebase(`teachers/${studentUser.teacherId}/classroom`, next);
                     }} disabled={!canAfford}
-                      style={{ width:"100%", padding:"8px", background: canAfford?"linear-gradient(135deg,#22c55e,#16a34a)":"rgba(255,255,255,0.1)", color:"#fff", border:"none", borderRadius:8, cursor:canAfford?"pointer":"default", fontSize:12, fontWeight:700 }}>
+                      style={{ width:"100%", padding:"8px", background: canAfford?"linear-gradient(135deg,#15803d,#15803d)":"rgba(255,255,255,0.1)", color:"#fff", border:"none", borderRadius:8, cursor:canAfford?"pointer":"default", fontSize:12, fontWeight:700 }}>
                       {canAfford ? "🛒 Request" : "Can't afford"}
                     </button>
                   )}
@@ -296,7 +296,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                 <div style={{ color:"#fff", fontSize:14, fontWeight:600 }}>{t.reason}</div>
                 <div style={{ color:"rgba(255,255,255,0.4)", fontSize:12 }}>{t.date}</div>
               </div>
-              <div style={{ fontWeight:800, fontSize:16, color: t.amount>=0?"#22c55e":"#ef4444" }}>
+              <div style={{ fontWeight:800, fontSize:16, color: t.amount>=0?"#15803d":"#ef4444" }}>
                 {t.amount>=0?"+":""}{fmt(t.amount)}
               </div>
             </div>
@@ -325,7 +325,7 @@ function LoginScreen({ auth, setScreen }) {
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f172a,#1e3a5f)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Segoe UI',sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f1f3d,#1e3a5f)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif" }}>
       <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:24, padding:"48px 40px", width:"100%", maxWidth:420, color:"#fff" }}>
         <div style={{ textAlign:"center", marginBottom:32 }}>
           <span style={{ fontSize:48 }}>🦕</span>
@@ -338,12 +338,12 @@ function LoginScreen({ auth, setScreen }) {
           onKeyDown={e => e.key==="Enter" && login()}
           style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:15, outline:"none", marginBottom:16, boxSizing:"border-box" }}/>
         {error && <div style={{ color:"#f87171", fontSize:13, marginBottom:12 }}>{error}</div>}
-        <button onClick={login} disabled={loading} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:16 }}>
+        <button onClick={login} disabled={loading} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#15803d)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:16 }}>
           {loading ? "Logging in..." : "Log In"}
         </button>
         <div style={{ textAlign:"center", color:"rgba(255,255,255,0.5)", fontSize:14 }}>
           Don't have an account?{" "}
-          <span onClick={() => setScreen("register")} style={{ color:"#22c55e", cursor:"pointer", fontWeight:600 }}>Sign up free</span>
+          <span onClick={() => setScreen("register")} style={{ color:"#15803d", cursor:"pointer", fontWeight:600 }}>Sign up free</span>
         </div>
         <div style={{ textAlign:"center", marginTop:12 }}>
           <span onClick={() => setScreen("landing")} style={{ color:"rgba(255,255,255,0.3)", cursor:"pointer", fontSize:13 }}>← Back to home</span>
@@ -376,7 +376,7 @@ function RegisterScreen({ auth, setScreen }) {
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f172a,#1e3a5f)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Segoe UI',sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f1f3d,#1e3a5f)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif" }}>
       <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:24, padding:"48px 40px", width:"100%", maxWidth:420, color:"#fff" }}>
         <div style={{ textAlign:"center", marginBottom:32 }}>
           <span style={{ fontSize:48 }}>🦕</span>
@@ -393,12 +393,12 @@ function RegisterScreen({ auth, setScreen }) {
           onKeyDown={e => e.key==="Enter" && register()}
           style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:15, outline:"none", marginBottom:16, boxSizing:"border-box" }}/>
         {error && <div style={{ color:"#f87171", fontSize:13, marginBottom:12 }}>{error}</div>}
-        <button onClick={register} disabled={loading} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:16 }}>
+        <button onClick={register} disabled={loading} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#15803d)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:16 }}>
           {loading ? "Creating..." : "Create Free Account 🦕"}
         </button>
         <div style={{ textAlign:"center", color:"rgba(255,255,255,0.5)", fontSize:13 }}>
           Already have an account?{" "}
-          <span onClick={() => setScreen("login")} style={{ color:"#22c55e", cursor:"pointer", fontWeight:600 }}>Log in</span>
+          <span onClick={() => setScreen("login")} style={{ color:"#15803d", cursor:"pointer", fontWeight:600 }}>Log in</span>
         </div>
         <div style={{ textAlign:"center", marginTop:12 }}>
           <span onClick={() => setScreen("landing")} style={{ color:"rgba(255,255,255,0.3)", cursor:"pointer", fontSize:13 }}>← Back to home</span>
@@ -423,7 +423,7 @@ function Dashboard({ user, auth }) {
 
   if (loading) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"#f8fafc" }}>
-      <div style={{ fontSize:18, color:"#64748b", fontFamily:"'Segoe UI',sans-serif" }}>Loading your classroom...</div>
+      <div style={{ fontSize:18, color:"#4a6580", fontFamily:"'Inter',sans-serif" }}>Loading your classroom...</div>
     </div>
   );
 
@@ -507,13 +507,13 @@ function SetupWizard({ user, auth }) {
 
   const stepStyle = (n) => ({
     width:32, height:32, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center",
-    background: step >= n ? "#22c55e" : "#e2e8f0",
-    color: step >= n ? "#fff" : "#94a3b8",
+    background: step >= n ? "#15803d" : "#e2e8f0",
+    color: step >= n ? "#fff" : "#7a9bb5",
     fontWeight:700, fontSize:14, flexShrink:0,
   });
 
   return (
-    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f172a,#1e3a5f)", fontFamily:"'Segoe UI',sans-serif", padding:"40px 20px" }}>
+    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f1f3d,#1e3a5f)", fontFamily:"'Inter',sans-serif", padding:"40px 20px" }}>
       {/* Header */}
       <div style={{ textAlign:"center", marginBottom:40 }}>
         <span style={{ fontSize:48 }}>🦕</span>
@@ -524,9 +524,9 @@ function SetupWizard({ user, auth }) {
       {/* Steps indicator */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8, marginBottom:40 }}>
         <div style={stepStyle(1)}>1</div>
-        <div style={{ width:60, height:2, background: step >= 2 ? "#22c55e" : "#e2e8f0" }}/>
+        <div style={{ width:60, height:2, background: step >= 2 ? "#15803d" : "#e2e8f0" }}/>
         <div style={stepStyle(2)}>2</div>
-        <div style={{ width:60, height:2, background: step >= 3 ? "#22c55e" : "#e2e8f0" }}/>
+        <div style={{ width:60, height:2, background: step >= 3 ? "#15803d" : "#e2e8f0" }}/>
         <div style={stepStyle(3)}>✓</div>
       </div>
 
@@ -570,7 +570,7 @@ function SetupWizard({ user, auth }) {
             </div>
 
             <button onClick={() => { if (!className.trim()) { alert("Please enter a class name!"); return; } setStep(2); }}
-              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700 }}>
+              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#15803d)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700 }}>
               Next: Add Students →
             </button>
           </div>
@@ -610,7 +610,7 @@ function SetupWizard({ user, auth }) {
                 ← Back
               </button>
               <button onClick={finish} disabled={saving}
-                style={{ flex:1, padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700 }}>
+                style={{ flex:1, padding:"14px", background:"linear-gradient(135deg,#15803d,#15803d)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700 }}>
                 {saving ? "Creating classroom..." : "🦕 Launch My Classroom!"}
               </button>
             </div>
@@ -668,7 +668,7 @@ function ClassroomApp({ user, auth, classroom }) {
     return () => { clearTimeout(fadeTimer); clearTimeout(hideTimer); };
   }, []);
 
-  const showToast = (msg, color="#22c55e") => {
+  const showToast = (msg, color="#15803d") => {
     setToast({ msg, color });
     setTimeout(() => setToast(null), 3000);
   };
@@ -705,12 +705,12 @@ function ClassroomApp({ user, auth, classroom }) {
   const randDino = DINO_EMOJIS[Math.floor(Math.random() * DINO_EMOJIS.length)];
 
   return (
-    <div style={{ minHeight:"100vh", background:"linear-gradient(180deg,#0f172a 0px,#1e293b 60px,#f1f5f9 140px)", fontFamily:"'Segoe UI',system-ui,sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:"linear-gradient(180deg,#0f1f3d 0px,#1e293b 60px,#f0f9f4 140px)", fontFamily:"'Inter',system-ui,sans-serif" }}>
 
       {/* Startup dino animation */}
       {showDino && (
         <div style={{ position:"fixed", inset:0, zIndex:9999, pointerEvents:"none",
-          background:"linear-gradient(135deg,#0f172a,#1e3a5f)",
+          background:"linear-gradient(135deg,#0f1f3d,#1e3a5f)",
           display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
           opacity:splashOpacity, transition:"opacity 0.6s ease" }}>
           <style>{`
@@ -721,7 +721,7 @@ function ClassroomApp({ user, auth, classroom }) {
           `}</style>
           <div style={{ fontSize:100, animation:`${["wiggle 0.6s ease 0.8s","spin 0.8s ease 0.8s","bounce 0.6s ease 0.8s","grow 0.6s ease 0.8s"][Math.floor(Math.random()*4)]}` }}>🦕</div>
           <div style={{ color:"#fff", fontSize:32, fontWeight:800, marginTop:20, letterSpacing:2 }}>EconoClassroom</div>
-          <div style={{ color:"#22c55e", fontSize:15, marginTop:8 }}>Real financial literacy. Real classroom fun.</div>
+          <div style={{ color:"#15803d", fontSize:15, marginTop:8 }}>Real financial literacy. Real classroom fun.</div>
         </div>
       )}
 
@@ -733,30 +733,30 @@ function ClassroomApp({ user, auth, classroom }) {
       )}
 
       {/* Nav */}
-      <nav style={{ background:"#0f172a", padding:"0 32px", display:"flex", justifyContent:"space-between", alignItems:"center", boxShadow:"0 4px 16px rgba(0,0,0,0.3)" }}>
+      <nav style={{ background:"#0f1f3d", padding:"0 32px", display:"flex", justifyContent:"space-between", alignItems:"center", boxShadow:"0 4px 16px rgba(0,0,0,0.3)" }}>
         <div style={{ display:"flex", alignItems:"center", gap:0 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10, padding:"16px 24px 16px 0", marginRight:16, borderRight:"1px solid rgba(255,255,255,0.1)" }}>
             <span style={{ fontSize:22 }}>{appState.currencyEmoji}</span>
             <div>
               <div style={{ fontSize:15, fontWeight:700, color:"#fff" }}>{appState.name}</div>
-              <div style={{ fontSize:11, color:"#64748b" }}>Grade {appState.grade} · {appState.province}</div>
+              <div style={{ fontSize:11, color:"#4a6580" }}>Grade {appState.grade} · {appState.province}</div>
             </div>
           </div>
           {tabs.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
               padding:"20px 18px", background:"none", border:"none", cursor:"pointer",
-              fontSize:13, fontWeight:600, color: tab===t.id ? "#22c55e" : "#94a3b8",
-              borderBottom: tab===t.id ? "2px solid #22c55e" : "2px solid transparent",
+              fontSize:13, fontWeight:600, color: tab===t.id ? "#15803d" : "#7a9bb5",
+              borderBottom: tab===t.id ? "2px solid #15803d" : "2px solid transparent",
               transition:"all 0.15s", whiteSpace:"nowrap"
             }}>{t.label}</button>
           ))}
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:16 }}>
           <div style={{ textAlign:"right" }}>
-            <div style={{ fontSize:13, fontWeight:700, color:"#22c55e" }}>{fmt(totalBalance)}</div>
-            <div style={{ fontSize:11, color:"#64748b" }}>total in circulation</div>
+            <div style={{ fontSize:13, fontWeight:700, color:"#15803d" }}>{fmt(totalBalance)}</div>
+            <div style={{ fontSize:11, color:"#4a6580" }}>total in circulation</div>
           </div>
-          <button onClick={() => signOut(auth)} style={{ padding:"8px 16px", background:"rgba(255,255,255,0.08)", color:"#94a3b8", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600 }}>
+          <button onClick={() => signOut(auth)} style={{ padding:"8px 16px", background:"rgba(255,255,255,0.08)", color:"#7a9bb5", border:"1px solid rgba(255,255,255,0.1)", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600 }}>
             Sign Out
           </button>
         </div>
@@ -771,7 +771,7 @@ function ClassroomApp({ user, auth, classroom }) {
             <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
               {[
                 { label:"Students", value:students.length, icon:"👨‍🎓", color:"#3b82f6", bg:"#eff6ff" },
-                { label:"In Circulation", value:fmt(totalBalance), icon:"💰", color:"#22c55e", bg:"#f0fdf4" },
+                { label:"In Circulation", value:fmt(totalBalance), icon:"💰", color:"#15803d", bg:"#f0fdf4" },
                 { label:"Avg Balance", value:fmt(Math.round(totalBalance/(students.length||1))), icon:"📊", color:"#8b5cf6", bg:"#f5f3ff" },
                 { label:"Transactions", value:(appState?.txLog||[]).length, icon:"📋", color:"#f59e0b", bg:"#fffbeb" },
               ].map(stat => (
@@ -779,7 +779,7 @@ function ClassroomApp({ user, auth, classroom }) {
                   <div style={{ width:44, height:44, borderRadius:12, background:stat.bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:22, flexShrink:0 }}>{stat.icon}</div>
                   <div>
                     <div style={{ fontSize:22, fontWeight:800, color:stat.color }}>{stat.value}</div>
-                    <div style={{ fontSize:12, color:"#94a3b8", fontWeight:500 }}>{stat.label}</div>
+                    <div style={{ fontSize:12, color:"#7a9bb5", fontWeight:500 }}>{stat.label}</div>
                   </div>
                 </div>
               ))}
@@ -795,7 +795,7 @@ function ClassroomApp({ user, auth, classroom }) {
                 return (
                   <div key={s.id} onClick={() => setSelected(isSelected ? null : s.id)}
                     style={{ background:"#fff", borderRadius:12, padding:"14px 12px", cursor:"pointer",
-                      border:`2px solid ${isSelected?"#22c55e":"#e2e8f0"}`,
+                      border:`2px solid ${isSelected?"#15803d":"#e2e8f0"}`,
                       boxShadow: isSelected?"0 4px 16px rgba(34,197,94,0.15)":"0 1px 3px rgba(0,0,0,0.06)",
                       transition:"all 0.15s" }}>
                     <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
@@ -803,15 +803,15 @@ function ClassroomApp({ user, auth, classroom }) {
                         {dino.emoji}
                       </div>
                       <div style={{ overflow:"hidden" }}>
-                        <div style={{ fontWeight:700, fontSize:12, color:"#0f172a", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name}</div>
-                        <div style={{ fontSize:10, color:"#94a3b8", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{job ? `${job.emoji} ${job.name}` : "No job"}</div>
+                        <div style={{ fontWeight:700, fontSize:12, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name}</div>
+                        <div style={{ fontSize:10, color:"#7a9bb5", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{job ? `${job.emoji} ${job.name}` : "No job"}</div>
                       </div>
                     </div>
-                    <div style={{ fontSize:20, fontWeight:800, color:"#22c55e" }}>{fmt(bal)}</div>
+                    <div style={{ fontSize:20, fontWeight:800, color:"#15803d" }}>{fmt(bal)}</div>
                     {isSelected && (
                       <div style={{ display:"flex", gap:6, marginTop:10 }}>
                         <button onClick={e => { e.stopPropagation(); setTab("pay"); }}
-                          style={{ flex:1, padding:"6px", background:"#22c55e", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:700 }}>💵 Pay</button>
+                          style={{ flex:1, padding:"6px", background:"#15803d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:700 }}>💵 Pay</button>
                         <button onClick={e => { e.stopPropagation(); setDeductModal(true); }}
                           style={{ flex:1, padding:"6px", background:"#ef4444", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:700 }}>− Deduct</button>
                       </div>
@@ -826,29 +826,29 @@ function ClassroomApp({ user, auth, classroom }) {
        {/* ═══ PAY ═══ */}
         {tab==="pay" && (
           <div style={{ maxWidth:800, margin:"0 auto" }}>
-            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>💵 Pay Students</h2>
+            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", marginBottom:24 }}>💵 Pay Students</h2>
             <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
               <div style={{ marginBottom:20 }}>
-                <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:8, letterSpacing:0.5 }}>SELECT RECIPIENT</label>
+                <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:8, letterSpacing:0.5 }}>SELECT RECIPIENT</label>
                 <div style={{ display:"flex", gap:8, marginBottom:12 }}>
                   <button onClick={() => { setSelected("all"); setMultiSelected([]); setPayMulti(false); }}
-                    style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${selected==="all"?"#22c55e":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
-                      background:selected==="all"?"#22c55e":"#fff", color:selected==="all"?"#fff":"#64748b" }}>
+                    style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${selected==="all"?"#15803d":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
+                      background:selected==="all"?"#15803d":"#fff", color:selected==="all"?"#fff":"#4a6580" }}>
                     🌍 Everyone
                   </button>
                   <button onClick={() => { setPayMulti(!payMulti); setSelected(null); setMultiSelected([]); }}
                     style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${payMulti?"#8b5cf6":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
-                      background:payMulti?"#8b5cf6":"#fff", color:payMulti?"#fff":"#64748b" }}>
+                      background:payMulti?"#8b5cf6":"#fff", color:payMulti?"#fff":"#4a6580" }}>
                     ☑️ Select Multiple
                   </button>
                   {payMulti && (
                     <>
                       <button onClick={() => setMultiSelected(students.map(s=>s.id))}
-                        style={{ padding:"8px 16px", borderRadius:8, border:"2px solid #e2e8f0", cursor:"pointer", fontSize:13, fontWeight:600, background:"#fff", color:"#64748b" }}>
+                        style={{ padding:"8px 16px", borderRadius:8, border:"2px solid #e2e8f0", cursor:"pointer", fontSize:13, fontWeight:600, background:"#fff", color:"#4a6580" }}>
                         Select All
                       </button>
                       <button onClick={() => setMultiSelected([])}
-                        style={{ padding:"8px 16px", borderRadius:8, border:"2px solid #e2e8f0", cursor:"pointer", fontSize:13, fontWeight:600, background:"#fff", color:"#64748b" }}>
+                        style={{ padding:"8px 16px", borderRadius:8, border:"2px solid #e2e8f0", cursor:"pointer", fontSize:13, fontWeight:600, background:"#fff", color:"#4a6580" }}>
                         Clear
                       </button>
                     </>
@@ -867,9 +867,9 @@ function ClassroomApp({ user, auth, classroom }) {
                           setSelected(s.id); setPayMulti(false);
                         }
                       }} style={{ padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600,
-                        border:`2px solid ${payMulti?(isMultiSel?"#8b5cf6":"#e2e8f0"):(isSingleSel?"#22c55e":"#e2e8f0")}`,
-                        background:payMulti?(isMultiSel?"#8b5cf6":"#fff"):(isSingleSel?"#22c55e":"#fff"),
-                        color:payMulti?(isMultiSel?"#fff":"#64748b"):(isSingleSel?"#fff":"#64748b"),
+                        border:`2px solid ${payMulti?(isMultiSel?"#8b5cf6":"#e2e8f0"):(isSingleSel?"#15803d":"#e2e8f0")}`,
+                        background:payMulti?(isMultiSel?"#8b5cf6":"#fff"):(isSingleSel?"#15803d":"#fff"),
+                        color:payMulti?(isMultiSel?"#fff":"#4a6580"):(isSingleSel?"#fff":"#4a6580"),
                         display:"flex", alignItems:"center", gap:6 }}>
                         <span>{dino.emoji}</span>{s.name}
                       </button>
@@ -885,24 +885,24 @@ function ClassroomApp({ user, auth, classroom }) {
 
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:20 }}>
                 <div>
-                  <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:8, letterSpacing:0.5 }}>AMOUNT</label>
+                  <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:8, letterSpacing:0.5 }}>AMOUNT</label>
                   <input type="number" value={payAmt} onChange={e => setPayAmt(e.target.value)} placeholder="10"
                     style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:20, fontWeight:800, outline:"none", boxSizing:"border-box" }}/>
                   <div style={{ display:"flex", gap:6, marginTop:8, flexWrap:"wrap" }}>
                     {[1,2,5,10,20,50].map(a => (
                       <button key={a} onClick={() => setPayAmt(String(a))}
-                        style={{ padding:"4px 10px", background:"#f1f5f9", border:"none", borderRadius:6, cursor:"pointer", fontSize:12, fontWeight:600, color:"#64748b" }}>{fmt(a)}</button>
+                        style={{ padding:"4px 10px", background:"#f0f9f4", border:"none", borderRadius:6, cursor:"pointer", fontSize:12, fontWeight:600, color:"#4a6580" }}>{fmt(a)}</button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:8, letterSpacing:0.5 }}>REASON</label>
+                  <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:8, letterSpacing:0.5 }}>REASON</label>
                   <input value={payReason} onChange={e => setPayReason(e.target.value)} placeholder="Job completed…"
                     style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
                   <div style={{ display:"flex", gap:6, marginTop:8, flexWrap:"wrap" }}>
                     {["Job completed","Great work!","Bonus","Participation"].map(r => (
                       <button key={r} onClick={() => setPayReason(r)}
-                        style={{ padding:"4px 10px", background: payReason===r?"#22c55e":"#f1f5f9", color:payReason===r?"#fff":"#64748b", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>{r}</button>
+                        style={{ padding:"4px 10px", background: payReason===r?"#15803d":"#f0f9f4", color:payReason===r?"#fff":"#4a6580", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>{r}</button>
                     ))}
                   </div>
                 </div>
@@ -926,7 +926,7 @@ function ClassroomApp({ user, auth, classroom }) {
                   showToast("Select a student first!", "#ef4444"); return;
                 }
                 setPayAmt("");
-              }} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#22c55e,#16a34a)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:16, fontWeight:700, boxShadow:"0 4px 12px rgba(34,197,94,0.3)" }}>
+              }} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#15803d)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:16, fontWeight:700, boxShadow:"0 4px 12px rgba(34,197,94,0.3)" }}>
                 💸 Pay {payMulti ? `${multiSelected.length} Students` : selected === "all" ? `Everyone (${students.length})` : selStudent?.name || "..."}
               </button>
             </div>
@@ -938,14 +938,14 @@ function ClassroomApp({ user, auth, classroom }) {
 {/* ═══ ECONOMY ═══ */}
         {tab==="economy" && (
           <div style={{ maxWidth:900, margin:"0 auto" }}>
-            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>🌍 Classroom Economy</h2>
+            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", marginBottom:24 }}>🌍 Classroom Economy</h2>
 
             {/* Morning Events Button */}
             <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16 }}>
                 <div>
-                  <div style={{ fontSize:16, fontWeight:800, color:"#0f172a", marginBottom:4 }}>🌅 Daily Dino Events</div>
-                  <div style={{ fontSize:13, color:"#94a3b8" }}>Fire one random event per student. Click every morning!</div>
+                  <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:4 }}>🌅 Daily Dino Events</div>
+                  <div style={{ fontSize:13, color:"#7a9bb5" }}>Fire one random event per student. Click every morning!</div>
                 </div>
                 <button onClick={() => {
                   const GOOD_EVENTS = [
@@ -982,7 +982,7 @@ function ClassroomApp({ user, auth, classroom }) {
                   showToast("🎲 Daily Dino Events fired for all students!");
                 }} style={{
                   padding:"14px 28px", border:"none", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700,
-                  background: dailyEventsDone ? "linear-gradient(135deg,#22c55e,#16a34a)" : "linear-gradient(135deg,#f59e0b,#d97706)",
+                  background: dailyEventsDone ? "linear-gradient(135deg,#15803d,#15803d)" : "linear-gradient(135deg,#f59e0b,#d97706)",
                   color:"#fff", boxShadow: dailyEventsDone ? "0 4px 12px rgba(34,197,94,0.3)" : "0 4px 12px rgba(245,158,11,0.4)",
                   animation: dailyEventsDone ? "none" : "pulse 2s infinite",
                 }}>
@@ -996,8 +996,8 @@ function ClassroomApp({ user, auth, classroom }) {
             <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16 }}>
                 <div>
-                  <div style={{ fontSize:16, fontWeight:800, color:"#0f172a", marginBottom:4 }}>💰 Payday Friday</div>
-                  <div style={{ fontSize:13, color:"#94a3b8" }}>Pays all salaries, deducts all weekly expenses, and fires weekly awards.</div>
+                  <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:4 }}>💰 Payday Friday</div>
+                  <div style={{ fontSize:13, color:"#7a9bb5" }}>Pays all salaries, deducts all weekly expenses, and fires weekly awards.</div>
                 </div>
                 <button onClick={() => {
                   // Pay salaries
@@ -1026,7 +1026,7 @@ function ClassroomApp({ user, auth, classroom }) {
 
             {/* Weekly Expenses */}
             <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
-              <div style={{ fontSize:16, fontWeight:800, color:"#0f172a", marginBottom:16 }}>📋 Weekly Expenses</div>
+              <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:16 }}>📋 Weekly Expenses</div>
               <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:16 }}>
                 <input value={newExpenseEmoji} onChange={e => setNewExpenseEmoji(e.target.value)} maxLength={2}
                   style={{ width:56, padding:"10px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:22, textAlign:"center", outline:"none" }}/>
@@ -1046,7 +1046,7 @@ function ClassroomApp({ user, auth, classroom }) {
               </div>
               {/* Default expenses quick-add */}
               <div style={{ marginBottom:16 }}>
-                <div style={{ fontSize:12, fontWeight:700, color:"#94a3b8", marginBottom:8 }}>QUICK ADD:</div>
+                <div style={{ fontSize:12, fontWeight:700, color:"#7a9bb5", marginBottom:8 }}>QUICK ADD:</div>
                 <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                   {[
                     { emoji:"🪑", name:"Desk Rental", amount:8 },
@@ -1058,7 +1058,7 @@ function ClassroomApp({ user, auth, classroom }) {
                     <button key={exp.name} onClick={() => {
                       update(prev => ({ ...prev, expenses: [...(prev.expenses||[]), { id:uuid(), ...exp }] }));
                       showToast(`${exp.emoji} "${exp.name}" added!`);
-                    }} style={{ padding:"6px 12px", background:"#f8fafc", border:"2px solid #e2e8f0", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600, color:"#64748b" }}>
+                    }} style={{ padding:"6px 12px", background:"#f8fafc", border:"2px solid #e2e8f0", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600, color:"#4a6580" }}>
                       {exp.emoji} {exp.name} (-{fmt(exp.amount)}/wk)
                     </button>
                   ))}
@@ -1067,10 +1067,10 @@ function ClassroomApp({ user, auth, classroom }) {
               {(appState?.expenses||[]).length > 0 ? (
                 <div>
                   {(appState?.expenses||[]).map(exp => (
-                    <div key={exp.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f1f5f9" }}>
+                    <div key={exp.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f0f9f4" }}>
                       <span style={{ fontSize:20 }}>{exp.emoji}</span>
                       <div style={{ flex:1 }}>
-                        <div style={{ fontWeight:600, fontSize:14, color:"#0f172a" }}>{exp.name}</div>
+                        <div style={{ fontWeight:600, fontSize:14, color:"#0f1f3d" }}>{exp.name}</div>
                         <div style={{ fontSize:12, color:"#ef4444", fontWeight:600 }}>-{fmt(exp.amount)} per student per week</div>
                       </div>
                       <button onClick={() => update(prev => ({ ...prev, expenses: prev.expenses.filter(e => e.id !== exp.id) }))}
@@ -1082,16 +1082,16 @@ function ClassroomApp({ user, auth, classroom }) {
                   </div>
                 </div>
               ) : (
-                <div style={{ textAlign:"center", padding:20, color:"#94a3b8", fontSize:13 }}>No expenses set yet. Use Quick Add above!</div>
+                <div style={{ textAlign:"center", padding:20, color:"#7a9bb5", fontSize:13 }}>No expenses set yet. Use Quick Add above!</div>
               )}
             </div>
 
             {/* Issue Fine */}
             <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
-              <div style={{ fontSize:16, fontWeight:800, color:"#0f172a", marginBottom:16 }}>🚨 Issue a Fine</div>
+              <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:16 }}>🚨 Issue a Fine</div>
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16, marginBottom:16 }}>
                 <div>
-                  <div style={{ fontSize:12, fontWeight:700, color:"#64748b", marginBottom:6 }}>STUDENT</div>
+                  <div style={{ fontSize:12, fontWeight:700, color:"#4a6580", marginBottom:6 }}>STUDENT</div>
                   <select value={fineStudent} onChange={e => setFineStudent(e.target.value)}
                     style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", background:"#fff" }}>
                     <option value="">Select student...</option>
@@ -1099,13 +1099,13 @@ function ClassroomApp({ user, auth, classroom }) {
                   </select>
                 </div>
                 <div>
-                  <div style={{ fontSize:12, fontWeight:700, color:"#64748b", marginBottom:6 }}>FINE AMOUNT</div>
+                  <div style={{ fontSize:12, fontWeight:700, color:"#4a6580", marginBottom:6 }}>FINE AMOUNT</div>
                   <input value={fineAmount} onChange={e => setFineAmount(e.target.value)} type="number" placeholder="Amount"
                     style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
                 </div>
               </div>
               <div style={{ marginBottom:12 }}>
-                <div style={{ fontSize:12, fontWeight:700, color:"#64748b", marginBottom:6 }}>REASON</div>
+                <div style={{ fontSize:12, fontWeight:700, color:"#4a6580", marginBottom:6 }}>REASON</div>
                 <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:8 }}>
                   {[
                     { label:"📱 Phone out in class", amount:8 },
@@ -1116,7 +1116,7 @@ function ClassroomApp({ user, auth, classroom }) {
                     { label:"☄️ Meteor-level mess", amount:5 },
                   ].map(r => (
                     <button key={r.label} onClick={() => { setFineReason(r.label); setFineAmount(String(r.amount)); }}
-                      style={{ padding:"6px 12px", background: fineReason===r.label?"#ef4444":"#f8fafc", color:fineReason===r.label?"#fff":"#64748b", border:`2px solid ${fineReason===r.label?"#ef4444":"#e2e8f0"}`, borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
+                      style={{ padding:"6px 12px", background: fineReason===r.label?"#ef4444":"#f8fafc", color:fineReason===r.label?"#fff":"#4a6580", border:`2px solid ${fineReason===r.label?"#ef4444":"#e2e8f0"}`, borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
                       {r.label}
                     </button>
                   ))}
@@ -1140,7 +1140,7 @@ function ClassroomApp({ user, auth, classroom }) {
                 {/* ═══ HISTORY ═══ */}
         {tab==="history" && (
           <div>
-            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>📋 Transaction History</h2>
+            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", marginBottom:24 }}>📋 Transaction History</h2>
             <div style={{ background:"#fff", borderRadius:16, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", overflow:"hidden" }}>
               {(appState?.txLog||[]).slice(0,50).map((t,i) => {
                 const s = students.find(st => st.id === t.studentId);
@@ -1154,17 +1154,17 @@ function ClassroomApp({ user, auth, classroom }) {
                       {dino.emoji}
                     </div>
                     <div style={{ flex:1 }}>
-                      <div style={{ fontWeight:600, fontSize:14, color:"#0f172a" }}>{s?.name || "Unknown"}</div>
-                      <div style={{ fontSize:12, color:"#94a3b8" }}>{t.reason} · {t.date}</div>
+                      <div style={{ fontWeight:600, fontSize:14, color:"#0f1f3d" }}>{s?.name || "Unknown"}</div>
+                      <div style={{ fontSize:12, color:"#7a9bb5" }}>{t.reason} · {t.date}</div>
                     </div>
-                    <div style={{ fontWeight:800, fontSize:16, color: t.amount>=0?"#22c55e":"#ef4444" }}>
+                    <div style={{ fontWeight:800, fontSize:16, color: t.amount>=0?"#15803d":"#ef4444" }}>
                       {t.amount>=0?"+":""}{fmt(t.amount)}
                     </div>
                   </div>
                 );
               })}
               {(appState?.txLog||[]).length === 0 && (
-                <div style={{ padding:48, textAlign:"center", color:"#94a3b8", fontSize:14 }}>No transactions yet!</div>
+                <div style={{ padding:48, textAlign:"center", color:"#7a9bb5", fontSize:14 }}>No transactions yet!</div>
               )}
             </div>
           </div>
@@ -1174,7 +1174,7 @@ function ClassroomApp({ user, auth, classroom }) {
         {tab==="jobs" && (
           <div style={{ maxWidth:900, margin:"0 auto" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
-              <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", margin:0 }}>👷 Classroom Jobs</h2>
+              <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", margin:0 }}>👷 Classroom Jobs</h2>
               <button onClick={() => {
                 const salaries = (appState?.students||[]).map(s => {
                   const job = (appState?.jobs||[]).find(j => j.id === (appState?.assigned||{})[s.id]);
@@ -1190,7 +1190,7 @@ function ClassroomApp({ user, auth, classroom }) {
 
             {/* Add new job */}
             <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
-              <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:12, letterSpacing:0.5 }}>ADD NEW JOB</label>
+              <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:12, letterSpacing:0.5 }}>ADD NEW JOB</label>
               <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
                 <input value={newJobEmoji} onChange={e => setNewJobEmoji(e.target.value)} maxLength={2}
                   style={{ width:56, padding:"10px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:22, textAlign:"center", outline:"none" }}/>
@@ -1204,7 +1204,7 @@ function ClassroomApp({ user, auth, classroom }) {
                   update(prev => ({ ...prev, jobs: [...(prev.jobs||[]), job] }));
                   setNewJobName(""); setNewJobPay("10"); setNewJobEmoji("⭐");
                   showToast(`Job "${job.name}" added!`);
-                }} style={{ padding:"10px 20px", background:"#22c55e", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:700 }}>
+                }} style={{ padding:"10px 20px", background:"#15803d", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:700 }}>
                   + Add Job
                 </button>
               </div>
@@ -1213,14 +1213,14 @@ function ClassroomApp({ user, auth, classroom }) {
             {/* Jobs list */}
             {(appState?.jobs||[]).length > 0 && (
               <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
-                <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:12, letterSpacing:0.5 }}>AVAILABLE JOBS</label>
+                <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:12, letterSpacing:0.5 }}>AVAILABLE JOBS</label>
                 <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
                   {(appState?.jobs||[]).map(job => (
                     <div key={job.id} style={{ display:"flex", alignItems:"center", gap:8, background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"8px 14px" }}>
                       <span style={{ fontSize:20 }}>{job.emoji}</span>
                       <div>
-                        <div style={{ fontWeight:700, fontSize:13, color:"#0f172a" }}>{job.name}</div>
-                        <div style={{ fontSize:11, color:"#22c55e", fontWeight:600 }}>{fmt(job.pay)}/week</div>
+                        <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d" }}>{job.name}</div>
+                        <div style={{ fontSize:11, color:"#15803d", fontWeight:600 }}>{fmt(job.pay)}/week</div>
                       </div>
                       <button onClick={() => update(prev => ({ ...prev, jobs: prev.jobs.filter(j => j.id !== job.id), assigned: Object.fromEntries(Object.entries(prev.assigned||{}).filter(([,v]) => v !== job.id)) }))}
                         style={{ background:"none", border:"none", cursor:"pointer", color:"#ef4444", fontSize:16, padding:"0 4px" }}>✕</button>
@@ -1232,9 +1232,9 @@ function ClassroomApp({ user, auth, classroom }) {
 
             {/* Assign jobs to students */}
             <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
-              <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:16, letterSpacing:0.5 }}>ASSIGN JOBS TO STUDENTS</label>
+              <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:16, letterSpacing:0.5 }}>ASSIGN JOBS TO STUDENTS</label>
               {(appState?.jobs||[]).length === 0 ? (
-                <div style={{ textAlign:"center", padding:32, color:"#94a3b8", fontSize:14 }}>Add jobs above first!</div>
+                <div style={{ textAlign:"center", padding:32, color:"#7a9bb5", fontSize:14 }}>Add jobs above first!</div>
               ) : (
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:12 }}>
                   {students.map(s => {
@@ -1247,11 +1247,11 @@ function ClassroomApp({ user, auth, classroom }) {
                           {dino.emoji}
                         </div>
                         <div style={{ flex:1, minWidth:0 }}>
-                          <div style={{ fontWeight:700, fontSize:13, color:"#0f172a", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name}</div>
-                          {assignedJob && <div style={{ fontSize:11, color:"#22c55e", fontWeight:600 }}>{assignedJob.emoji} {assignedJob.name} · {fmt(assignedJob.pay)}/wk</div>}
+                          <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name}</div>
+                          {assignedJob && <div style={{ fontSize:11, color:"#15803d", fontWeight:600 }}>{assignedJob.emoji} {assignedJob.name} · {fmt(assignedJob.pay)}/wk</div>}
                         </div>
                         <select value={assignedJobId||""} onChange={e => update(prev => ({ ...prev, assigned: { ...(prev.assigned||{}), [s.id]: e.target.value||null } }))}
-                          style={{ padding:"6px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff", color:"#0f172a", cursor:"pointer" }}>
+                          style={{ padding:"6px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff", color:"#0f1f3d", cursor:"pointer" }}>
                           <option value="">No job</option>
                           {(appState?.jobs||[]).map(j => <option key={j.id} value={j.id}>{j.emoji} {j.name}</option>)}
                         </select>
@@ -1267,26 +1267,26 @@ function ClassroomApp({ user, auth, classroom }) {
         {/* ═══ STORE ═══ */}
         {tab==="store" && (
           <div style={{ maxWidth:1000, margin:"0 auto" }}>
-            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f172a", marginBottom:24 }}>🏪 Class Store</h2>
+            <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", marginBottom:24 }}>🏪 Class Store</h2>
 
             {/* Add item */}
             <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
-              <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:12, letterSpacing:0.5 }}>ADD STORE ITEM</label>
+              <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:12, letterSpacing:0.5 }}>ADD STORE ITEM</label>
               <div style={{ display:"flex", gap:10, flexWrap:"wrap", alignItems:"flex-end" }}>
                 <input value={newItemEmoji||"🎁"} onChange={e => setNewItemEmoji(e.target.value)} maxLength={2}
                   style={{ width:56, padding:"10px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:22, textAlign:"center", outline:"none" }}/>
                 <div style={{ flex:2, minWidth:140 }}>
-                  <div style={{ fontSize:11, fontWeight:600, color:"#94a3b8", marginBottom:4 }}>ITEM NAME</div>
+                  <div style={{ fontSize:11, fontWeight:600, color:"#7a9bb5", marginBottom:4 }}>ITEM NAME</div>
                   <input value={newItemName||""} onChange={e => setNewItemName(e.target.value)} placeholder="e.g. Homework Pass"
                     style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
                 </div>
                 <div style={{ flex:1, minWidth:100 }}>
-                  <div style={{ fontSize:11, fontWeight:600, color:"#94a3b8", marginBottom:4 }}>PRICE</div>
+                  <div style={{ fontSize:11, fontWeight:600, color:"#7a9bb5", marginBottom:4 }}>PRICE</div>
                   <input value={newItemPrice||""} onChange={e => setNewItemPrice(e.target.value)} type="number" placeholder="10"
                     style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
                 </div>
                 <div style={{ flex:2, minWidth:140 }}>
-                  <div style={{ fontSize:11, fontWeight:600, color:"#94a3b8", marginBottom:4 }}>DESCRIPTION</div>
+                  <div style={{ fontSize:11, fontWeight:600, color:"#7a9bb5", marginBottom:4 }}>DESCRIPTION</div>
                   <input value={newItemDesc||""} onChange={e => setNewItemDesc(e.target.value)} placeholder="Skip one homework assignment"
                     style={{ width:"100%", padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
                 </div>
@@ -1296,7 +1296,7 @@ function ClassroomApp({ user, auth, classroom }) {
                   update(prev => ({ ...prev, storeItems: [...(prev.storeItems||[]), item] }));
                   setNewItemName(""); setNewItemPrice(""); setNewItemDesc(""); setNewItemEmoji("🎁");
                   showToast(`${item.emoji} "${item.name}" added to store!`);
-                }} style={{ padding:"10px 20px", background:"#22c55e", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:700, whiteSpace:"nowrap" }}>
+                }} style={{ padding:"10px 20px", background:"#15803d", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:700, whiteSpace:"nowrap" }}>
                   + Add Item
                 </button>
               </div>
@@ -1305,16 +1305,16 @@ function ClassroomApp({ user, auth, classroom }) {
             {/* Store items */}
             {(appState?.storeItems||[]).length > 0 && (
               <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
-                <label style={{ fontSize:12, fontWeight:700, color:"#64748b", display:"block", marginBottom:16, letterSpacing:0.5 }}>STORE ITEMS ({(appState?.storeItems||[]).length})</label>
+                <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:16, letterSpacing:0.5 }}>STORE ITEMS ({(appState?.storeItems||[]).length})</label>
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:12 }}>
                   {(appState?.storeItems||[]).map(item => (
                     <div key={item.id} style={{ background:"#f8fafc", borderRadius:12, padding:16, border:"1px solid #e2e8f0", position:"relative" }}>
                       <button onClick={() => update(prev => ({ ...prev, storeItems: prev.storeItems.filter(i => i.id !== item.id) }))}
                         style={{ position:"absolute", top:8, right:8, background:"none", border:"none", cursor:"pointer", color:"#ef4444", fontSize:14 }}>✕</button>
                       <div style={{ fontSize:32, marginBottom:8 }}>{item.emoji}</div>
-                      <div style={{ fontWeight:700, fontSize:14, color:"#0f172a", marginBottom:4 }}>{item.name}</div>
-                      <div style={{ fontSize:12, color:"#94a3b8", marginBottom:8 }}>{item.description}</div>
-                      <div style={{ fontWeight:800, fontSize:18, color:"#22c55e" }}>{fmt(item.price)}</div>
+                      <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d", marginBottom:4 }}>{item.name}</div>
+                      <div style={{ fontSize:12, color:"#7a9bb5", marginBottom:8 }}>{item.description}</div>
+                      <div style={{ fontWeight:800, fontSize:18, color:"#15803d" }}>{fmt(item.price)}</div>
                     </div>
                   ))}
                 </div>
@@ -1332,13 +1332,13 @@ function ClassroomApp({ user, auth, classroom }) {
                   const item = (appState?.storeItems||[]).find(i => i.id === p.itemId);
                   const dino = DINO_OPTIONS.find(d => d.id === student?.dinoId) || DINO_OPTIONS[0];
                   return (
-                    <div key={p.id} style={{ display:"flex", alignItems:"center", gap:16, padding:"14px 0", borderBottom:"1px solid #f1f5f9" }}>
+                    <div key={p.id} style={{ display:"flex", alignItems:"center", gap:16, padding:"14px 0", borderBottom:"1px solid #f0f9f4" }}>
                       <div style={{ width:36, height:36, borderRadius:10, background:`${dino.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>
                         {dino.emoji}
                       </div>
                       <div style={{ flex:1 }}>
-                        <div style={{ fontWeight:600, fontSize:14, color:"#0f172a" }}>{student?.name} wants {item?.emoji} {item?.name}</div>
-                        <div style={{ fontSize:12, color:"#94a3b8" }}>{fmt(item?.price)} · {p.date}</div>
+                        <div style={{ fontWeight:600, fontSize:14, color:"#0f1f3d" }}>{student?.name} wants {item?.emoji} {item?.name}</div>
+                        <div style={{ fontSize:12, color:"#7a9bb5" }}>{fmt(item?.price)} · {p.date}</div>
                       </div>
                       <div style={{ display:"flex", gap:8 }}>
                         <button onClick={() => {
@@ -1349,7 +1349,7 @@ function ClassroomApp({ user, auth, classroom }) {
                             txLog: [{ id:uuid(), studentId:p.studentId, amount:-item.price, reason:`Bought ${item.emoji} ${item.name}`, date:todayStr() }, ...(prev.txLog||[])],
                           }));
                           showToast(`✅ Approved ${student?.name}'s purchase!`);
-                        }} style={{ padding:"8px 16px", background:"#22c55e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>✅ Approve</button>
+                        }} style={{ padding:"8px 16px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>✅ Approve</button>
                         <button onClick={() => {
                           update(prev => ({ ...prev, purchases: prev.purchases.map(x => x.id===p.id ? {...x, status:"denied"} : x) }));
                           showToast(`❌ Denied ${student?.name}'s purchase.`, "#ef4444");
@@ -1362,7 +1362,7 @@ function ClassroomApp({ user, auth, classroom }) {
             )}
 
             {(appState?.storeItems||[]).length === 0 && (
-              <div style={{ textAlign:"center", padding:48, color:"#94a3b8", fontSize:14 }}>
+              <div style={{ textAlign:"center", padding:48, color:"#7a9bb5", fontSize:14 }}>
                 <div style={{ fontSize:48, marginBottom:12 }}>🏪</div>
                 Add items above to stock your store!
               </div>
@@ -1376,8 +1376,8 @@ function ClassroomApp({ user, auth, classroom }) {
       {deductModal && (
         <div style={{ position:"fixed", inset:0, background:"rgba(15,23,42,0.6)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:9998, backdropFilter:"blur(4px)" }}>
           <div style={{ background:"#fff", borderRadius:20, padding:32, width:"100%", maxWidth:400, boxShadow:"0 24px 64px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ fontSize:18, fontWeight:800, color:"#0f172a", marginBottom:4 }}>Deduct from {selStudent?.name}</h3>
-            <p style={{ fontSize:13, color:"#94a3b8", marginBottom:20 }}>Current balance: {fmt(balances[selected]||0)}</p>
+            <h3 style={{ fontSize:18, fontWeight:800, color:"#0f1f3d", marginBottom:4 }}>Deduct from {selStudent?.name}</h3>
+            <p style={{ fontSize:13, color:"#7a9bb5", marginBottom:20 }}>Current balance: {fmt(balances[selected]||0)}</p>
             <input type="number" value={deductAmt} onChange={e => setDeductAmt(e.target.value)} placeholder="Amount to deduct" autoFocus
               style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:18, fontWeight:700, outline:"none", marginBottom:12, boxSizing:"border-box" }}/>
             <input value={deductReason} onChange={e => setDeductReason(e.target.value)} placeholder="Reason for deduction"
@@ -1389,7 +1389,7 @@ function ClassroomApp({ user, auth, classroom }) {
                 setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction");
               }} style={{ flex:1, padding:"13px", background:"#ef4444", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:15, fontWeight:700 }}>− Deduct</button>
               <button onClick={() => { setDeductModal(false); setDeductAmt(""); }}
-                style={{ padding:"13px 20px", background:"#f1f5f9", color:"#64748b", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:600 }}>Cancel</button>
+                style={{ padding:"13px 20px", background:"#f0f9f4", color:"#4a6580", border:"none", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:600 }}>Cancel</button>
             </div>
           </div>
         </div>
