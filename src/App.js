@@ -214,6 +214,23 @@ function ParentPortal({ code, setScreen }) {
 
       <div style={{ maxWidth:680, margin:"0 auto", padding:"24px 20px" }}>
 
+              {/* Page guide */}
+        <div style={{ background:"rgba(15,31,61,0.06)", border:"1px solid #d4e8dd", borderRadius:14, padding:"14px 20px", marginBottom:20, display:"flex", gap:16, flexWrap:"wrap", alignItems:"center" }}>
+          <div style={{ fontSize:13, fontWeight:700, color:"#0f1f3d" }}>On this page:</div>
+          {[
+            { icon:"🦕", label:"Your child's balance" },
+            { icon:"📊", label:"This week's activity" },
+            { icon:"📈", label:"Balance history" },
+            { icon:"✉️", label:"Teacher messages" },
+            { icon:"📋", label:"Recent transactions" },
+            { icon:"📅", label:"School calendar" },
+          ].map(item => (
+            <div key={item.label} style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"#4a6580", background:"#fff", borderRadius:20, padding:"4px 12px", border:"1px solid #e2e8f0" }}>
+              <span>{item.icon}</span>{item.label}
+            </div>
+          ))}
+        </div>
+
         {/* Child's dino card */}
         <div style={{ background:"linear-gradient(135deg,#0f1f3d,#15803d)", borderRadius:20, padding:28, marginBottom:20, color:"#fff", boxShadow:"0 8px 32px rgba(15,31,61,0.3)" }}>
           <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:20 }}>
@@ -411,7 +428,7 @@ function ParentPortal({ code, setScreen }) {
                 link.click();
                 document.body.removeChild(link);
               }} style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"10px 18px", background:"#0f1f3d", border:"none", borderRadius:10, color:"#fff", fontSize:13, fontWeight:600, cursor:"pointer" }}>
-              📥 Download PDF
+              📄 Open PDF Calendar
             </button>
           </div>
           {/* Significant dates */}
