@@ -1099,13 +1099,14 @@ function ClassroomApp({ user, auth, classroom }) {
   const totalBalance = Object.values(balances).reduce((a,b) => a+b, 0);
 
   const tabs = [
-    { id:"dashboard", label:"🏠 Class" },
-    { id:"pay",       label:"💵 Pay" },
-    { id:"jobs",      label:"👷 Jobs" },
-    { id:"store",     label:"🏪 Store" },
-    { id:"economy",   label:"🌍 Economy" },
-    { id:"parents",   label:"👨‍👩‍👧 Parents" },
-    { id:"history",   label:"📋 History" },
+    { id:"dashboard",   label:"🏠 Class" },
+    { id:"pay",         label:"💵 Pay" },
+    { id:"jobs",        label:"👷 Jobs" },
+    { id:"store",       label:"🏪 Store" },
+    { id:"economy",     label:"🌍 Economy" },
+    { id:"parents",     label:"👨‍👩‍👧 Parents" },
+    { id:"curriculum",  label:"🎓 Curriculum" },
+    { id:"history",     label:"📋 History" },
   ];
 
   const DINO_EMOJIS = ["🦕","🦖","🦕","🦖"];
@@ -1666,6 +1667,150 @@ function ClassroomApp({ user, auth, classroom }) {
                   );
                 })
               )}
+            </div>
+          </div>
+        )}
+
+                {/* ═══ CURRICULUM ═══ */}
+        {tab==="curriculum" && (
+          <div style={{ maxWidth:900, margin:"0 auto" }}>
+            {/* Header */}
+            <div style={{ background:"linear-gradient(135deg,#0f1f3d,#15803d)", borderRadius:20, padding:28, marginBottom:24, color:"#fff" }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:16 }}>
+                <div>
+                  <div style={{ fontSize:13, color:"rgba(255,255,255,0.6)", marginBottom:4, letterSpacing:1 }}>ONTARIO MATHEMATICS CURRICULUM 2020</div>
+                  <div style={{ fontSize:26, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif", marginBottom:8 }}>Strand F: Financial Literacy</div>
+                  <div style={{ fontSize:14, color:"rgba(255,255,255,0.75)", maxWidth:500, lineHeight:1.6 }}>
+                    EconoClassroom Pro covers <strong>all 7 specific expectations</strong> of the Grade 6 Financial Literacy strand through authentic, hands-on learning activities.
+                  </div>
+                </div>
+                <div style={{ background:"rgba(255,255,255,0.15)", borderRadius:16, padding:"16px 24px", textAlign:"center" }}>
+                  <div style={{ fontSize:48, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif" }}>7/7</div>
+                  <div style={{ fontSize:12, color:"rgba(255,255,255,0.7)" }}>Expectations covered</div>
+                </div>
+              </div>
+              <div style={{ display:"flex", gap:10, marginTop:16, flexWrap:"wrap" }}>
+                {["Money Concepts","Financial Management","Consumer & Civic Awareness"].map(s => (
+                  <div key={s} style={{ background:"rgba(255,255,255,0.15)", borderRadius:20, padding:"4px 14px", fontSize:12, color:"#fff", fontWeight:600 }}>{s}</div>
+                ))}
+              </div>
+            </div>
+
+            {/* Expectations grid */}
+            {[
+              {
+                strand:"💳 Money Concepts",
+                color:"#0f1f3d",
+                bg:"#e8f0fe",
+                expectations:[
+                  {
+                    code:"F1.1",
+                    title:"Methods of Payment",
+                    desc:"Describe the advantages and disadvantages of various methods of payment that can be used to purchase goods and services.",
+                    features:["🏪 Class Store — students experience buying with classroom currency","💵 Tax calculation on all purchases (13% HST)","💻 Digital vs. physical currency comparison"],
+                    howItHelps:"Students use Dino Bucks to make real purchasing decisions in the class store, experiencing digital currency transactions and calculating tax — directly mirroring real-world payment methods."
+                  },
+                  {
+                    code:"F1.2",
+                    title:"Interest Rates & Banking",
+                    desc:"Explain the concept of interest rates, and identify types of interest rates and fees associated with different accounts and loans.",
+                    features:["📈 Stock market investing with real TSX data","💹 Portfolio growth and loss tracking","🏦 Investment returns and risk concepts"],
+                    howItHelps:"The stock market simulation gives students firsthand experience with investment growth, market fluctuations, and the concept of returns — making interest and investment concepts concrete and real."
+                  },
+                ]
+              },
+              {
+                strand:"📊 Financial Management",
+                color:"#15803d",
+                bg:"#f0fdf4",
+                expectations:[
+                  {
+                    code:"F1.3",
+                    title:"Financial Goals",
+                    desc:"Identify different types of financial goals, including earning and saving goals, and outline some key steps in achieving them.",
+                    features:["🎯 Students set saving goals for store items","💰 Balance tracking over time","📈 Investment as a long-term goal"],
+                    howItHelps:"Students experience both short-term goals (saving for a store item) and long-term goals (growing their investment portfolio), making the abstract concept of financial planning concrete and motivating."
+                  },
+                  {
+                    code:"F1.4",
+                    title:"Factors Affecting Goals",
+                    desc:"Identify and describe various factors that may help or interfere with reaching financial goals.",
+                    features:["🎲 Random Dino Events (unexpected expenses & windfalls)","💸 Weekly fixed expenses (desk rent, utilities, Chromebook)","🚨 Fines for classroom infractions","📉 Stock market volatility"],
+                    howItHelps:"Weekly expenses, random events, fines, and market swings teach students that financial goals can be disrupted by unexpected costs — exactly as in real adult life."
+                  },
+                  {
+                    code:"F1.5",
+                    title:"Budgeting Strategies",
+                    desc:"Describe various budgeting strategies and explain how they can help meet financial goals.",
+                    features:["📋 Weekly income vs. expenses tracking","💡 Electricity, Chromebook, and desk rental fees","🧾 Transaction history for budget review","💰 Minimum balance requirement ($25)"],
+                    howItHelps:"Students must manage a real budget — earning a salary, paying fixed weekly expenses, and deciding how much to save vs. spend vs. invest. The $25 minimum balance enforces responsible budgeting."
+                  },
+                ]
+              },
+              {
+                strand:"🌍 Consumer & Civic Awareness",
+                color:"#d97706",
+                bg:"#fffbeb",
+                expectations:[
+                  {
+                    code:"F1.6",
+                    title:"Distributing Financial Resources",
+                    desc:"Describe trading, lending, borrowing, and donating as different ways to distribute financial and other resources among individuals and organizations.",
+                    features:["🏪 Store as a marketplace for exchange","👷 Job salary as income distribution","🏆 Teacher bonuses and awards","💸 Class-wide expense sharing"],
+                    howItHelps:"The classroom economy models how money flows through a community — from teacher (employer) to students (workers) to the store (marketplace) — mirroring the broader economic system."
+                  },
+                  {
+                    code:"F1.7",
+                    title:"Consumer Choices & Impact",
+                    desc:"Describe how the decisions that individuals and corporations make to spend, save, or donate money can affect others and the environment.",
+                    features:["🛒 Store purchase decisions and trade-offs","📈 Investment choices affecting portfolio","🌿 Eco-themed random events","💡 Utility costs tied to resource use"],
+                    howItHelps:"Every spending decision in EconoClassroom has a consequence — buy now and deplete savings, or wait and invest. Environmental costs appear as utility bills and eco-themed events, connecting consumer choices to real-world impact."
+                  },
+                ]
+              }
+            ].map(section => (
+              <div key={section.strand} style={{ marginBottom:24 }}>
+                <div style={{ fontSize:18, fontWeight:800, color:section.color, fontFamily:"'Space Grotesk',sans-serif", marginBottom:12, display:"flex", alignItems:"center", gap:10 }}>
+                  {section.strand}
+                </div>
+                <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+                  {section.expectations.map(exp => (
+                    <div key={exp.code} style={{ background:"#fff", borderRadius:16, padding:24, border:`2px solid ${section.bg}`, boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+                      <div style={{ display:"flex", alignItems:"flex-start", gap:16, marginBottom:12 }}>
+                        <div style={{ background:section.bg, borderRadius:10, padding:"6px 12px", fontSize:13, fontWeight:800, color:section.color, flexShrink:0, fontFamily:"'Space Grotesk',sans-serif" }}>
+                          {exp.code}
+                        </div>
+                        <div>
+                          <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:4, fontFamily:"'Space Grotesk',sans-serif" }}>{exp.title}</div>
+                          <div style={{ fontSize:13, color:"#4a6580", lineHeight:1.6, fontStyle:"italic" }}>"{exp.desc}"</div>
+                        </div>
+                      </div>
+                      <div style={{ background:section.bg, borderRadius:12, padding:16, marginBottom:12 }}>
+                        <div style={{ fontSize:12, fontWeight:700, color:section.color, marginBottom:8, letterSpacing:0.5 }}>HOW ECONOCLASSROOM COVERS THIS:</div>
+                        <div style={{ fontSize:13, color:"#4a6580", lineHeight:1.7 }}>{exp.howItHelps}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize:12, fontWeight:700, color:"#94a3b8", marginBottom:8, letterSpacing:0.5 }}>FEATURES USED:</div>
+                        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+                          {exp.features.map(f => (
+                            <div key={f} style={{ background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:20, padding:"4px 12px", fontSize:12, color:"#4a6580" }}>{f}</div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* Print button */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, border:"1px solid #e2e8f0", textAlign:"center" }}>
+              <div style={{ fontSize:16, fontWeight:700, color:"#0f1f3d", marginBottom:8, fontFamily:"'Space Grotesk',sans-serif" }}>📄 Curriculum Alignment Document</div>
+              <div style={{ fontSize:13, color:"#7a9bb5", marginBottom:16 }}>Print or save this curriculum alignment for admin presentations, school improvement plans, or parent communication.</div>
+              <button onClick={() => window.print()}
+                style={{ padding:"12px 28px", background:"linear-gradient(135deg,#15803d,#0f1f3d)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700, fontFamily:"'Space Grotesk',sans-serif" }}>
+                🖨️ Print Curriculum Document
+              </button>
             </div>
           </div>
         )}
