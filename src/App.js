@@ -402,10 +402,17 @@ function ParentPortal({ code, setScreen }) {
               style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"10px 18px", background:"#f0f9f4", border:"1px solid #d4e8dd", borderRadius:10, color:"#15803d", fontSize:13, fontWeight:600, textDecoration:"none" }}>
               🌐 View Calendar PDF
             </a>
-            <a href="https://cdnsm5-ss14.sharpschool.com/UserFiles/Servers/Server_210898/File/Elementary/Planning%20for%20School/School%20Year%20Calendar/2026-27-School-Year-Calendar-elementary-5-day-cycle.pdf" download target="_blank" rel="noopener noreferrer"
-              style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"10px 18px", background:"#0f1f3d", border:"none", borderRadius:10, color:"#fff", fontSize:13, fontWeight:600, textDecoration:"none" }}>
+            <button onClick={() => {
+                const link = document.createElement("a");
+                link.href = "https://cdnsm5-ss14.sharpschool.com/UserFiles/Servers/Server_210898/File/Elementary/Planning%20for%20School/School%20Year%20Calendar/2026-27-School-Year-Calendar-elementary-5-day-cycle.pdf";
+                link.download = "SCDSB-2026-27-Calendar.pdf";
+                link.target = "_blank";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }} style={{ display:"inline-flex", alignItems:"center", gap:8, padding:"10px 18px", background:"#0f1f3d", border:"none", borderRadius:10, color:"#fff", fontSize:13, fontWeight:600, cursor:"pointer" }}>
               📥 Download PDF
-            </a>
+            </button>
           </div>
           {/* Significant dates */}
           <div style={{ marginTop:16, padding:"12px 16px", background:"#f8fafc", borderRadius:10, fontSize:12, color:"#4a6580", lineHeight:1.8 }}>
