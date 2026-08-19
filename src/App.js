@@ -1045,6 +1045,7 @@ function ClassroomApp({ user, auth, classroom }) {
   const [newItemPrice, setNewItemPrice] = React.useState("");
   const [newItemDesc, setNewItemDesc] = React.useState("");
   const [newItemEmoji, setNewItemEmoji] = React.useState("🎁");
+  const [investStudent, setInvestStudent] = React.useState(null);
   const [newJobName, setNewJobName] = React.useState("");
   const [newJobPay, setNewJobPay] = React.useState("10");
   const [newJobEmoji, setNewJobEmoji] = React.useState("⭐");
@@ -1106,6 +1107,7 @@ function ClassroomApp({ user, auth, classroom }) {
     { id:"economy",     label:"🌍 Economy" },
     { id:"parents",     label:"👨‍👩‍👧 Parents" },
     { id:"curriculum",  label:"🎓 Curriculum" },
+    { id:"invest",      label:"📈 Invest" },
     { id:"history",     label:"📋 History" },
   ];
 
@@ -1667,6 +1669,160 @@ function ClassroomApp({ user, auth, classroom }) {
                   );
                 })
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ═══ INVEST ═══ */}
+        {tab==="invest" && (
+          <div style={{ maxWidth:1000, margin:"0 auto" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24, flexWrap:"wrap", gap:16 }}>
+              <div>
+                <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", margin:"0 0 4px", fontFamily:"'Space Grotesk',sans-serif" }}>📈 Stock Market</h2>
+                <p style={{ fontSize:13, color:"#7a9bb5", margin:0 }}>Real TSX-linked stocks updated daily. Students invest their earned currency.</p>
+              </div>
+              <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+                <select value={investStudent||""} onChange={e => setInvestStudent(e.target.value||null)}
+                  style={{ padding:"10px 14px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", background:"#fff", color:"#0f1f3d", cursor:"pointer" }}>
+                  <option value="">👨‍🎓 All Students</option>
+                  {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+            </div>
+
+            {/* Stock prices */}
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:16, marginBottom:24 }}>
+              {[
+                { id:"bananas",  name:"Brachiosaur Bananas",  emoji:"🦕", color:"#15803d", startPrice:20, desc:"Staples & Grocery",   tickers:["L.TO","MRU.TO","ATD.TO"] },
+                { id:"trextech", name:"T-Rex Tech",           emoji:"🦖", color:"#7c3aed", startPrice:50, desc:"Technology",          tickers:["SHOP.TO","CSU.TO","CLS.TO"] },
+                { id:"airways",  name:"Pterodactyl Airways",  emoji:"🐉", color:"#0f1f3d", startPrice:35, desc:"Travel & Leisure",    tickers:["AC.TO","DOO.TO","CJT.TO"] },
+                { id:"energy",   name:"DinoEgg Energy",       emoji:"🥚", color:"#d97706", startPrice:15, desc:"Energy & Utilities",  tickers:["ENB.TO","FTS.TO","TRP.TO"] },
+                { id:"steel",    name:"Stegosaurus Steel",    emoji:"💎", color:"#64748b", startPrice:28, desc:"Industrials",         tickers:["CNR.TO","CAE.TO","WSP.TO"] },
+              ].map(stock => {
+                const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+                const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
+                const isUp = change >= 0;
+                // Calculate total shares owned by all students
+                const totalShares = students.reduce((sum, s) => sum + (appState?.portfolios?.[s.id]?.[stock.id] || 0), 0);
+                const totalValue = totalShares * price;
+                return (
+                  <div key={stock.id} style={{ background:"#fff", borderRadius:16, padding:20, border:`2px solid ${isUp?"#d4e8dd":"#fecaca"}`, boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                        <div style={{ width:44, height:44, borderRadius:12, background:`${stock.color}15`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24 }}>{stock.emoji}</div>
+                        <div>
+                          <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d", fontFamily:"'Space Grotesk',sans-serif" }}>{stock.name}</div>
+                          <div style={{ fontSize:11, color:"#7a9bb5" }}>{stock.desc}</div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign:"right" }}>
+                        <div style={{ fontSize:22, fontWeight:800, color:stock.color, fontFamily:"'Space Grotesk',sans-serif" }}>{`${appState?.currencyEmoji||"🦕"}${price.toFixed(2)}`}</div>
+                        <div style={{ fontSize:12, fontWeight:700, color:isUp?"#15803d":"#dc2626", background:isUp?"#f0fdf4":"#fef2f2", borderRadius:20, padding:"2px 10px" }}>
+                          {isUp?"▲":"▼"} {Math.abs(change)}%
+                        </div>
+                      </div>
+                    </div>
+                    {totalShares > 0 && (
+                      <div style={{ background:"#f8fafc", borderRadius:10, padding:"8px 12px", fontSize:12, color:"#4a6580" }}>
+                        📊 Class owns {totalShares.toFixed(2)} shares = {`${appState?.currencyEmoji||"🦕"}${Math.round(totalValue)}`}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Student portfolios */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+              <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:16, fontFamily:"'Space Grotesk',sans-serif" }}>
+                📊 {investStudent ? students.find(s=>s.id===investStudent)?.name+"'s Portfolio" : "Class Portfolio Overview"}
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:12 }}>
+                {(investStudent ? students.filter(s=>s.id===investStudent) : students).map(s => {
+                  const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
+                  const portfolio = appState?.portfolios?.[s.id] || {};
+                  const STOCKS = [
+                    { id:"bananas", name:"Brachiosaur Bananas", emoji:"🦕", startPrice:20 },
+                    { id:"trextech", name:"T-Rex Tech", emoji:"🦖", startPrice:50 },
+                    { id:"airways", name:"Pterodactyl Airways", emoji:"🐉", startPrice:35 },
+                    { id:"energy", name:"DinoEgg Energy", emoji:"🥚", startPrice:15 },
+                    { id:"steel", name:"Stegosaurus Steel", emoji:"💎", startPrice:28 },
+                  ];
+                  const portfolioValue = STOCKS.reduce((sum, stock) => {
+                    const shares = portfolio[stock.id] || 0;
+                    const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+                    return sum + shares * price;
+                  }, 0);
+                  const hasInvestments = portfolioValue > 0;
+                  return (
+                    <div key={s.id} style={{ background:"#f8fafc", borderRadius:14, padding:16, border:"1px solid #e2e8f0" }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+                        <div style={{ width:36, height:36, borderRadius:10, background:`${dino.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>{dino.emoji}</div>
+                        <div>
+                          <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d" }}>{s.name}</div>
+                          <div style={{ fontSize:11, color:"#7a9bb5" }}>Balance: {`${appState?.currencyEmoji||"🦕"}${appState?.balances?.[s.id]||0}`}</div>
+                        </div>
+                      </div>
+                      {hasInvestments ? (
+                        <div>
+                          <div style={{ fontSize:18, fontWeight:800, color:"#15803d", fontFamily:"'Space Grotesk',sans-serif", marginBottom:8 }}>
+                            📈 {`${appState?.currencyEmoji||"🦕"}${Math.round(portfolioValue)}`}
+                          </div>
+                          {STOCKS.filter(stock => (portfolio[stock.id]||0) > 0).map(stock => (
+                            <div key={stock.id} style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:"#4a6580", padding:"3px 0", borderBottom:"1px solid #f0f0f0" }}>
+                              <span>{stock.emoji} {stock.name.split(" ")[0]}</span>
+                              <span>{(portfolio[stock.id]||0).toFixed(2)} shares</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize:12, color:"#94a3b8", fontStyle:"italic" }}>No investments yet</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Investor leaderboard */}
+            <div style={{ background:"linear-gradient(135deg,#0f1f3d,#15803d)", borderRadius:16, padding:24, marginTop:24, color:"#fff" }}>
+              <div style={{ fontSize:16, fontWeight:800, marginBottom:16, fontFamily:"'Space Grotesk',sans-serif" }}>🏆 Top Investors</div>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:12 }}>
+                {students.map(s => {
+                  const STOCKS = [
+                    { id:"bananas", startPrice:20 },{ id:"trextech", startPrice:50 },
+                    { id:"airways", startPrice:35 },{ id:"energy", startPrice:15 },{ id:"steel", startPrice:28 },
+                  ];
+                  const portfolioValue = STOCKS.reduce((sum, stock) => {
+                    const shares = (appState?.portfolios?.[s.id]?.[stock.id])||0;
+                    const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+                    return sum + shares * price;
+                  }, 0);
+                  return { ...s, portfolioValue };
+                }).filter(s => s.portfolioValue > 0)
+                  .sort((a,b) => b.portfolioValue - a.portfolioValue)
+                  .slice(0,6)
+                  .map((s, i) => {
+                    const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
+                    return (
+                      <div key={s.id} style={{ background:"rgba(255,255,255,0.1)", borderRadius:12, padding:"12px 16px", display:"flex", alignItems:"center", gap:12 }}>
+                        <div style={{ fontSize:20, fontWeight:800, color:"#a8f0c0", width:28, fontFamily:"'Space Grotesk',sans-serif" }}>#{i+1}</div>
+                        <div style={{ width:36, height:36, borderRadius:10, background:`${dino.color}33`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>{dino.emoji}</div>
+                        <div>
+                          <div style={{ fontWeight:700, fontSize:13 }}>{s.name.split(" ")[0]}</div>
+                          <div style={{ fontSize:13, color:"#a8f0c0", fontWeight:600, fontFamily:"'Space Grotesk',sans-serif" }}>{`${appState?.currencyEmoji||"🦕"}${Math.round(s.portfolioValue)}`}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                {students.every(s => {
+                  const val = [{ id:"bananas", startPrice:20 },{ id:"trextech", startPrice:50 },{ id:"airways", startPrice:35 },{ id:"energy", startPrice:15 },{ id:"steel", startPrice:28 }]
+                    .reduce((sum, stock) => sum + ((appState?.portfolios?.[s.id]?.[stock.id])||0) * (appState?.stockPrices?.[stock.id] ?? stock.startPrice), 0);
+                  return val === 0;
+                }) && (
+                  <div style={{ color:"rgba(255,255,255,0.5)", fontSize:14, gridColumn:"1/-1", textAlign:"center", padding:16 }}>No investments yet — encourage your students to invest!</div>
+                )}
+              </div>
             </div>
           </div>
         )}
