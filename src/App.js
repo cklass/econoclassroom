@@ -634,6 +634,64 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
         </div>
       )}
 
+            {/* Invest */}
+      <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:16, padding:20, marginBottom:16 }}>
+        <div style={{ color:"#fff", fontSize:16, fontWeight:700, marginBottom:16 }}>📈 Dino Stock Market</div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:12 }}>
+          {[
+            { id:"bananas",  name:"Brachiosaur Bananas",  emoji:"🦕", color:"#15803d", startPrice:20, desc:"Staples & Grocery" },
+            { id:"trextech", name:"T-Rex Tech",           emoji:"🦖", color:"#7c3aed", startPrice:50, desc:"Technology" },
+            { id:"airways",  name:"Pterodactyl Airways",  emoji:"🐉", color:"#0f1f3d", startPrice:35, desc:"Travel & Leisure" },
+            { id:"energy",   name:"DinoEgg Energy",       emoji:"🥚", color:"#d97706", startPrice:15, desc:"Energy & Utilities" },
+            { id:"steel",    name:"Stegosaurus Steel",    emoji:"💎", color:"#64748b", startPrice:28, desc:"Industrials" },
+          ].map(stock => {
+            const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+            const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
+            const isUp = change >= 0;
+            const shares = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
+            const value = shares * price;
+            const todayTx = (appState?.txLog||[]).filter(t => 
+              t.studentId===studentUser.id && 
+              t.date===new Date().toISOString().slice(0,10) && 
+              t.reason?.includes(stock.name)
+            );
+            const alreadyTraded = todayTx.length > 0;
+            return (
+              <div key={stock.id} style={{ background:"rgba(255,255,255,0.07)", borderRadius:14, padding:16, border:`1px solid ${isUp?"rgba(21,128,61,0.4)":"rgba(239,68,68,0.3)"}` }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                    <span style={{ fontSize:24 }}>{stock.emoji}</span>
+                    <div>
+                      <div style={{ fontWeight:700, fontSize:13, color:"#fff" }}>{stock.name}</div>
+                      <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)" }}>{stock.desc}</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign:"right" }}>
+                    <div style={{ fontSize:20, fontWeight:800, color:isUp?"#a8f0c0":"#fca5a5", fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(price)}</div>
+                    <div style={{ fontSize:11, fontWeight:700, color:isUp?"#a8f0c0":"#fca5a5" }}>{isUp?"▲":"▼"} {Math.abs(change)}%</div>
+                  </div>
+                </div>
+                {shares > 0 && (
+                  <div style={{ background:"rgba(21,128,61,0.2)", borderRadius:8, padding:"6px 10px", marginBottom:8, fontSize:12, color:"#a8f0c0" }}>
+                    📦 You own {shares.toFixed(4)} shares = {fmt(Math.round(value))}
+                  </div>
+                )}
+                {alreadyTraded ? (
+                  <div style={{ textAlign:"center", fontSize:12, color:"#f59e0b", padding:"8px", background:"rgba(245,158,11,0.1)", borderRadius:8 }}>
+                    ⏰ Already traded today — come back tomorrow!
+                  </div>
+                ) : (
+                  <div style={{ display:"flex", gap:6 }}>
+                    <input id={`eco-buy-${stock.id}`} type="number" placeholder="$ buy" min="1"
+                      style={{ flex:1, padding:"7px 8px", borderRadius:8, border:"1.5px solid rgba(21,128,61,0.5)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:13, outline:"none", width:0 }}/>
+                    <button onClick={() => {
+                      const amt = parseFloat(document.getElementById(`eco-buy-${stock.id}`)?.value);
+                      if (!amt || amt <= 0) return;
+                      const bal = appState?.balances?.[studentUser.id] || 0;
+                      if (amt > bal - 25) { alert("Not enough balance! You must keep " + fmt(25) + " minimum."); return; }
+                      const newShares = amt / price;
+                      const uuid = () => Math.random().toString(36).slice(2);
+
       {/* Recent transactions */}
       <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:16, padding:20 }}>
         <div style={{ color:"#fff", fontSize:16, fontWeight:700, marginBottom:16 }}>📋 Recent Transactions</div>
