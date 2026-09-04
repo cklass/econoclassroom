@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue, off } from "firebase/database";
+import { getAuth, signInWithEmailAndPassword, signOut, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAtc1-Jp4NudoGc-u-yRBvII0ZgD4DFifQ",
@@ -13,6 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+export const auth = getAuth(app);
 
 export function saveToFirebase(path, data) {
   return set(ref(db, path), data);
@@ -22,4 +24,16 @@ export function subscribeToFirebase(path, callback) {
   const r = ref(db, path);
   onValue(r, snapshot => callback(snapshot.val()));
   return () => off(r);
+}
+
+export function teacherSignIn() {
+  return signInWithEmailAndPassword(auth, "mrklassen@dinobucks.ca", "DinoBucks2026");
+}
+
+export function teacherSignOut() {
+  return signOut(auth);
+}
+
+export function studentSignIn() {
+  return signInAnonymously(auth);
 }

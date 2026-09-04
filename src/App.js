@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import { saveToFirebase, subscribeToFirebase } from "./firebase";
+import { saveToFirebase, subscribeToFirebase, studentSignIn } from "./firebase";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAtc1-Jp4NudoGc-u-yRBvII0ZgD4DFifQ",
@@ -493,13 +493,18 @@ function StudentLoginScreen({ setScreen }) {
     }
   };
 
-  const login = () => {
+  const login = async () => {
     if (!classroom) return;
     const savedPw = classroom.passwords?.[username.trim().toLowerCase()];
     const match = (classroom.students||[]).find(s => s.username === username.trim().toLowerCase());
     if (!match) { setError("Username not found!"); return; }
     const correctPw = savedPw || match.password;
     if (correctPw !== password) { setError("Wrong password!"); return; }
+    try {
+      await studentSignIn();
+    } catch(e) {
+      console.log("Anonymous auth failed:", e);
+    }
     setStudentUser({ ...match, teacherId: classroom.teacherId });
   };
 
@@ -702,7 +707,9 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                         txLog: [{ id:uuid(), studentId:studentUser.id, amount:-Math.round(amt), reason:`Bought ${stock.emoji} ${stock.name} shares`, date:todayStr() }, ...(appState.txLog||[])],
                       };
                       setAppState(next);
-                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom`, next);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/portfolios/${studentUser.id}`, next.portfolios[studentUser.id]);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, next.txLog);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/balances`, next.balances);
                       document.getElementById(`eco-buy-${stock.id}`).value = "";
                     }} style={{ padding:"7px 12px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Buy</button>
                     <input id={`eco-sell-${stock.id}`} type="number" placeholder="$ sell" min="1"
@@ -723,7 +730,9 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                         txLog: [{ id:uuid2(), studentId:studentUser.id, amount:proceeds, reason:`Sold ${stock.emoji} ${stock.name} shares`, date:todayStr2() }, ...(appState.txLog||[])],
                       };
                       setAppState(next2);
-                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom`, next2);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/portfolios/${studentUser.id}`, next2.portfolios[studentUser.id]);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, next2.txLog);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/balances`, next2.balances);
                       document.getElementById(`eco-sell-${stock.id}`).value = "";
                     }} style={{ padding:"7px 12px", background:"#dc2626", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Sell</button>
                   </div>
