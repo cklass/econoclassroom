@@ -685,8 +685,11 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                     <input id={`eco-buy-${stock.id}`} type="number" placeholder="$ buy" min="1"
                       style={{ flex:1, padding:"7px 8px", borderRadius:8, border:"1.5px solid rgba(21,128,61,0.5)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:13, outline:"none", width:0 }}/>
                     <button onClick={() => {
-                      const amt = parseFloat(document.getElementById(`eco-buy-${stock.id}`)?.value);
-                      if (!amt || amt <= 0) return;
+                      const inputEl = document.getElementById(`eco-buy-${stock.id}`);
+                      console.log("Input element:", inputEl, "Value:", inputEl?.value);
+                      const amt = parseFloat(inputEl?.value);
+                      console.log("Amount parsed:", amt);
+                      if (!amt || amt <= 0) { alert("Invalid amount: " + inputEl?.value); return; }
                       const bal = appState?.balances?.[studentUser.id] || 0;
                       if (amt > bal - 25) { alert("Not enough! Balance: " + bal + " Amount: " + amt + " Min needed: " + (amt + 25)); return; }
                       const newShares = amt / price;
