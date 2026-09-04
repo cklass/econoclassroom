@@ -690,7 +690,46 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                       const bal = appState?.balances?.[studentUser.id] || 0;
                       if (amt > bal - 25) { alert("Not enough balance! You must keep " + fmt(25) + " minimum."); return; }
                       const newShares = amt / price;
-                      const uuid = () => Math.random().toString(36).slice(2);
+                                            const uuid = () => Math.random().toString(36).slice(2);
+                      const todayStr = () => new Date().toISOString().slice(0,10);
+                      const next = {
+                        ...appState,
+                        balances: { ...appState.balances, [studentUser.id]: Math.max(25, (appState.balances?.[studentUser.id]||0) - Math.round(amt)) },
+                        portfolios: { ...appState.portfolios, [studentUser.id]: { ...(appState.portfolios?.[studentUser.id]||{}), [stock.id]: (appState.portfolios?.[studentUser.id]?.[stock.id]||0) + newShares }},
+                        txLog: [{ id:uuid(), studentId:studentUser.id, amount:-Math.round(amt), reason:`Bought ${stock.emoji} ${stock.name} shares`, date:todayStr() }, ...(appState.txLog||[])],
+                      };
+                      setAppState(next);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom`, next);
+                      document.getElementById(`eco-buy-${stock.id}`).value = "";
+                    }} style={{ padding:"7px 12px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Buy</button>
+                    <input id={`eco-sell-${stock.id}`} type="number" placeholder="$ sell" min="1"
+                      style={{ flex:1, padding:"7px 8px", borderRadius:8, border:"1.5px solid rgba(239,68,68,0.5)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:13, outline:"none", width:0 }}/>
+                    <button onClick={() => {
+                      if (!shares || shares <= 0) { alert("No shares to sell!"); return; }
+                      const sellAmt = parseFloat(document.getElementById(`eco-sell-${stock.id}`)?.value);
+                      const totalVal = shares * price;
+                      const amtToSell = (sellAmt > 0) ? Math.min(sellAmt, totalVal) : totalVal;
+                      const sharesToSell = amtToSell / price;
+                      const proceeds = Math.round(amtToSell);
+                      const uuid2 = () => Math.random().toString(36).slice(2);
+                      const todayStr2 = () => new Date().toISOString().slice(0,10);
+                      const next2 = {
+                        ...appState,
+                        balances: { ...appState.balances, [studentUser.id]: (appState.balances?.[studentUser.id]||0) + proceeds },
+                        portfolios: { ...appState.portfolios, [studentUser.id]: { ...(appState.portfolios?.[studentUser.id]||{}), [stock.id]: Math.max(0, shares - sharesToSell) }},
+                        txLog: [{ id:uuid2(), studentId:studentUser.id, amount:proceeds, reason:`Sold ${stock.emoji} ${stock.name} shares`, date:todayStr2() }, ...(appState.txLog||[])],
+                      };
+                      setAppState(next2);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom`, next2);
+                      document.getElementById(`eco-sell-${stock.id}`).value = "";
+                    }} style={{ padding:"7px 12px", background:"#dc2626", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Sell</button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Recent transactions */}
       <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:16, padding:20 }}>
