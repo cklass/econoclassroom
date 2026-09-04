@@ -1094,6 +1094,63 @@ function ClassroomApp({ user, auth, classroom }) {
     }));
   };
 
+  // ── Daily stock price fetch ────────────────────────────────────────────────
+  React.useEffect(() => {
+    if (!appState) return;
+    const today = new Date().toISOString().slice(0,10);
+    if (appState?.lastStockFetch === today) return;
+    const dayOfWeek = new Date().getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) return;
+
+    const DINO_STOCKS = [
+      { id:"bananas",  startPrice:20, volatility:0.06, tickers:["L.TO","MRU.TO","ATD.TO"] },
+      { id:"trextech", startPrice:50, volatility:0.18, tickers:["SHOP.TO","CSU.TO","CLS.TO"] },
+      { id:"airways",  startPrice:35, volatility:0.12, tickers:["AC.TO","DOO.TO","CJT.TO"] },
+      { id:"energy",   startPrice:15, volatility:0.05, tickers:["ENB.TO","FTS.TO","TRP.TO"] },
+      { id:"steel",    startPrice:28, volatility:0.10, tickers:["CNR.TO","CAE.TO","WSP.TO"] },
+    ];
+
+    const fetchChange = async (tickers) => {
+      const changes = await Promise.all(tickers.map(async ticker => {
+        try {
+          const url = "https://corsproxy.io/?" + encodeURIComponent(
+            "https://query1.finance.yahoo.com/v8/finance/chart/" + ticker + "?interval=1d&range=5d"
+          );
+          const res = await fetch(url);
+          const data = await res.json();
+          const closes = data?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(Boolean);
+          if (!closes || closes.length < 2) return 0;
+          return (closes[closes.length-1] - closes[closes.length-2]) / closes[closes.length-2];
+        } catch { return 0; }
+      }));
+      return changes.reduce((a,b) => a+b, 0) / changes.length;
+    };
+
+    const fetchStocks = async () => {
+      const newPrices = { ...(appState.stockPrices || {}) };
+      for (const stock of DINO_STOCKS) {
+        try {
+          const avgChange = await fetchChange(stock.tickers);
+          const currentPrice = appState.stockPrices?.[stock.id] ?? stock.startPrice;
+          const newPrice = Math.max(1, currentPrice * (1 + avgChange));
+          newPrices[stock.id] = Math.round(newPrice * 100) / 100;
+        } catch {
+          const move = (Math.random() - 0.48) * stock.volatility;
+          const currentPrice = appState.stockPrices?.[stock.id] ?? stock.startPrice;
+          newPrices[stock.id] = Math.max(1, Math.round(currentPrice * (1 + move) * 100) / 100);
+        }
+      }
+      update(prev => ({
+        ...prev,
+        stockPrices: newPrices,
+        lastStockFetch: today,
+        stockHistory: { ...(prev.stockHistory||{}), [today]: newPrices }
+      }));
+    };
+
+    fetchStocks();
+  }, [appState?.students]);
+
   const students = appState?.students || [];
   const balances = appState?.balances || {};
   const selStudent = students.find(s => s.id === selected);
