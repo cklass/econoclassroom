@@ -688,7 +688,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                       const amt = parseFloat(document.getElementById(`eco-buy-${stock.id}`)?.value);
                       if (!amt || amt <= 0) return;
                       const bal = appState?.balances?.[studentUser.id] || 0;
-                      if (amt > bal - 25) { alert("Not enough balance! You must keep " + fmt(25) + " minimum."); return; }
+                      if (amt > bal - 25) { alert("Not enough! Balance: " + bal + " Amount: " + amt + " Min needed: " + (amt + 25)); return; }
                       const newShares = amt / price;
                                             const uuid = () => Math.random().toString(36).slice(2);
                       const todayStr = () => new Date().toISOString().slice(0,10);
