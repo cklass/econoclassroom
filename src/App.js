@@ -569,7 +569,10 @@ function StudentLoginScreen({ setScreen }) {
 function StudentDashboard({ studentUser, classroom, setScreen }) {
   const [appState, setAppState] = React.useState(classroom);
   const fmt = n => `${appState.currencyEmoji}${Number(n).toLocaleString()}`;
-  const balance = appState?.balances?.[studentUser.id] || 0;
+  // Calculate balance from txLog — more secure than reading balances directly
+  const balance = (appState?.txLog||[])
+    .filter(t => t.studentId === studentUser.id)
+    .reduce((sum, t) => sum + t.amount, 0);
   const myTx = (appState?.txLog||[]).filter(t => t.studentId === studentUser.id);
   const dino = DINO_OPTIONS.find(d => d.id === studentUser.dinoId) || DINO_OPTIONS[0];
 
@@ -661,7 +664,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
             const todayTx = (appState?.txLog||[]).filter(t => 
               t.studentId===studentUser.id && 
               t.date===new Date().toISOString().slice(0,10) && 
-              t.reason?.includes(stock.name)
+              (t.reason?.includes(`Bought ${stock.emoji}`) || t.reason?.includes(`Sold ${stock.emoji}`))
             );
             const alreadyTraded = todayTx.length > 0;
             return (
@@ -703,16 +706,12 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                       const newShares = amt / price;
                                             const uuid = () => Math.random().toString(36).slice(2);
                       const todayStr = () => new Date().toISOString().slice(0,10);
-                      const next = {
-                        ...appState,
-                        balances: { ...appState.balances, [studentUser.id]: Math.max(25, (appState.balances?.[studentUser.id]||0) - Math.round(amt)) },
-                        portfolios: { ...appState.portfolios, [studentUser.id]: { ...(appState.portfolios?.[studentUser.id]||{}), [stock.id]: (appState.portfolios?.[studentUser.id]?.[stock.id]||0) + newShares }},
-                        txLog: [{ id:uuid(), studentId:studentUser.id, amount:-Math.round(amt), reason:`Bought ${stock.emoji} ${stock.name} shares`, date:todayStr() }, ...(appState.txLog||[])],
-                      };
-                      setAppState(next);
-                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/portfolios/${studentUser.id}`, next.portfolios[studentUser.id]);
-                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, next.txLog);
-                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/balances`, next.balances);
+                      const newTx = { id:uuid(), studentId:studentUser.id, amount:-Math.round(amt), reason:`Bought ${stock.emoji} ${stock.name} shares`, date:todayStr() };
+                      const newPortfolio = { ...(appState.portfolios?.[studentUser.id]||{}), [stock.id]: (appState.portfolios?.[studentUser.id]?.[stock.id]||0) + newShares };
+                      const newTxLog = [newTx, ...(appState.txLog||[])];
+                      setAppState(prev => ({ ...prev, txLog: newTxLog, portfolios: { ...prev.portfolios, [studentUser.id]: newPortfolio } }));
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/portfolios/${studentUser.id}`, newPortfolio);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, newTxLog);
                       document.getElementById(`eco-buy-${stock.id}`).value = "";
                     }} style={{ padding:"7px 12px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Buy</button>
                     <input id={`eco-sell-${stock.id}`} type="number" placeholder="$ sell" min="1"
@@ -726,16 +725,12 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                       const proceeds = Math.round(amtToSell);
                       const uuid2 = () => Math.random().toString(36).slice(2);
                       const todayStr2 = () => new Date().toISOString().slice(0,10);
-                      const next2 = {
-                        ...appState,
-                        balances: { ...appState.balances, [studentUser.id]: (appState.balances?.[studentUser.id]||0) + proceeds },
-                        portfolios: { ...appState.portfolios, [studentUser.id]: { ...(appState.portfolios?.[studentUser.id]||{}), [stock.id]: Math.max(0, shares - sharesToSell) }},
-                        txLog: [{ id:uuid2(), studentId:studentUser.id, amount:proceeds, reason:`Sold ${stock.emoji} ${stock.name} shares`, date:todayStr2() }, ...(appState.txLog||[])],
-                      };
-                      setAppState(next2);
-                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/portfolios/${studentUser.id}`, next2.portfolios[studentUser.id]);
-                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, next2.txLog);
-                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/balances`, next2.balances);
+                      const newTx2 = { id:uuid2(), studentId:studentUser.id, amount:proceeds, reason:`Sold ${stock.emoji} ${stock.name} shares`, date:todayStr2() };
+                      const newPortfolio2 = { ...(appState.portfolios?.[studentUser.id]||{}), [stock.id]: Math.max(0, shares - sharesToSell) };
+                      const newTxLog2 = [newTx2, ...(appState.txLog||[])];
+                      setAppState(prev => ({ ...prev, txLog: newTxLog2, portfolios: { ...prev.portfolios, [studentUser.id]: newPortfolio2 } }));
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/portfolios/${studentUser.id}`, newPortfolio2);
+                      saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, newTxLog2);
                       document.getElementById(`eco-sell-${stock.id}`).value = "";
                     }} style={{ padding:"7px 12px", background:"#dc2626", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Sell</button>
                   </div>
