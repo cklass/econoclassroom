@@ -29,7 +29,10 @@ export default function App() {
     const unsub = onAuthStateChanged(auth, u => {
       setUser(u);
       setLoading(false);
-      if (u && !window.location.hash.startsWith("#parent-")) setScreen("dashboard");
+      // Only redirect to dashboard for non-anonymous (teacher) logins
+      if (u && !u.isAnonymous && !window.location.hash.startsWith("#parent-")) {
+        setScreen("dashboard");
+      }
     });
     return unsub;
   }, []);
