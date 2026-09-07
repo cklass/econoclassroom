@@ -567,6 +567,7 @@ function StudentLoginScreen({ setScreen }) {
 
 // ── Student Dashboard ─────────────────────────────────────────────────────────
 function StudentDashboard({ studentUser, classroom, setScreen }) {
+  const [studentActiveGame, setStudentActiveGame] = React.useState(null);
   const [appState, setAppState] = React.useState(classroom);
   const fmt = n => `${appState.currencyEmoji}${Number(n).toLocaleString()}`;
   // Calculate balance from txLog — more secure than reading balances directly
@@ -739,6 +740,51 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
             );
           })}
         </div>
+      </div>
+
+            {/* Games */}
+      <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:16, padding:20, marginBottom:16 }}>
+        <div style={{ color:"#fff", fontSize:16, fontWeight:700, marginBottom:16 }}>🎮 Game Zone</div>
+        {studentActiveGame ? (
+          <div>
+            <button onClick={() => setStudentActiveGame(null)} style={{ padding:"6px 16px", background:"rgba(255,255,255,0.1)", color:"#fff", border:"1px solid rgba(255,255,255,0.2)", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600, marginBottom:16 }}>← Back to Games</button>
+            <ProGameArea game={studentActiveGame} studentUser={studentUser} appState={appState}
+              saveScore={(gameId, score) => {
+                const lb = appState?.gameLeaderboards?.[gameId] || [];
+                const filtered = lb.filter(e => e.username !== studentUser.username);
+                const existing = lb.find(e => e.username === studentUser.username);
+                if (existing && existing.score >= score) return;
+                const newLb = [...filtered, { username:studentUser.username, name:studentUser.name, score }]
+                  .sort((a,b) => b.score - a.score).slice(0,10);
+                const next = { ...appState, gameLeaderboards: { ...(appState.gameLeaderboards||{}), [gameId]: newLb }};
+                setAppState(next);
+                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/gameLeaderboards`, next.gameLeaderboards);
+              }}/>
+          </div>
+        ) : (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))", gap:10 }}>
+            {[
+              { id:"marketcrash", name:"Market Crash",  emoji:"☄️", color:"#dc2626" },
+              { id:"bullrun",     name:"Bull Run",       emoji:"🐂", color:"#15803d" },
+              { id:"dinotrader", name:"Dino Trader",    emoji:"📊", color:"#7c3aed" },
+              { id:"budgetblitz", name:"Budget Blitz",   emoji:"💰", color:"#d97706" },
+              { id:"eggdrop",     name:"Egg Drop",       emoji:"🥚", color:"#64748b" },
+            ].map(game => {
+              const myScore = appState?.gameLeaderboards?.[game.id]?.find(e => e.username === studentUser.username);
+              return (
+                <div key={game.id} onClick={() => setStudentActiveGame(game.id)}
+                  style={{ background:`${game.color}22`, borderRadius:14, padding:16, textAlign:"center", cursor:"pointer",
+                    border:`2px solid ${game.color}44`, transition:"transform 0.15s" }}
+                  onMouseEnter={e => e.currentTarget.style.transform="scale(1.04)"}
+                  onMouseLeave={e => e.currentTarget.style.transform="scale(1)"}>
+                  <div style={{ fontSize:36, marginBottom:8, filter:`drop-shadow(0 0 8px ${game.color})` }}>{game.emoji}</div>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#fff", marginBottom:4 }}>{game.name}</div>
+                  {myScore && <div style={{ fontSize:10, color:"rgba(255,255,255,0.6)" }}>Best: {myScore.score}</div>}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Recent transactions */}
@@ -1135,8 +1181,514 @@ function formatFullDate(dateStr) {
   return `${dayName}, ${fullDate}${cycleDay ? ` · Day ${cycleDay}` : ""}`;
 }
 
+// ── GAME COMPONENTS ───────────────────────────────────────────────────────────
+
+function ProGameArea({ game, studentUser, appState, saveScore }) {
+  if (game === "marketcrash") return <MarketCrashGame studentUser={studentUser} appState={appState} saveScore={saveScore}/>;
+  if (game === "bullrun")     return <BullRunGame studentUser={studentUser} appState={appState} saveScore={saveScore}/>;
+  if (game === "dinotrader")  return <DinoTraderGame studentUser={studentUser} appState={appState} saveScore={saveScore}/>;
+  if (game === "budgetblitz") return <BudgetBlitzGame studentUser={studentUser} appState={appState} saveScore={saveScore}/>;
+  if (game === "eggdrop")     return <ProEggDropGame studentUser={studentUser} appState={appState} saveScore={saveScore}/>;
+  return null;
+}
+
+function MarketCrashGame({ studentUser, appState, saveScore }) {
+  const W = 560, H = 320;
+  const [playing, setPlaying] = React.useState(false);
+  const [score, setScore] = React.useState(0);
+  const [lives, setLives] = React.useState(3);
+  const [done, setDone] = React.useState(false);
+  const [shipX, setShipX] = React.useState(280);
+  const [meteors, setMeteors] = React.useState([]);
+  const [bullets, setBullets] = React.useState([]);
+  const [explosions, setExplosions] = React.useState([]);
+  const frameRef = React.useRef();
+  const shipRef = React.useRef(280);
+  const meteorsRef = React.useRef([]);
+  const bulletsRef = React.useRef([]);
+  const scoreRef = React.useRef(0);
+  const livesRef = React.useRef(3);
+  const keysRef = React.useRef({});
+  const NEWS = ["📉 Inflation!","🌋 Volcano!","⚡ Power cut!","🦠 Pandemic!","💸 Recession!","🌪️ Storm!","🏦 Bank fail!","📰 Bad news!"];
+
+  React.useEffect(() => {
+    const down = e => { keysRef.current[e.code]=true; if(e.code==="Space"){e.preventDefault();bulletsRef.current=[...bulletsRef.current,{id:Math.random(),x:shipRef.current,y:260}];} };
+    const up = e => keysRef.current[e.code]=false;
+    window.addEventListener("keydown",down); window.addEventListener("keyup",up);
+    return ()=>{window.removeEventListener("keydown",down);window.removeEventListener("keyup",up);};
+  },[playing]);
+
+  React.useEffect(()=>{
+    if(!playing)return;
+    let lastM=0;
+    const tick=ts=>{
+      if(keysRef.current["ArrowLeft"]||keysRef.current["KeyA"]){shipRef.current=Math.max(30,shipRef.current-6);setShipX(shipRef.current);}
+      if(keysRef.current["ArrowRight"]||keysRef.current["KeyD"]){shipRef.current=Math.min(W-30,shipRef.current+6);setShipX(shipRef.current);}
+      const interval=Math.max(400,1400-scoreRef.current*1.5);
+      if(ts-lastM>interval){lastM=ts;meteorsRef.current=[...meteorsRef.current,{id:Math.random(),x:Math.random()*(W-60)+30,y:-30,speed:2+Math.random()*3+scoreRef.current*0.008,label:NEWS[Math.floor(Math.random()*NEWS.length)]}];}
+      meteorsRef.current=meteorsRef.current.map(m=>({...m,y:m.y+m.speed}));
+      bulletsRef.current=bulletsRef.current.map(b=>({...b,y:b.y-12})).filter(b=>b.y>-10);
+      const newExp=[]; const hitM=new Set(); const hitB=new Set();
+      bulletsRef.current.forEach(b=>{meteorsRef.current.forEach(m=>{if(Math.abs(b.x-m.x)<30&&Math.abs(b.y-m.y)<30){hitM.add(m.id);hitB.add(b.id);scoreRef.current+=15;newExp.push({id:Math.random(),x:m.x,y:m.y,t:0});}});});
+      if(newExp.length){setScore(scoreRef.current);setExplosions(p=>[...p,...newExp]);}
+      meteorsRef.current=meteorsRef.current.filter(m=>!hitM.has(m.id));
+      bulletsRef.current=bulletsRef.current.filter(b=>!hitB.has(b.id));
+      const escaped=meteorsRef.current.filter(m=>m.y>H);
+      if(escaped.length){livesRef.current=Math.max(0,livesRef.current-escaped.length);setLives(livesRef.current);meteorsRef.current=meteorsRef.current.filter(m=>m.y<=H);}
+      if(livesRef.current<=0){setPlaying(false);setDone(true);if(saveScore)saveScore("marketcrash",scoreRef.current);return;}
+      setMeteors([...meteorsRef.current]);setBullets([...bulletsRef.current]);
+      setExplosions(p=>p.map(e=>({...e,t:e.t+1})).filter(e=>e.t<10));
+      frameRef.current=requestAnimationFrame(tick);
+    };
+    frameRef.current=requestAnimationFrame(tick);
+    return()=>cancelAnimationFrame(frameRef.current);
+  },[playing]);
+
+  const start=()=>{setDone(false);setScore(0);setLives(3);setShipX(280);scoreRef.current=0;livesRef.current=3;shipRef.current=280;meteorsRef.current=[];bulletsRef.current=[];setMeteors([]);setBullets([]);setExplosions([]);setPlaying(true);};
+  const lb=(appState?.gameLeaderboards?.marketcrash||[]);
+
+  return(
+    <div style={{textAlign:"center"}}>
+      <div style={{fontSize:12,color:"#7a9bb5",marginBottom:8}}>Arrow keys to move · SPACE to shoot bad news! Score: {score} | Lives: {"❤️".repeat(lives)}</div>
+      <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+        <div>
+          <div onClick={()=>{if(playing){bulletsRef.current=[...bulletsRef.current,{id:Math.random(),x:shipRef.current,y:260}];}}}
+            style={{position:"relative",width:W,maxWidth:"100%",height:H,background:"linear-gradient(180deg,#0a0a2e,#0f1f3d)",borderRadius:14,overflow:"hidden",cursor:"crosshair",border:"2px solid #15803d",margin:"0 auto"}}>
+            {[{x:5,y:8},{x:15,y:22},{x:30,y:5},{x:45,y:18},{x:60,y:3},{x:75,y:14},{x:85,y:25},{x:92,y:9},{x:20,y:38},{x:55,y:32},{x:70,y:40},{x:38,y:48}].map((s,i)=>(
+              <div key={i} style={{position:"absolute",left:`${s.x}%`,top:`${s.y}%`,width:2,height:2,background:"#fff",borderRadius:"50%",opacity:0.6}}/>
+            ))}
+            <div style={{position:"absolute",bottom:55,left:0,right:0,height:2,background:"rgba(21,128,61,0.3)"}}/>
+            <div style={{position:"absolute",bottom:56,left:shipX,transform:"translateX(-50%)",fontSize:32,filter:"drop-shadow(0 0 8px #15803d)"}}>🦕</div>
+            {bullets.map(b=><div key={b.id} style={{position:"absolute",left:b.x,top:b.y,width:4,height:14,background:"#15803d",borderRadius:2,transform:"translateX(-50%)",boxShadow:"0 0 6px #15803d"}}/>)}
+            {meteors.map(m=>(
+              <div key={m.id} style={{position:"absolute",left:m.x,top:m.y,transform:"translateX(-50%)",textAlign:"center"}}>
+                <div style={{fontSize:22}}>☄️</div>
+                <div style={{fontSize:9,color:"#fca5a5",fontWeight:700,whiteSpace:"nowrap",background:"rgba(0,0,0,0.5)",padding:"1px 4px",borderRadius:4}}>{m.label}</div>
+              </div>
+            ))}
+            {explosions.map(e=><div key={e.id} style={{position:"absolute",left:e.x,top:e.y,fontSize:20+e.t*2,transform:"translateX(-50%)",opacity:1-e.t/10}}>💥</div>)}
+            <div style={{position:"absolute",top:8,left:12,fontFamily:"'Space Grotesk',sans-serif",fontSize:16,color:"#15803d",fontWeight:700}}>{score}</div>
+            <div style={{position:"absolute",top:8,right:12,fontSize:14}}>{"❤️".repeat(lives)}</div>
+          </div>
+          {!playing&&<button onClick={start} style={{marginTop:14,padding:"10px 28px",background:"linear-gradient(135deg,#dc2626,#b91c1c)",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:700,fontFamily:"'Space Grotesk',sans-serif"}}>{done?`💥 Score: ${score} — Play Again`:"🚀 Start Market Crash!"}</button>}
+        </div>
+        <div style={{background:"#f8fafc",borderRadius:14,padding:16,minWidth:180,maxHeight:360,overflowY:"auto",border:"1px solid #e2e8f0"}}>
+          <div style={{fontWeight:700,fontSize:14,color:"#0f1f3d",marginBottom:10,fontFamily:"'Space Grotesk',sans-serif"}}>🏆 Top 10</div>
+          <div style={{fontSize:11,color:"#7a9bb5",marginBottom:10}}>📚 F1.4 — Factors affecting financial goals</div>
+          {lb.length===0?<div style={{color:"#94a3b8",fontSize:12}}>No scores yet!</div>:lb.map((e,i)=>(
+            <div key={e.username} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:"1px solid #f0f0f0"}}>
+              <div style={{fontWeight:700,fontSize:13,color:"#0f1f3d",width:24}}>#{i+1}</div>
+              <div style={{flex:1,fontSize:13,fontWeight:600,color:"#0f1f3d"}}>{e.name}</div>
+              <div style={{fontWeight:700,fontSize:13,color:"#dc2626",fontFamily:"'Space Grotesk',sans-serif"}}>{e.score}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BullRunGame({ studentUser, appState, saveScore }) {
+  const COLS=20,ROWS=15,CELL=26;
+  const [snake,setSnake]=React.useState([[10,7],[9,7],[8,7]]);
+  const [food,setFood]=React.useState({pos:[15,7],type:"green"});
+  const [playing,setPlaying]=React.useState(false);
+  const [dead,setDead]=React.useState(false);
+  const [score,setScore]=React.useState(0);
+  const snakeRef=React.useRef([[10,7],[9,7],[8,7]]);
+  const dirRef=React.useRef("RIGHT");
+  const nextDirRef=React.useRef("RIGHT");
+  const foodRef=React.useRef({pos:[15,7],type:"green"});
+  const scoreRef=React.useRef(0);
+
+  const randFood=sn=>{
+    let f;
+    do{f=[Math.floor(Math.random()*COLS),Math.floor(Math.random()*ROWS)];}
+    while(sn.some(s=>s[0]===f[0]&&s[1]===f[1]));
+    const type=Math.random()<0.7?"green":"red";
+    return{pos:f,type};
+  };
+
+  React.useEffect(()=>{
+    if(!playing)return;
+    const handleKey=e=>{
+      if(e.code==="ArrowUp"&&dirRef.current!=="DOWN")nextDirRef.current="UP";
+      if(e.code==="ArrowDown"&&dirRef.current!=="UP")nextDirRef.current="DOWN";
+      if(e.code==="ArrowLeft"&&dirRef.current!=="RIGHT")nextDirRef.current="LEFT";
+      if(e.code==="ArrowRight"&&dirRef.current!=="LEFT")nextDirRef.current="RIGHT";
+      if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();
+    };
+    window.addEventListener("keydown",handleKey);
+    return()=>window.removeEventListener("keydown",handleKey);
+  },[playing]);
+
+  React.useEffect(()=>{
+    if(!playing)return;
+    const speed=Math.max(80,220-scoreRef.current*1.5);
+    const interval=setInterval(()=>{
+      dirRef.current=nextDirRef.current;
+      const moves={UP:[0,-1],DOWN:[0,1],LEFT:[-1,0],RIGHT:[1,0]};
+      const[dx,dy]=moves[dirRef.current];
+      const head=[snakeRef.current[0][0]+dx,snakeRef.current[0][1]+dy];
+      if(head[0]<0||head[0]>=COLS||head[1]<0||head[1]>=ROWS||snakeRef.current.some(s=>s[0]===head[0]&&s[1]===head[1])){
+        setPlaying(false);setDead(true);if(saveScore)saveScore("bullrun",scoreRef.current);return;
+      }
+      const ate=head[0]===foodRef.current.pos[0]&&head[1]===foodRef.current.pos[1];
+      const newSnake=ate?[head,...snakeRef.current]:[head,...snakeRef.current.slice(0,-1)];
+      if(ate){
+        const pts=foodRef.current.type==="green"?10:-5;
+        scoreRef.current=Math.max(0,scoreRef.current+pts);
+        setScore(scoreRef.current);
+        const nf=randFood(newSnake);
+        foodRef.current=nf;setFood(nf);
+      }
+      snakeRef.current=newSnake;setSnake([...newSnake]);
+    },speed);
+    return()=>clearInterval(interval);
+  },[playing,score]);
+
+  const start=()=>{
+    const init=[[10,7],[9,7],[8,7]];
+    snakeRef.current=init;dirRef.current="RIGHT";nextDirRef.current="RIGHT";
+    scoreRef.current=0;const nf={pos:[15,7],type:"green"};foodRef.current=nf;
+    setSnake(init);setFood(nf);setScore(0);setDead(false);setPlaying(true);
+  };
+
+  const lb=(appState?.gameLeaderboards?.bullrun||[]);
+
+  return(
+    <div style={{textAlign:"center"}}>
+      <div style={{fontSize:12,color:"#7a9bb5",marginBottom:8}}>Arrow keys · Eat 📈 green candles (+10) · Avoid 📉 red candles (-5) · Score: {score}</div>
+      <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+        <div>
+          <div style={{display:"inline-block",background:"#0f1f3d",borderRadius:12,padding:4,border:"2px solid #15803d"}}>
+            <svg width={COLS*CELL} height={ROWS*CELL}>
+              {Array(COLS).fill(0).map((_,i)=><line key={"v"+i} x1={i*CELL} y1={0} x2={i*CELL} y2={ROWS*CELL} stroke="rgba(255,255,255,0.04)" strokeWidth={1}/>)}
+              {Array(ROWS).fill(0).map((_,i)=><line key={"h"+i} x1={0} y1={i*CELL} x2={COLS*CELL} y2={i*CELL} stroke="rgba(255,255,255,0.04)" strokeWidth={1}/>)}
+              {snake.map((s,i)=>(
+                <rect key={i} x={s[0]*CELL+1} y={s[1]*CELL+1} width={CELL-2} height={CELL-2} rx={i===0?8:4}
+                  fill={i===0?"#f59e0b":i===1?"#d97706":"#b45309"} opacity={Math.max(0.4,1-i*0.015)}/>
+              ))}
+              {snake[0]&&<>
+                <circle cx={snake[0][0]*CELL+CELL*0.3} cy={snake[0][1]*CELL+CELL*0.35} r={3} fill="white"/>
+                <circle cx={snake[0][0]*CELL+CELL*0.7} cy={snake[0][1]*CELL+CELL*0.35} r={3} fill="white"/>
+                <circle cx={snake[0][0]*CELL+CELL*0.3} cy={snake[0][1]*CELL+CELL*0.35} r={1.5} fill="#111"/>
+                <circle cx={snake[0][0]*CELL+CELL*0.7} cy={snake[0][1]*CELL+CELL*0.35} r={1.5} fill="#111"/>
+              </>}
+              <text x={food.pos[0]*CELL+CELL/2} y={food.pos[1]*CELL+CELL/2+6} textAnchor="middle" fontSize={18}>{food.type==="green"?"📈":"📉"}</text>
+            </svg>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,marginTop:10}}>
+            <button onPointerDown={()=>nextDirRef.current="UP"} style={{padding:"6px 18px",background:"#0f1f3d",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:16}}>▲</button>
+            <div style={{display:"flex",gap:4}}>
+              <button onPointerDown={()=>nextDirRef.current="LEFT"} style={{padding:"6px 18px",background:"#0f1f3d",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:16}}>◀</button>
+              <button onPointerDown={()=>nextDirRef.current="DOWN"} style={{padding:"6px 18px",background:"#0f1f3d",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:16}}>▼</button>
+              <button onPointerDown={()=>nextDirRef.current="RIGHT"} style={{padding:"6px 18px",background:"#0f1f3d",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:16}}>▶</button>
+            </div>
+          </div>
+          {!playing&&<button onClick={start} style={{marginTop:10,padding:"10px 28px",background:"linear-gradient(135deg,#15803d,#0f1f3d)",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:700,fontFamily:"'Space Grotesk',sans-serif"}}>{dead?`💀 Score: ${score} — Play Again`:"🐂 Start Bull Run!"}</button>}
+        </div>
+        <div style={{background:"#f8fafc",borderRadius:14,padding:16,minWidth:180,maxHeight:400,overflowY:"auto",border:"1px solid #e2e8f0"}}>
+          <div style={{fontWeight:700,fontSize:14,color:"#0f1f3d",marginBottom:10,fontFamily:"'Space Grotesk',sans-serif"}}>🏆 Top 10</div>
+          <div style={{fontSize:11,color:"#7a9bb5",marginBottom:10}}>📚 F1.2 — Interest rates & investment</div>
+          {lb.length===0?<div style={{color:"#94a3b8",fontSize:12}}>No scores yet!</div>:lb.map((e,i)=>(
+            <div key={e.username} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:"1px solid #f0f0f0"}}>
+              <div style={{fontWeight:700,fontSize:13,color:"#0f1f3d",width:24}}>#{i+1}</div>
+              <div style={{flex:1,fontSize:13,fontWeight:600,color:"#0f1f3d"}}>{e.name}</div>
+              <div style={{fontWeight:700,fontSize:13,color:"#15803d",fontFamily:"'Space Grotesk',sans-serif"}}>{e.score}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DinoTraderGame({ studentUser, appState, saveScore }) {
+  const CHARTS=[
+    {data:[20,22,21,25,28,26,30,32,29,35],answer:"up",label:"T-Rex Tech surges!"},
+    {data:[50,48,45,43,40,38,35,33,30,28],answer:"down",label:"Market correction"},
+    {data:[15,16,14,17,19,18,21,20,23,25],answer:"up",label:"Energy recovery"},
+    {data:[30,29,31,28,26,24,22,20,18,16],answer:"down",label:"Sector decline"},
+    {data:[10,12,11,14,13,16,15,18,20,22],answer:"up",label:"Steady growth"},
+    {data:[40,38,41,37,34,36,32,30,28,25],answer:"down",label:"Volatile drop"},
+    {data:[25,27,26,29,31,30,33,35,34,38],answer:"up",label:"Bull momentum"},
+    {data:[60,58,55,57,53,50,48,45,43,40],answer:"down",label:"Bear territory"},
+  ];
+  const [idx,setIdx]=React.useState(0);
+  const [score,setScore]=React.useState(0);
+  const [round,setRound]=React.useState(0);
+  const [done,setDone]=React.useState(false);
+  const [feedback,setFeedback]=React.useState(null);
+  const [showing,setShowing]=React.useState(true);
+  const [timeLeft,setTimeLeft]=React.useState(3);
+  const timerRef=React.useRef();
+
+  React.useEffect(()=>{
+    if(!showing||done)return;
+    setTimeLeft(3);
+    timerRef.current=setInterval(()=>{
+      setTimeLeft(t=>{
+        if(t<=1){clearInterval(timerRef.current);setShowing(false);return 0;}
+        return t-1;
+      });
+    },1000);
+    return()=>clearInterval(timerRef.current);
+  },[idx,showing,done]);
+
+  const answer=choice=>{
+    if(showing||feedback)return;
+    const correct=choice===CHARTS[idx].answer;
+    setFeedback(correct?"correct":"wrong");
+    if(correct)setScore(s=>s+10);
+    setTimeout(()=>{
+      setFeedback(null);
+      if(round+1>=CHARTS.length){setDone(true);if(saveScore)saveScore("dinotrader",correct?score+10:score);return;}
+      setRound(r=>r+1);
+      setIdx(i=>(i+1)%CHARTS.length);
+      setShowing(true);
+    },800);
+  };
+
+  const start=()=>{setScore(0);setRound(0);setIdx(0);setDone(false);setFeedback(null);setShowing(true);};
+  const chart=CHARTS[idx];
+  const W=300,H=120,pad=16;
+  const minV=Math.min(...chart.data)*0.95;
+  const maxV=Math.max(...chart.data)*1.05;
+  const x=i=>pad+(i/(chart.data.length-1))*(W-pad*2);
+  const y=v=>H-pad-((v-minV)/(maxV-minV))*(H-pad*2);
+  const points=chart.data.map((v,i)=>`${x(i)},${y(v)}`).join(" ");
+  const lb=(appState?.gameLeaderboards?.dinotrader||[]);
+
+  return(
+    <div style={{textAlign:"center"}}>
+      <div style={{fontSize:12,color:"#7a9bb5",marginBottom:12}}>
+        {done?"Game Over!":showing?`📊 Study the chart! ${timeLeft}s`:"Did it go UP or DOWN?"} · Score: {score} · Round {round+1}/{CHARTS.length}
+      </div>
+      <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+        <div style={{maxWidth:400}}>
+          {!done&&(
+            <div style={{background:"#0f1f3d",borderRadius:16,padding:20,marginBottom:16}}>
+              <div style={{fontSize:13,color:"#7a9bb5",marginBottom:10}}>{showing?chart.label:"What happened next?"}</div>
+              <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:120,background:"rgba(255,255,255,0.03)",borderRadius:10}}>
+                {showing?(
+                  <>
+                    <polyline points={points} fill="none" stroke="#15803d" strokeWidth="2.5" strokeLinejoin="round"/>
+                    <polygon points={`${x(0)},${H} ${points} ${x(chart.data.length-1)},${H}`} fill="rgba(21,128,61,0.15)"/>
+                    {chart.data.map((v,i)=><circle key={i} cx={x(i)} cy={y(v)} r={3} fill="#15803d"/>)}
+                  </>
+                ):(
+                  <text x={W/2} y={H/2+8} textAnchor="middle" fontSize="40" fill="rgba(255,255,255,0.1)">?</text>
+                )}
+              </svg>
+              {!showing&&!done&&(
+                <div style={{display:"flex",gap:12,marginTop:16,justifyContent:"center"}}>
+                  <button onClick={()=>answer("up")}
+                    style={{flex:1,padding:"14px",background:feedback==="correct"&&CHARTS[idx].answer==="up"?"#15803d":feedback==="wrong"&&CHARTS[idx].answer!=="up"?"#dc2626":"rgba(21,128,61,0.2)",
+                    color:"#fff",border:"2px solid #15803d",borderRadius:12,cursor:"pointer",fontSize:18,fontWeight:700}}>
+                    📈 UP
+                  </button>
+                  <button onClick={()=>answer("down")}
+                    style={{flex:1,padding:"14px",background:feedback==="correct"&&CHARTS[idx].answer==="down"?"#dc2626":feedback==="wrong"&&CHARTS[idx].answer!=="down"?"#dc2626":"rgba(220,38,38,0.2)",
+                    color:"#fff",border:"2px solid #dc2626",borderRadius:12,cursor:"pointer",fontSize:18,fontWeight:700}}>
+                    📉 DOWN
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {done&&(
+            <div style={{background:"#0f1f3d",borderRadius:16,padding:24,marginBottom:16,textAlign:"center"}}>
+              <div style={{fontSize:48,marginBottom:12}}>🏆</div>
+              <div style={{color:"#fff",fontSize:24,fontWeight:800,fontFamily:"'Space Grotesk',sans-serif",marginBottom:8}}>Score: {score}/{CHARTS.length*10}</div>
+              <button onClick={start} style={{padding:"10px 24px",background:"linear-gradient(135deg,#15803d,#0f1f3d)",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:700}}>Play Again</button>
+            </div>
+          )}
+        </div>
+        <div style={{background:"#f8fafc",borderRadius:14,padding:16,minWidth:180,maxHeight:360,overflowY:"auto",border:"1px solid #e2e8f0"}}>
+          <div style={{fontWeight:700,fontSize:14,color:"#0f1f3d",marginBottom:10,fontFamily:"'Space Grotesk',sans-serif"}}>🏆 Top 10</div>
+          <div style={{fontSize:11,color:"#7a9bb5",marginBottom:10}}>📚 F1.2 — Reading financial charts</div>
+          {lb.length===0?<div style={{color:"#94a3b8",fontSize:12}}>No scores yet!</div>:lb.map((e,i)=>(
+            <div key={e.username} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:"1px solid #f0f0f0"}}>
+              <div style={{fontWeight:700,fontSize:13,color:"#0f1f3d",width:24}}>#{i+1}</div>
+              <div style={{flex:1,fontSize:13,fontWeight:600,color:"#0f1f3d"}}>{e.name}</div>
+              <div style={{fontWeight:700,fontSize:13,color:"#7c3aed",fontFamily:"'Space Grotesk',sans-serif"}}>{e.score}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BudgetBlitzGame({ studentUser, appState, saveScore }) {
+  const NEEDS=[{e:"🏠",l:"Rent"},{e:"🍎",l:"Groceries"},{e:"💡",l:"Electricity"},{e:"💊",l:"Medicine"},{e:"🚌",l:"Bus pass"},{e:"🥛",l:"Milk"},{e:"🔌",l:"Internet"},{e:"🧻",l:"Supplies"}];
+  const WANTS=[{e:"🎮",l:"Video game"},{e:"👟",l:"New shoes"},{e:"🍕",l:"Pizza"},{e:"🎬",l:"Movies"},{e:"☕",l:"Coffee"},{e:"🧸",l:"Toy"},{e:"🍦",l:"Ice cream"},{e:"💎",l:"Jewelry"}];
+  const [items,setItems]=React.useState([]);
+  const [score,setScore]=React.useState(0);
+  const [lives,setLives]=React.useState(3);
+  const [playing,setPlaying]=React.useState(false);
+  const [done,setDone]=React.useState(false);
+  const scoreRef=React.useRef(0);
+  const livesRef=React.useRef(3);
+  const itemsRef=React.useRef([]);
+  const frameRef=React.useRef();
+
+  React.useEffect(()=>{
+    if(!playing)return;
+    let lastSpawn=0;
+    const tick=ts=>{
+      if(ts-lastSpawn>1200-Math.min(scoreRef.current*3,600)){
+        lastSpawn=ts;
+        const isNeed=Math.random()<0.5;
+        const pool=isNeed?NEEDS:WANTS;
+        const item=pool[Math.floor(Math.random()*pool.length)];
+        itemsRef.current=[...itemsRef.current,{id:Math.random(),x:Math.random()*80+10,y:-10,type:isNeed?"need":"want",...item,speed:1.5+Math.random()*1.5}];
+      }
+      itemsRef.current=itemsRef.current.map(i=>({...i,y:i.y+i.speed}));
+      const escaped=itemsRef.current.filter(i=>i.y>110);
+      escaped.forEach(i=>{
+        if(i.type==="need"){livesRef.current=Math.max(0,livesRef.current-1);setLives(livesRef.current);}
+      });
+      itemsRef.current=itemsRef.current.filter(i=>i.y<=110);
+      setItems([...itemsRef.current]);
+      if(livesRef.current<=0){setPlaying(false);setDone(true);if(saveScore)saveScore("budgetblitz",scoreRef.current);return;}
+      frameRef.current=requestAnimationFrame(tick);
+    };
+    frameRef.current=requestAnimationFrame(tick);
+    return()=>cancelAnimationFrame(frameRef.current);
+  },[playing]);
+
+  const click=id=>{
+    const item=itemsRef.current.find(i=>i.id===id);
+    if(!item)return;
+    if(item.type==="need"){scoreRef.current+=10;setScore(scoreRef.current);}
+    else{livesRef.current=Math.max(0,livesRef.current-1);setLives(livesRef.current);}
+    itemsRef.current=itemsRef.current.filter(i=>i.id!==id);
+    if(livesRef.current<=0){setPlaying(false);setDone(true);if(saveScore)saveScore("budgetblitz",scoreRef.current);}
+  };
+
+  const start=()=>{setDone(false);setScore(0);setLives(3);scoreRef.current=0;livesRef.current=3;itemsRef.current=[];setItems([]);setPlaying(true);};
+  const lb=(appState?.gameLeaderboards?.budgetblitz||[]);
+
+  return(
+    <div style={{textAlign:"center"}}>
+      <div style={{fontSize:12,color:"#7a9bb5",marginBottom:8}}>Click NEEDS ✅ · Avoid WANTS ❌ · Score: {score} | Lives: {"❤️".repeat(lives)}</div>
+      <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+        <div>
+          <div style={{position:"relative",width:400,height:320,background:"linear-gradient(180deg,#0f1f3d,#1e3a5f)",borderRadius:14,overflow:"hidden",border:"2px solid #15803d",margin:"0 auto"}}>
+            <div style={{position:"absolute",top:8,left:12,fontSize:12,color:"rgba(255,255,255,0.5)"}}>Click NEEDS only!</div>
+            {items.map(item=>(
+              <div key={item.id} onClick={()=>click(item.id)}
+                style={{position:"absolute",left:`${item.x}%`,top:`${item.y}%`,transform:"translateX(-50%)",cursor:"pointer",textAlign:"center",
+                  background:item.type==="need"?"rgba(21,128,61,0.3)":"rgba(220,38,38,0.3)",
+                  border:`2px solid ${item.type==="need"?"#15803d":"#dc2626"}`,borderRadius:10,padding:"4px 8px",minWidth:64}}>
+                <div style={{fontSize:24}}>{item.e}</div>
+                <div style={{fontSize:9,color:"#fff",fontWeight:700}}>{item.l}</div>
+              </div>
+            ))}
+          </div>
+          {!playing&&<button onClick={start} style={{marginTop:14,padding:"10px 28px",background:"linear-gradient(135deg,#d97706,#0f1f3d)",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:700,fontFamily:"'Space Grotesk',sans-serif"}}>{done?`Score: ${score} — Play Again`:"💰 Start Budget Blitz!"}</button>}
+        </div>
+        <div style={{background:"#f8fafc",borderRadius:14,padding:16,minWidth:180,maxHeight:360,overflowY:"auto",border:"1px solid #e2e8f0"}}>
+          <div style={{fontWeight:700,fontSize:14,color:"#0f1f3d",marginBottom:10,fontFamily:"'Space Grotesk',sans-serif"}}>🏆 Top 10</div>
+          <div style={{fontSize:11,color:"#7a9bb5",marginBottom:10}}>📚 F1.5 — Budgeting strategies</div>
+          {lb.length===0?<div style={{color:"#94a3b8",fontSize:12}}>No scores yet!</div>:lb.map((e,i)=>(
+            <div key={e.username} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:"1px solid #f0f0f0"}}>
+              <div style={{fontWeight:700,fontSize:13,color:"#0f1f3d",width:24}}>#{i+1}</div>
+              <div style={{flex:1,fontSize:13,fontWeight:600,color:"#0f1f3d"}}>{e.name}</div>
+              <div style={{fontWeight:700,fontSize:13,color:"#d97706",fontFamily:"'Space Grotesk',sans-serif"}}>{e.score}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProEggDropGame({ studentUser, appState, saveScore }) {
+  const [playing,setPlaying]=React.useState(false);
+  const [basketX,setBasketX]=React.useState(200);
+  const [eggs,setEggs]=React.useState([]);
+  const [score,setScore]=React.useState(0);
+  const [missed,setMissed]=React.useState(0);
+  const [done,setDone]=React.useState(false);
+  const frameRef=React.useRef();
+  const eggsRef=React.useRef([]);
+  const scoreRef=React.useRef(0);
+  const missedRef=React.useRef(0);
+  const basketRef=React.useRef(200);
+  const TYPES=[{e:"🥇",v:15,label:"High Risk"},{e:"🥈",v:8,label:"Med Risk"},{e:"🥚",v:3,label:"Low Risk"},{e:"💣",v:-10,label:"BOMB!"}];
+
+  React.useEffect(()=>{
+    const move=e=>{const rect=document.getElementById("probowl")?.getBoundingClientRect();if(rect){const nx=Math.max(50,Math.min(rect.width-50,e.clientX-rect.left));basketRef.current=nx;setBasketX(nx);}};
+    const touch=e=>{const rect=document.getElementById("probowl")?.getBoundingClientRect();if(rect&&e.touches[0]){const nx=Math.max(50,Math.min(rect.width-50,e.touches[0].clientX-rect.left));basketRef.current=nx;setBasketX(nx);}};
+    window.addEventListener("mousemove",move);window.addEventListener("touchmove",touch);
+    return()=>{window.removeEventListener("mousemove",move);window.removeEventListener("touchmove",touch);};
+  },[]);
+
+  React.useEffect(()=>{
+    if(!playing)return;
+    let last=0;
+    const tick=ts=>{
+      if(ts-last>700-Math.min(scoreRef.current*3,400)){
+        last=ts;
+        const t=TYPES[Math.random()<0.15?3:Math.floor(Math.random()*3)];
+        eggsRef.current=[...eggsRef.current,{id:Math.random(),x:Math.random()*340+30,y:0,...t,speed:2+Math.random()*2}];
+      }
+      eggsRef.current=eggsRef.current.map(e=>({...e,y:e.y+e.speed+scoreRef.current*0.008}));
+      const caught=eggsRef.current.filter(e=>e.y>230&&e.y<270&&Math.abs(e.x-basketRef.current)<55);
+      const fell=eggsRef.current.filter(e=>e.y>310&&Math.abs(e.x-basketRef.current)>=55);
+      caught.forEach(e=>{scoreRef.current=Math.max(0,scoreRef.current+e.v);setScore(scoreRef.current);});
+      if(fell.length){missedRef.current+=fell.length;setMissed(missedRef.current);}
+      eggsRef.current=eggsRef.current.filter(e=>e.y<=310);
+      setEggs([...eggsRef.current]);
+      if(missedRef.current>=5){setPlaying(false);setDone(true);if(saveScore)saveScore("eggdrop",scoreRef.current);return;}
+      frameRef.current=requestAnimationFrame(tick);
+    };
+    frameRef.current=requestAnimationFrame(tick);
+    return()=>cancelAnimationFrame(frameRef.current);
+  },[playing]);
+
+  const start=()=>{setDone(false);setScore(0);setMissed(0);scoreRef.current=0;missedRef.current=0;eggsRef.current=[];setEggs([]);setPlaying(true);};
+  const lb=(appState?.gameLeaderboards?.eggdrop||[]);
+
+  return(
+    <div style={{textAlign:"center"}}>
+      <div style={{fontSize:12,color:"#7a9bb5",marginBottom:8}}>Move mouse to catch! 🥇+15 🥈+8 🥚+3 💣-10 · Caught: {score} | Missed: {missed}/5</div>
+      <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
+        <div>
+          <div id="probowl" style={{position:"relative",width:400,height:300,background:"linear-gradient(180deg,#0a0a2e,#0f1f3d,#1a472a)",borderRadius:16,overflow:"hidden",margin:"0 auto",border:"2px solid #15803d",cursor:"none"}}>
+            <div style={{position:"absolute",top:8,right:12,fontSize:12,color:"rgba(255,255,255,0.5)"}}>Score: {score}</div>
+            {eggs.map(e=>(
+              <div key={e.id} style={{position:"absolute",left:e.x,top:e.y,transform:"translateX(-50%)",textAlign:"center"}}>
+                <div style={{fontSize:22}}>{e.e}</div>
+                <div style={{fontSize:8,color:"rgba(255,255,255,0.6)",fontWeight:700}}>{e.label}</div>
+              </div>
+            ))}
+            <div style={{position:"absolute",bottom:42,left:basketRef.current,transform:"translateX(-50%)",fontSize:40}}>🧺</div>
+          </div>
+          {!playing&&<button onClick={start} style={{marginTop:14,padding:"10px 28px",background:"linear-gradient(135deg,#d97706,#15803d)",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:700,fontFamily:"'Space Grotesk',sans-serif"}}>{done?`Score: ${score} — Play Again`:"🥚 Start Egg Drop!"}</button>}
+        </div>
+        <div style={{background:"#f8fafc",borderRadius:14,padding:16,minWidth:180,maxHeight:360,overflowY:"auto",border:"1px solid #e2e8f0"}}>
+          <div style={{fontWeight:700,fontSize:14,color:"#0f1f3d",marginBottom:10,fontFamily:"'Space Grotesk',sans-serif"}}>🏆 Top 10</div>
+          <div style={{fontSize:11,color:"#7a9bb5",marginBottom:10}}>📚 F1.7 — Risk vs reward decisions</div>
+          {lb.length===0?<div style={{color:"#94a3b8",fontSize:12}}>No scores yet!</div>:lb.map((e,i)=>(
+            <div key={e.username} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:"1px solid #f0f0f0"}}>
+              <div style={{fontWeight:700,fontSize:13,color:"#0f1f3d",width:24}}>#{i+1}</div>
+              <div style={{flex:1,fontSize:13,fontWeight:600,color:"#0f1f3d"}}>{e.name}</div>
+              <div style={{fontWeight:700,fontSize:13,color:"#d97706",fontFamily:"'Space Grotesk',sans-serif"}}>{e.score}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Classroom App ─────────────────────────────────────────────────────────────
 function ClassroomApp({ user, auth, classroom }) {
+  const [activeProGame, setActiveProGame] = React.useState(null);
   const [parentMessage, setParentMessage] = React.useState("");
   const [parentMessageStudent, setParentMessageStudent] = React.useState("all");
   const [parentSubject, setParentSubject] = React.useState("");
@@ -1272,6 +1824,7 @@ function ClassroomApp({ user, auth, classroom }) {
     { id:"parents",     label:"👨‍👩‍👧 Parents" },
     { id:"curriculum",  label:"🎓 Curriculum" },
     { id:"invest",      label:"📈 Invest" },
+    { id:"games",       label:"🎮 Games" },
     { id:"history",     label:"📋 History" },
   ];
 
@@ -1988,6 +2541,82 @@ function ClassroomApp({ user, auth, classroom }) {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+                {/* ═══ GAMES ═══ */}
+        {tab==="games" && (
+          <div style={{ maxWidth:1000, margin:"0 auto" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
+              <div>
+                <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", margin:"0 0 4px", fontFamily:"'Space Grotesk',sans-serif" }}>🎮 Game Zone</h2>
+                <p style={{ fontSize:13, color:"#7a9bb5", margin:0 }}>5 curriculum-aligned games. Each teaches a different financial literacy expectation.</p>
+              </div>
+            </div>
+
+            {/* Game leaderboard summary */}
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))", gap:12, marginBottom:24 }}>
+              {[
+                { id:"marketcrash", name:"Market Crash", emoji:"☄️", color:"#dc2626", curriculum:"F1.4" },
+                { id:"bullrun",     name:"Bull Run",     emoji:"🐂", color:"#15803d", curriculum:"F1.2" },
+                { id:"dinotrader", name:"Dino Trader",  emoji:"📊", color:"#7c3aed", curriculum:"F1.2" },
+                { id:"budgetblitz", name:"Budget Blitz", emoji:"💰", color:"#d97706", curriculum:"F1.5" },
+                { id:"eggdrop",     name:"Egg Drop",     emoji:"🥚", color:"#0f1f3d", curriculum:"F1.7" },
+              ].map(game => {
+                const lb = appState?.gameLeaderboards?.[game.id] || [];
+                const leader = lb[0];
+                return (
+                  <div key={game.id} style={{ background:"#fff", borderRadius:14, padding:16, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+                    <div style={{ fontSize:32, marginBottom:8 }}>{game.emoji}</div>
+                    <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d", marginBottom:2, fontFamily:"'Space Grotesk',sans-serif" }}>{game.name}</div>
+                    <div style={{ fontSize:11, color:"#7a9bb5", marginBottom:8 }}>📚 Ontario {game.curriculum}</div>
+                    {leader ? (
+                      <div style={{ fontSize:11, color:"#15803d", fontWeight:600 }}>🥇 {leader.name}: {leader.score}</div>
+                    ) : (
+                      <div style={{ fontSize:11, color:"#94a3b8" }}>No scores yet</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Active game */}
+            {activeProGame ? (
+              <div style={{ background:"#fff", borderRadius:16, padding:24, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.04)" }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+                  <div style={{ fontWeight:700, fontSize:18, color:"#0f1f3d", fontFamily:"'Space Grotesk',sans-serif" }}>
+                    {activeProGame==="marketcrash"?"☄️ Market Crash":activeProGame==="bullrun"?"🐂 Bull Run":activeProGame==="dinotrader"?"📊 Dino Trader":activeProGame==="budgetblitz"?"💰 Budget Blitz":"🥚 Egg Drop"}
+                  </div>
+                  <button onClick={() => setActiveProGame(null)} style={{ padding:"8px 18px", background:"#f1f5f9", color:"#64748b", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600 }}>← Back to Games</button>
+                </div>
+                <ProGameArea game={activeProGame} studentUser={null} appState={appState} saveScore={(gameId, score) => {
+                  update(prev => {
+                    const lb = prev.gameLeaderboards?.[gameId] || [];
+                    return { ...prev, gameLeaderboards: { ...(prev.gameLeaderboards||{}), [gameId]: lb } };
+                  });
+                }}/>
+              </div>
+            ) : (
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:16 }}>
+                {[
+                  { id:"marketcrash", name:"Market Crash",  emoji:"☄️", desc:"Shoot bad news before it crashes your stocks!", color:"#dc2626", bg:"linear-gradient(135deg,#0f1f3d,#dc2626)" },
+                  { id:"bullrun",     name:"Bull Run",       emoji:"🐂", desc:"Eat green candles, avoid red ones in the market!", color:"#15803d", bg:"linear-gradient(135deg,#0f1f3d,#15803d)" },
+                  { id:"dinotrader", name:"Dino Trader",    emoji:"📊", desc:"Study the chart — did the stock go up or down?", color:"#7c3aed", bg:"linear-gradient(135deg,#0f1f3d,#7c3aed)" },
+                  { id:"budgetblitz", name:"Budget Blitz",   emoji:"💰", desc:"Click needs, ignore wants — budget fast!", color:"#d97706", bg:"linear-gradient(135deg,#0f1f3d,#d97706)" },
+                  { id:"eggdrop",     name:"Egg Drop",       emoji:"🥚", desc:"Catch high-risk gold or safe eggs — your choice!", color:"#64748b", bg:"linear-gradient(135deg,#0f1f3d,#64748b)" },
+                ].map(game => (
+                  <div key={game.id} onClick={() => setActiveProGame(game.id)}
+                    style={{ background:game.bg, borderRadius:20, padding:24, textAlign:"center", cursor:"pointer",
+                      boxShadow:`0 8px 24px ${game.color}44`, border:`2px solid ${game.color}66`, transition:"transform 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.transform="scale(1.04)"}
+                    onMouseLeave={e => e.currentTarget.style.transform="scale(1)"}>
+                    <div style={{ fontSize:48, marginBottom:10, filter:`drop-shadow(0 0 12px ${game.color})` }}>{game.emoji}</div>
+                    <div style={{ fontFamily:"'Space Grotesk',sans-serif", fontSize:17, color:"#fff", marginBottom:6, fontWeight:700 }}>{game.name}</div>
+                    <div style={{ fontFamily:"'Inter',sans-serif", fontSize:12, color:"rgba(255,255,255,0.7)" }}>{game.desc}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
