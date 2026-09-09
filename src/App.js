@@ -62,10 +62,11 @@ function LandingPage({ setScreen, pricingCAD, setPricingCAD }) {
           <span style={{ fontSize:32 }}>🦕</span>
           <span style={{ fontSize:22, fontWeight:700, letterSpacing:1 }}>EconoClassroom</span>
         </div>
-        <div style={{ display:"flex", gap:12 }}>
+        <div style={{ display:"flex", gap:12, alignItems:"center" }}>
           <button onClick={() => setScreen("studentlogin")} style={{ padding:"10px 24px", background:"transparent", color:"#a8d8b5", border:"2px solid rgba(168,216,181,0.4)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>🦕 Student Login</button>
-          <button onClick={() => setScreen("login")} style={{ padding:"10px 24px", background:"transparent", color:"#fff", border:"2px solid rgba(255,255,255,0.3)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Log In</button>
-          <button onClick={() => setScreen("register")} style={{ padding:"10px 24px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Get Started Free</button>
+          <a href="#pricing" style={{ padding:"10px 24px", background:"transparent", color:"rgba(255,255,255,0.7)", border:"none", cursor:"pointer", fontSize:15, fontWeight:600, textDecoration:"none" }}>Pricing</a>
+          <button onClick={() => setScreen("login")} style={{ padding:"10px 24px", background:"transparent", color:"#fff", border:"2px solid rgba(255,255,255,0.3)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Teacher Login</button>
+          <button onClick={() => setScreen("register")} style={{ padding:"10px 24px", background:"#22c55e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Get Started Free</button>
         </div>
       </nav>
 
