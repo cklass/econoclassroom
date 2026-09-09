@@ -2295,6 +2295,137 @@ function ClassroomApp({ user, auth, classroom }) {
               </div>
             </div>
 
+                        {/* Cash-Out Sheet */}
+            <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16 }}>
+                <div>
+                  <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:4 }}>🖨️ Print Cash-Out Sheet</div>
+                  <div style={{ fontSize:13, color:"#7a9bb5" }}>Shows exact bills needed for each student. Print every Friday for physical currency distribution.</div>
+                </div>
+                <button onClick={() => {
+                  const BILLS = [100,50,20,10,5,2,1];
+                  const makeChange = (amount) => {
+                    let remaining = Math.round(amount);
+                    const result = {};
+                    BILLS.forEach(bill => {
+                      if (remaining >= bill) {
+                        result[bill] = Math.floor(remaining / bill);
+                        remaining = remaining % bill;
+                      }
+                    });
+                    return result;
+                  };
+
+                  // Calculate balances from txLog
+                  const calcBalance = (studentId) => {
+                    return (appState?.txLog||[])
+                      .filter(t => t.studentId === studentId)
+                      .reduce((sum, t) => sum + t.amount, 0);
+                  };
+
+                  const win = window.open("","_blank");
+                  win.document.write(`
+                    <html>
+                    <head>
+                      <title>${appState.name} — Cash-Out Sheet</title>
+                      <style>
+                        * { box-sizing: border-box; margin: 0; padding: 0; }
+                        body { font-family: 'Segoe UI', sans-serif; padding: 24px; color: #0f1f3d; }
+                        h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+                        .subtitle { font-size: 13px; color: #7a9bb5; margin-bottom: 24px; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th { background: #0f1f3d; color: #fff; padding: 10px 12px; text-align: left; font-size: 12px; letter-spacing: 0.5px; }
+                        td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+                        tr:nth-child(even) td { background: #f0fdf4; }
+                        .balance { font-weight: 800; color: #15803d; font-size: 15px; }
+                        .bills { font-size: 11px; color: #4a6580; }
+                        .emoji { font-size: 18px; }
+                        .total-row td { background: #0f1f3d !important; color: #fff; font-weight: 800; }
+                        @media print { button { display: none; } }
+                        .print-btn { margin-bottom: 16px; padding: 10px 20px; background: #15803d; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+                        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+                        .logo { font-size: 28px; }
+                        .date { font-size: 12px; color: #7a9bb5; text-align: right; }
+                      </style>
+                    </head>
+                    <body>
+                      <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+                      <div class="header">
+                        <div>
+                          <div class="logo">🦕 EconoClassroom</div>
+                          <h1>${appState.name}</h1>
+                          <div class="subtitle">Cash-Out Sheet · ${new Date().toLocaleDateString("en-CA",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
+                        </div>
+                        <div class="date">
+                          <div style="font-size:11px;color:#7a9bb5">Currency: ${appState.currencyEmoji} ${appState.currency||"Dino Bucks"}</div>
+                          <div style="font-size:11px;color:#7a9bb5;margin-top:4px">Grade ${appState.grade} · ${appState.province}</div>
+                        </div>
+                      </div>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Student</th>
+                            <th>Balance</th>
+                            <th>$100</th>
+                            <th>$50</th>
+                            <th>$20</th>
+                            <th>$10</th>
+                            <th>$5</th>
+                            <th>$2</th>
+                            <th>$1</th>
+                            <th>✓</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${students.sort((a,b) => a.name.localeCompare(b.name)).map((s,i) => {
+                            const bal = calcBalance(s.id);
+                            const change = makeChange(Math.max(0,bal));
+                            return `
+                              <tr>
+                                <td>${i+1}</td>
+                                <td><strong>${s.name}</strong></td>
+                                <td class="balance">${appState.currencyEmoji}${Math.max(0,bal)}</td>
+                                <td>${change[100]||""}</td>
+                                <td>${change[50]||""}</td>
+                                <td>${change[20]||""}</td>
+                                <td>${change[10]||""}</td>
+                                <td>${change[5]||""}</td>
+                                <td>${change[2]||""}</td>
+                                <td>${change[1]||""}</td>
+                                <td style="border:1px solid #e2e8f0;min-width:28px"></td>
+                              </tr>
+                            `;
+                          }).join("")}
+                          <tr class="total-row">
+                            <td colspan="2">TOTAL NEEDED</td>
+                            <td>${appState.currencyEmoji}${Math.max(0,students.reduce((sum,s)=>sum+calcBalance(s.id),0))}</td>
+                            ${[100,50,20,10,5,2,1].map(bill => {
+                              const total = students.reduce((sum,s) => {
+                                const bal = Math.max(0,calcBalance(s.id));
+                                return sum + (makeChange(bal)[bill]||0);
+                              },0);
+                              return `<td>${total||""}</td>`;
+                            }).join("")}
+                            <td></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div style="margin-top:20px;font-size:11px;color:#7a9bb5;text-align:center">Generated by EconoClassroom · econoclassroom.ca</div>
+                    </body>
+                    </html>
+                  `);
+                  win.document.close();
+                }} style={{
+                  padding:"14px 28px", border:"none", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700,
+                  background:"linear-gradient(135deg,#0f1f3d,#15803d)", color:"#fff",
+                  boxShadow:"0 4px 12px rgba(15,31,61,0.3)", fontFamily:"'Space Grotesk',sans-serif"
+                }}>
+                  🖨️ Print Cash-Out Sheet
+                </button>
+              </div>
+            </div>
+
             {/* Weekly Expenses */}
             <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
               <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:16 }}>📋 Weekly Expenses</div>
