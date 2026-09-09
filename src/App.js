@@ -20,6 +20,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [screen, setScreen] = useState("landing"); // landing, login, register, dashboard
+  const [pricingCAD, setPricingCAD] = useState(true);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -48,11 +49,11 @@ export default function App() {
   if (screen === "register") return <RegisterScreen auth={auth} setScreen={setScreen}/>;
   if (screen === "studentlogin") return <StudentLoginScreen setScreen={setScreen}/>;
   if (screen.startsWith("parent-")) return <ParentPortal code={screen.replace("parent-","")} setScreen={setScreen}/>;
-  return <LandingPage setScreen={setScreen}/>;
+  return <LandingPage setScreen={setScreen} pricingCAD={pricingCAD} setPricingCAD={setPricingCAD}/>;
 }
 
 // ── Landing Page ──────────────────────────────────────────────────────────────
-function LandingPage({ setScreen }) {
+function LandingPage({ setScreen, pricingCAD, setPricingCAD }) {
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f1f3d 0%,#1e3a5f 50%,#0f2a1a 100%)", fontFamily:"'Inter',sans-serif", color:"#fff" }}>
       {/* Nav */}
@@ -105,6 +106,148 @@ function LandingPage({ setScreen }) {
             <div style={{ fontSize:14, color:"rgba(255,255,255,0.6)", lineHeight:1.6 }}>{f.desc}</div>
           </div>
         ))}
+      </div>
+
+            {/* Pricing */}
+      <div id="pricing" style={{ padding:"60px 40px", maxWidth:1100, margin:"0 auto" }}>
+        <div style={{ textAlign:"center", marginBottom:48 }}>
+          <div style={{ display:"inline-block", background:"rgba(21,128,61,0.15)", border:"1px solid rgba(21,128,61,0.3)", borderRadius:20, padding:"6px 16px", fontSize:13, color:"#22c55e", marginBottom:16, letterSpacing:1 }}>
+            💰 SIMPLE, TRANSPARENT PRICING
+          </div>
+          <h2 style={{ fontSize:"clamp(2rem,4vw,3rem)", fontWeight:800, color:"#fff", margin:"0 0 16px", fontFamily:"'Space Grotesk',sans-serif" }}>
+            Start Free. Upgrade When Ready.
+          </h2>
+          <p style={{ fontSize:16, color:"rgba(255,255,255,0.6)", maxWidth:500, margin:"0 auto" }}>
+            No credit card required. No surprise charges. Cancel anytime.
+          </p>
+          {/* Currency toggle */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:12, marginTop:24 }}>
+            <span style={{ fontSize:14, color:"rgba(255,255,255,0.6)" }}>🇺🇸 USD</span>
+            <div onClick={() => setPricingCAD(p=>!p)}
+              style={{ width:52, height:28, borderRadius:14, background:pricingCAD?"#22c55e":"rgba(255,255,255,0.2)", cursor:"pointer", position:"relative", transition:"background 0.2s" }}>
+              <div style={{ position:"absolute", top:4, left:pricingCAD?28:4, width:20, height:20, borderRadius:"50%", background:"#fff", transition:"left 0.2s" }}/>
+            </div>
+            <span style={{ fontSize:14, color:pricingCAD?"#22c55e":"rgba(255,255,255,0.6)", fontWeight:pricingCAD?700:400 }}>🇨🇦 CAD</span>
+          </div>
+        </div>
+
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:24 }}>
+          {/* Free */}
+          <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:20, padding:32 }}>
+            <div style={{ fontSize:14, fontWeight:700, color:"rgba(255,255,255,0.5)", letterSpacing:1, marginBottom:12 }}>FREE FOREVER</div>
+            <div style={{ fontSize:48, fontWeight:800, color:"#fff", fontFamily:"'Space Grotesk',sans-serif", marginBottom:4 }}>$0</div>
+            <div style={{ fontSize:13, color:"rgba(255,255,255,0.4)", marginBottom:24 }}>No credit card required</div>
+            <div style={{ borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:20, marginBottom:24 }}>
+              {[
+                "✅ 1 classroom",
+                "✅ Up to 30 students",
+                "✅ Student portal with class code",
+                "✅ Pay, Jobs & Store",
+                "✅ Parent portal",
+                "✅ Transaction history",
+                "❌ Stock market investing",
+                "❌ Educational games",
+                "❌ Parent messaging",
+                "❌ Curriculum alignment doc",
+                "❌ Monthly newsletter",
+                "❌ Printable cash-out sheet",
+              ].map(f => (
+                <div key={f} style={{ fontSize:13, color:f.startsWith("✅")?"rgba(255,255,255,0.8)":"rgba(255,255,255,0.3)", padding:"6px 0", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>{f}</div>
+              ))}
+            </div>
+            <button onClick={() => setScreen("register")}
+              style={{ width:"100%", padding:"13px", background:"rgba(255,255,255,0.1)", color:"#fff", border:"1px solid rgba(255,255,255,0.2)", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:600 }}>
+              Get Started Free →
+            </button>
+          </div>
+
+          {/* Pro */}
+          <div style={{ background:"linear-gradient(135deg,rgba(21,128,61,0.3),rgba(15,31,61,0.5))", border:"2px solid #22c55e", borderRadius:20, padding:32, position:"relative" }}>
+            <div style={{ position:"absolute", top:-14, left:"50%", transform:"translateX(-50%)", background:"#22c55e", color:"#fff", fontSize:12, fontWeight:700, padding:"4px 16px", borderRadius:20, letterSpacing:1 }}>
+              ⭐ MOST POPULAR
+            </div>
+            <div style={{ fontSize:14, fontWeight:700, color:"#22c55e", letterSpacing:1, marginBottom:12 }}>PRO</div>
+            <div style={{ display:"flex", alignItems:"baseline", gap:8, marginBottom:4 }}>
+              <div style={{ fontSize:48, fontWeight:800, color:"#fff", fontFamily:"'Space Grotesk',sans-serif" }}>
+                {pricingCAD?"$6.99":"$5.99"}
+              </div>
+              <div style={{ fontSize:14, color:"rgba(255,255,255,0.5)" }}>{pricingCAD?"CAD":"USD"}/month</div>
+            </div>
+            <div style={{ fontSize:13, color:"#22c55e", marginBottom:24 }}>
+              or {pricingCAD?"$59 CAD":"$49 USD"}/year — save 30%!
+            </div>
+            <div style={{ borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:20, marginBottom:24 }}>
+              {[
+                "✅ Everything in Free",
+                "✅ Unlimited classrooms",
+                "✅ Real TSX stock market",
+                "✅ 5 curriculum-aligned games",
+                "✅ Parent messaging & portal",
+                "✅ Ontario curriculum alignment",
+                "✅ Monthly Dino Newsletter",
+                "✅ Printable cash-out sheet",
+                "✅ Daily Dino Events",
+                "✅ Priority email support",
+                "✅ New features first",
+              ].map(f => (
+                <div key={f} style={{ fontSize:13, color:"rgba(255,255,255,0.85)", padding:"6px 0", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>{f}</div>
+              ))}
+            </div>
+            <button onClick={() => setScreen("register")}
+              style={{ width:"100%", padding:"13px", background:"linear-gradient(135deg,#22c55e,#15803d)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700, boxShadow:"0 4px 16px rgba(34,197,94,0.4)" }}>
+              Start Free Trial →
+            </button>
+          </div>
+
+          {/* School */}
+          <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:20, padding:32 }}>
+            <div style={{ fontSize:14, fontWeight:700, color:"rgba(255,255,255,0.5)", letterSpacing:1, marginBottom:12 }}>SCHOOL LICENSE</div>
+            <div style={{ display:"flex", alignItems:"baseline", gap:8, marginBottom:4 }}>
+              <div style={{ fontSize:48, fontWeight:800, color:"#fff", fontFamily:"'Space Grotesk',sans-serif" }}>
+                {pricingCAD?"$199":"$159"}
+              </div>
+              <div style={{ fontSize:14, color:"rgba(255,255,255,0.5)" }}>{pricingCAD?"CAD":"USD"}/year</div>
+            </div>
+            <div style={{ fontSize:13, color:"rgba(255,255,255,0.4)", marginBottom:24 }}>Per school · Unlimited teachers</div>
+            <div style={{ borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:20, marginBottom:24 }}>
+              {[
+                "✅ Everything in Pro",
+                "✅ Unlimited teachers",
+                "✅ All grades supported",
+                "✅ Admin dashboard",
+                "✅ School-wide leaderboards",
+                "✅ Custom currency branding",
+                "✅ Curriculum docs for all grades",
+                "✅ 1 PD session included",
+                "✅ Dedicated support",
+                "✅ Early access to new features",
+                "✅ Invoice available for boards",
+              ].map(f => (
+                <div key={f} style={{ fontSize:13, color:"rgba(255,255,255,0.85)", padding:"6px 0", borderBottom:"1px solid rgba(255,255,255,0.05)" }}>{f}</div>
+              ))}
+            </div>
+            <button style={{ width:"100%", padding:"13px", background:"rgba(255,255,255,0.1)", color:"#fff", border:"1px solid rgba(255,255,255,0.2)", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:600 }}>
+              Contact Us →
+            </button>
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div style={{ marginTop:48, display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:20 }}>
+          {[
+            { q:"Do I need a credit card to start?", a:"No! The free plan never requires a credit card. Upgrade anytime when you're ready." },
+            { q:"Can I switch plans?", a:"Yes — upgrade or downgrade anytime. If you downgrade, you keep Pro features until your billing period ends." },
+            { q:"Is student data safe?", a:"Yes. We use Firebase Authentication and encrypted connections. We never sell or share student data." },
+            { q:"What curriculum is covered?", a:"Currently Ontario Grade 6 Math (Strand F: Financial Literacy). More provinces and grades coming soon!" },
+            { q:"Can I get a school board invoice?", a:"Yes! School license purchases include a formal invoice suitable for board reimbursement." },
+            { q:"Is there a student limit?", a:"Free: 30 students. Pro and School: unlimited students per classroom." },
+          ].map(faq => (
+            <div key={faq.q} style={{ background:"rgba(255,255,255,0.05)", borderRadius:14, padding:20, border:"1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ fontSize:14, fontWeight:700, color:"#fff", marginBottom:8 }}>❓ {faq.q}</div>
+              <div style={{ fontSize:13, color:"rgba(255,255,255,0.6)", lineHeight:1.6 }}>{faq.a}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Footer */}
