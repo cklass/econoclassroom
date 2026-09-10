@@ -731,7 +731,33 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
   }, [studentUser.teacherId]);
   React.useEffect(() => {
     if (isBirthdayToday(studentUser)) {
-      setTimeout(() => setShowBirthday(true), 1500);
+      setTimeout(() => {
+        setShowBirthday(true);
+        // Play Happy Birthday melody
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const notes = [
+            [261,0.3],[261,0.3],[294,0.6],[261,0.6],[349,0.6],[330,1.2],
+            [261,0.3],[261,0.3],[294,0.6],[261,0.6],[392,0.6],[349,1.2],
+            [261,0.3],[261,0.3],[523,0.6],[440,0.6],[349,0.6],[330,0.6],[294,1.2],
+            [466,0.3],[466,0.3],[440,0.6],[349,0.6],[392,0.6],[349,1.2],
+          ];
+          let time = ctx.currentTime + 0.1;
+          notes.forEach(([freq, dur]) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = freq;
+            osc.type = "sine";
+            gain.gain.setValueAtTime(0.3, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + dur - 0.05);
+            osc.start(time);
+            osc.stop(time + dur);
+            time += dur;
+          });
+        } catch(e) { console.log("Audio not supported"); }
+      }, 1500);
     }
   }, []);
 
