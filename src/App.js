@@ -734,28 +734,75 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
       setTimeout(() => {
         setShowBirthday(true);
         // Play Happy Birthday melody
-        try {
+                try {
           const ctx = new (window.AudioContext || window.webkitAudioContext)();
-          const notes = [
-            [261,0.3],[261,0.3],[294,0.6],[261,0.6],[349,0.6],[330,1.2],
-            [261,0.3],[261,0.3],[294,0.6],[261,0.6],[392,0.6],[349,1.2],
-            [261,0.3],[261,0.3],[523,0.6],[440,0.6],[349,0.6],[330,0.6],[294,1.2],
-            [466,0.3],[466,0.3],[440,0.6],[349,0.6],[392,0.6],[349,1.2],
-          ];
-          let time = ctx.currentTime + 0.1;
-          notes.forEach(([freq, dur]) => {
+          const playNote = (freq, start, dur, type="sine", vol=0.4) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
+            // Add slight distortion for richness
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc2.connect(gain2); gain2.connect(ctx.destination);
             osc.frequency.value = freq;
-            osc.type = "sine";
-            gain.gain.setValueAtTime(0.3, time);
-            gain.gain.exponentialRampToValueAtTime(0.001, time + dur - 0.05);
-            osc.start(time);
-            osc.stop(time + dur);
-            time += dur;
+            osc2.frequency.value = freq * 2; // octave harmony
+            osc.type = type;
+            osc2.type = "triangle";
+            gain.gain.setValueAtTime(0, start);
+            gain.gain.linearRampToValueAtTime(vol, start + 0.02);
+            gain.gain.setValueAtTime(vol, start + dur - 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+            gain2.gain.setValueAtTime(0, start);
+            gain2.gain.linearRampToValueAtTime(vol * 0.3, start + 0.02);
+            gain2.gain.exponentialRampToValueAtTime(0.001, start + dur);
+            osc.start(start); osc.stop(start + dur);
+            osc2.start(start); osc2.stop(start + dur);
+          };
+
+          // Percussion kick
+          const kick = (start) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.setValueAtTime(150, start);
+            osc.frequency.exponentialRampToValueAtTime(0.001, start + 0.3);
+            gain.gain.setValueAtTime(1, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
+            osc.start(start); osc.stop(start + 0.3);
+          };
+
+          const t = ctx.currentTime + 0.1;
+          const tempo = 0.28; // faster tempo
+
+          // Happy Birthday melody with harmonies
+          const melody = [
+            [261,1],[261,1],[294,2],[261,2],[349,2],[330,4],
+            [261,1],[261,1],[294,2],[261,2],[392,2],[349,4],
+            [261,1],[261,1],[523,2],[440,2],[349,2],[330,2],[294,4],
+            [466,1],[466,1],[440,2],[349,2],[392,2],[349,4],
+          ];
+
+          // Bass line
+          const bass = [130,130,147,130,174,165,130,130,147,130,196,174,130,130,261,220,174,165,147,233,233,220,174,196,174];
+
+          let time = t;
+          melody.forEach(([freq, beats], i) => {
+            playNote(freq, time, beats * tempo - 0.02, "square", 0.35);
+            if (bass[i]) playNote(bass[i], time, beats * tempo - 0.02, "sine", 0.2);
+            if (i % 4 === 0) kick(time);
+            time += beats * tempo;
           });
+
+          // Finish with a fanfare!
+          const fanfare = [392,440,494,523];
+          fanfare.forEach((freq, i) => {
+            playNote(freq, time + i * 0.12, 0.15, "square", 0.5);
+            playNote(freq * 1.5, time + i * 0.12, 0.15, "triangle", 0.3);
+          });
+          playNote(523, time + 0.5, 0.8, "square", 0.6);
+          playNote(659, time + 0.5, 0.8, "triangle", 0.4);
+          playNote(784, time + 0.5, 0.8, "sine", 0.3);
+
         } catch(e) { console.log("Audio not supported"); }
       }, 1500);
     }
