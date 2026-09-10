@@ -720,6 +720,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
     .reduce((sum, t) => sum + t.amount, 0);
   const myTx = (appState?.txLog||[]).filter(t => t.studentId === studentUser.id);
   const dino = DINO_OPTIONS.find(d => d.id === studentUser.dinoId) || DINO_OPTIONS[0];
+  const [showBirthday, setShowBirthday] = React.useState(false);
 
   // Subscribe to live updates
   React.useEffect(() => {
@@ -728,6 +729,11 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
     });
     return unsub;
   }, [studentUser.teacherId]);
+  React.useEffect(() => {
+    if (isBirthdayToday(studentUser)) {
+      setTimeout(() => setShowBirthday(true), 1500);
+    }
+  }, []);
 
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#0f1f3d 0%,#1e3a5f 50%,#0f2a1a 100%)", fontFamily:"'Inter',sans-serif", padding:20 }}>
@@ -949,6 +955,48 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
             </div>
           ))
         )}
+              {/* 🎂 Birthday Celebration Modal */}
+      {showBirthday && (
+        <div style={{ position:"fixed", inset:0, zIndex:9999, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column",
+          background:"linear-gradient(135deg,#0f1f3d,#15803d,#0f1f3d)" }}>
+          <style>{`
+            @keyframes confetti { 0%{transform:translateY(-100px) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+            @keyframes bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+            @keyframes sparkle { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+          `}</style>
+          {/* Confetti */}
+          {Array.from({length:40}).map((_,i) => (
+            <div key={i} style={{
+              position:"fixed",
+              left:`${Math.random()*100}%`,
+              top:"-20px",
+              width:10, height:10,
+              background:["#15803d","#f59e0b","#dc2626","#7c3aed","#fff","#22c55e"][i%6],
+              borderRadius:i%3===0?"50%":"2px",
+              animation:`confetti ${2+Math.random()*3}s ${Math.random()*2}s linear forwards`,
+              zIndex:9999
+            }}/>
+          ))}
+          <div style={{ textAlign:"center", color:"#fff", padding:32, maxWidth:440, zIndex:10000 }}>
+            <div style={{ fontSize:100, animation:"bounce 0.8s ease infinite", marginBottom:16 }}>{dino.emoji}</div>
+            <div style={{ fontSize:48, marginBottom:8 }}>🎂🎉🎊</div>
+            <div style={{ fontSize:32, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif", marginBottom:8 }}>
+              Happy Birthday, {studentUser.name.split(" ")[0]}!
+            </div>
+            <div style={{ fontSize:16, color:"rgba(255,255,255,0.8)", lineHeight:1.7, marginBottom:24 }}>
+              Wishing you a fantastic birthday! Your {dino.name} dino is doing a happy dance just for you! 🦕✨
+            </div>
+            <div style={{ fontSize:14, color:"rgba(255,255,255,0.6)", marginBottom:24, fontStyle:"italic" }}>
+              — From your EconoClassroom teacher 🎓
+            </div>
+            <div style={{ fontSize:32, animation:"sparkle 1s ease infinite", marginBottom:24 }}>⭐🌟⭐</div>
+            <button onClick={() => setShowBirthday(false)}
+              style={{ padding:"14px 36px", background:"linear-gradient(135deg,#f59e0b,#d97706)", color:"#fff", border:"none", borderRadius:16, cursor:"pointer", fontSize:18, fontWeight:800, fontFamily:"'Space Grotesk',sans-serif", boxShadow:"0 8px 24px rgba(245,158,11,0.4)" }}>
+              🎂 Thank you! Let's go!
+            </button>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
@@ -1236,6 +1284,17 @@ function SetupWizard({ user, auth }) {
                   <input value={s.name} onChange={e => updateStudent(s.id, "name", e.target.value)}
                     placeholder={`Student ${i+1} name`}
                     style={{ flex:1, padding:"11px 14px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:14, outline:"none" }}/>
+                  <input type="date" value={s.birthday||""} onChange={e => updateStudent(s.id, "birthday", e.target.value)}
+                    title="Birthday"
+                    style={{ width:140, padding:"11px 10px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:13, outline:"none" }}/>
+                  <select value={s.celebrateOn||"actual"} onChange={e => updateStudent(s.id, "celebrateOn", e.target.value)}
+                    title="When to celebrate"
+                    style={{ padding:"11px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"#1e3a5f", color:"#fff", fontSize:12, outline:"none" }}>
+                    <option value="actual">🎂 Actual date</option>
+                    <option value="half">🎂 Half-birthday</option>
+                    <option value="lastweek">🎂 Last week of school</option>
+                    <option value="firstday">🎂 First day back</option>
+                  </select>
                   <select value={s.dino} onChange={e => updateStudent(s.id, "dino", e.target.value)}
                     style={{ padding:"11px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"#1e3a5f", color:"#fff", fontSize:13, outline:"none" }}>
                     {DINO_OPTIONS.map(d => <option key={d.id} value={d.id}>{d.emoji} {d.name}</option>)}
@@ -1830,6 +1889,31 @@ function ProEggDropGame({ studentUser, appState, saveScore }) {
   );
 }
 
+// ── Birthday utilities ────────────────────────────────────────────────────────
+function getCelebrationDate(student) {
+  if (!student.birthday) return null;
+  const [year, month, day] = student.birthday.split("-").map(Number);
+  const celebrateOn = student.celebrateOn || "actual";
+
+  if (celebrateOn === "actual") {
+    return `${month.toString().padStart(2,"0")}-${day.toString().padStart(2,"0")}`;
+  }
+  if (celebrateOn === "half") {
+    const halfMonth = ((month + 5) % 12) + 1;
+    return `${halfMonth.toString().padStart(2,"0")}-${day.toString().padStart(2,"0")}`;
+  }
+  if (celebrateOn === "lastweek") return "06-23"; // Last week of June
+  if (celebrateOn === "firstday") return "09-08"; // First day of school
+  return null;
+}
+
+function isBirthdayToday(student) {
+  const celebDate = getCelebrationDate(student);
+  if (!celebDate) return false;
+  const today = new Date().toISOString().slice(5,10); // MM-DD
+  return celebDate === today;
+}
+
 // ── Classroom App ─────────────────────────────────────────────────────────────
 function ClassroomApp({ user, auth, classroom }) {
   const [activeProGame, setActiveProGame] = React.useState(null);
@@ -2038,6 +2122,22 @@ function ClassroomApp({ user, auth, classroom }) {
         {/* ═══ DASHBOARD ═══ */}
         {tab==="dashboard" && (
           <div>
+
+            {/* Birthday notifications */}
+            {students.filter(s => isBirthdayToday(s)).length > 0 && (
+              <div style={{ background:"linear-gradient(135deg,#f59e0b,#d97706)", borderRadius:14, padding:"12px 20px", marginBottom:16, display:"flex", alignItems:"center", gap:12 }}>
+                <span style={{ fontSize:28 }}>🎂</span>
+                <div style={{ color:"#fff" }}>
+                  <div style={{ fontWeight:700, fontSize:14, fontFamily:"'Space Grotesk',sans-serif" }}>
+                    Birthday{students.filter(s=>isBirthdayToday(s)).length>1?"s":""} Today!
+                  </div>
+                  <div style={{ fontSize:13, color:"rgba(255,255,255,0.85)" }}>
+                    {students.filter(s=>isBirthdayToday(s)).map(s=>s.name.split(" ")[0]).join(", ")} 🎉
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Stats strip */}
             <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
               {[
@@ -2074,7 +2174,9 @@ function ClassroomApp({ user, auth, classroom }) {
                         {dino.emoji}
                       </div>
                       <div style={{ overflow:"hidden" }}>
-                        <div style={{ fontWeight:700, fontSize:12, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name}</div>
+                        <div style={{ fontWeight:700, fontSize:12, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+                          {isBirthdayToday(s) ? "👑 " : ""}{s.name}
+                        </div>
                         <div style={{ fontSize:10, color:"#7a9bb5", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{job ? `${job.emoji} ${job.name}` : "No job"}</div>
                       </div>
                     </div>
