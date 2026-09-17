@@ -71,8 +71,8 @@ function LandingPage({ setScreen, pricingCAD, setPricingCAD }) {
 
       {/* Hero */}
       <div style={{ textAlign:"center", padding:"80px 40px 60px", display:"block", margin:"0 auto" }}>
-        <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:220, width:"auto", marginBottom:24, filter:"drop-shadow(0 8px 24px rgba(0,0,0,0.3))" }}/>
-        <div style={{ display:"inline-block", background:"#fff", border:"2px solid #15803d", borderRadius:20, padding:"6px 16px", fontSize:13, color:"#15803d", fontWeight:700, marginBottom:24, letterSpacing:1 }}>
+        <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:220, width:"auto", marginBottom:40, filter:"drop-shadow(0 8px 24px rgba(0,0,0,0.3))" }}/>
+        <div style={{ display:"inline-block", background:"#fff", border:"2px solid #15803d", borderRadius:20, padding:"6px 16px", fontSize:13, color:"#15803d", fontWeight:700, marginBottom:24, marginTop:8, letterSpacing:1 }}> border:"2px solid #15803d", borderRadius:20, padding:"6px 16px", fontSize:13, color:"#15803d", fontWeight:700, marginBottom:24, letterSpacing:1 }}>
           🎉 FREE FOR TEACHERS — NO CREDIT CARD REQUIRED
         </div>
         <h1 style={{ fontSize:"clamp(2.5rem,6vw,4.5rem)", fontWeight:800, margin:"0 0 24px", lineHeight:1.1, background:"linear-gradient(135deg,#fff,#a8d8b5)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
