@@ -59,8 +59,7 @@ function LandingPage({ setScreen, pricingCAD, setPricingCAD }) {
       {/* Nav */}
       <nav style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"20px 40px", borderBottom:"1px solid rgba(255,255,255,0.1)" }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <span style={{ fontSize:32 }}>🦕</span>
-          <span style={{ fontSize:22, fontWeight:700, letterSpacing:1 }}>EconoClassroom</span>
+          <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:52, width:"auto" }}/>
         </div>
         <div style={{ display:"flex", gap:12, alignItems:"center" }}>
           <button onClick={() => setScreen("studentlogin")} style={{ padding:"10px 24px", background:"transparent", color:"#a8d8b5", border:"2px solid rgba(168,216,181,0.4)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>🦕 Student Login</button>
@@ -72,6 +71,7 @@ function LandingPage({ setScreen, pricingCAD, setPricingCAD }) {
 
       {/* Hero */}
       <div style={{ textAlign:"center", padding:"80px 40px 60px" }}>
+        <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:220, width:"auto", marginBottom:24, filter:"drop-shadow(0 8px 24px rgba(0,0,0,0.3))" }}/>
         <div style={{ display:"inline-block", background:"rgba(34,197,94,0.15)", border:"1px solid rgba(34,197,94,0.3)", borderRadius:20, padding:"6px 16px", fontSize:13, color:"#15803d", marginBottom:24, letterSpacing:1 }}>
           🎉 FREE FOR TEACHERS — NO CREDIT CARD REQUIRED
         </div>
@@ -2135,7 +2135,7 @@ function ClassroomApp({ user, auth, classroom }) {
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(180deg,#0f1f3d 0px,#1e293b 60px,#f0f9f4 140px)", fontFamily:"'Inter',system-ui,sans-serif" }}>
 
-      {/* Startup dino animation */}
+            {/* Startup dino animation */}
       {showDino && (
         <div style={{ position:"fixed", inset:0, zIndex:9999, pointerEvents:"none",
           background:"linear-gradient(135deg,#0f1f3d,#1e3a5f)",
@@ -2147,8 +2147,9 @@ function ClassroomApp({ user, auth, classroom }) {
             @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-40px)} }
             @keyframes grow { 0%{transform:scale(1)} 50%{transform:scale(1.8)} 100%{transform:scale(1)} }
           `}</style>
-          <div style={{ fontSize:100, animation:`${["wiggle 0.6s ease 0.8s","spin 0.8s ease 0.8s","bounce 0.6s ease 0.8s","grow 0.6s ease 0.8s"][Math.floor(Math.random()*4)]}` }}>🦕</div>
-          <div style={{ color:"#fff", fontSize:32, fontWeight:800, marginTop:20, letterSpacing:2 }}>EconoClassroom</div>
+          <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png"
+            alt="EconoClassroom"
+            style={{ height:220, width:"auto", animation:`${["wiggle 0.6s ease 0.8s","spin 0.8s ease 0.8s","bounce 0.6s ease 0.8s","grow 0.6s ease 0.8s"][Math.floor(Math.random()*4)]}` }}/>
           <div style={{ color:"#15803d", fontSize:15, marginTop:8 }}>Real financial literacy. Real classroom fun.</div>
         </div>
       )}
