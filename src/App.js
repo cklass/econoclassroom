@@ -70,6 +70,8 @@ function LandingPage({ setScreen, pricingCAD, setPricingCAD }) {
       </nav>
 
       {/* Hero */}
+      <div style={{ textAlign:"center", padding:"80px 40px 60px", display:"flex", flexDirection:"column", alignItems:"center" }}>
+        <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:220, width:"auto", marginBottom:40, filter:"drop-shadow(0 8px 24px rgba(0,0,0,0.3))" }}/>
         <div style={{ display:"inline-block", background:"#fff", border:"2px solid #15803d", borderRadius:20, padding:"6px 16px", fontSize:13, color:"#15803d", fontWeight:700, marginBottom:24, marginTop:8, letterSpacing:1 }}>
           🎉 FREE FOR TEACHERS — NO CREDIT CARD REQUIRED
         </div>
