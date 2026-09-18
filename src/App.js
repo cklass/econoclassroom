@@ -613,35 +613,40 @@ function AssistantLoginScreen({ setScreen }) {
   const [loading, setLoading] = React.useState(false);
   const [classroom, setClassroom] = React.useState(null);
   const [teacherId, setTeacherId] = React.useState(null);
-
-  const findClassroom = async () => {
+  const findClassroom = () => {
     if (!code.trim()) { setError("Enter your assistant code!"); return; }
     setLoading(true); setError("");
     const upperCode = code.trim().toUpperCase();
-    try {
-      const { getDatabase, ref, get } = await import("firebase/database");
-      const { initializeApp, getApps } = await import("firebase/app");
-      const firebaseConfig = {
-        apiKey: "AIzaSyAtc1-Jp4NudoGc-u-yRBvII0ZgD4DFifQ",
-        authDomain: "econoclassroom-9780e.firebaseapp.com",
-        databaseURL: "https://econoclassroom-9780e-default-rtdb.firebaseio.com",
-        projectId: "econoclassroom-9780e",
-      };
-      const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-      const db = getDatabase(app);
-      const codeSnap = await get(ref(db, `classCodes/${upperCode}`));
-      const data = codeSnap.val();
-      if (!data || data.type !== "assistant") { setError("Invalid assistant code!"); setLoading(false); return; }
-      const classSnap = await get(ref(db, `teachers/${data.teacherId}/classroom`));
-      const classData = classSnap.val();
-      setClassroom(classData);
-      setTeacherId(data.teacherId);
-      setLoading(false);
-    } catch(e) {
-      console.error(e);
-      setError("Something went wrong. Try again!"); 
-      setLoading(false);
-    }
+    
+    let resolved = false;
+    const unsub = subscribeToFirebase(`classCodes/${upperCode}`, data => {
+      if (resolved) return;
+      resolved = true;
+      unsub();
+      
+      if (!data || data.type !== "assistant") { 
+        setError("Invalid assistant code!"); 
+        setLoading(false); 
+        return; 
+      }
+      
+      let resolved2 = false;
+      const unsub2 = subscribeToFirebase(`teachers/${data.teacherId}/classroom`, classData => {
+        if (resolved2) return;
+        resolved2 = true;
+        unsub2();
+        setClassroom(classData);
+        setTeacherId(data.teacherId);
+        setLoading(false);
+      });
+    });
+
+    setTimeout(() => {
+      if (!resolved) {
+        setError("Could not connect. Check your code and try again.");
+        setLoading(false);
+      }
+    }, 5000);
   };
 
   if (classroom) return <AssistantDashboard classroom={classroom} teacherId={teacherId} setScreen={setScreen}/>;
