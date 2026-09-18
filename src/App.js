@@ -2444,6 +2444,30 @@ function ClassroomApp({ user, auth, classroom }) {
               </div>
             )}
 
+            {/* Assistant Code */}
+            {appState?.assistantCode && (
+              <div style={{ background:"#fff", borderRadius:14, padding:"14px 20px", marginBottom:16, border:"1px solid #e2e8f0", display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  <span style={{ fontSize:24 }}>🧑‍🏫</span>
+                  <div>
+                    <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d" }}>Assistant Code</div>
+                    <div style={{ fontSize:11, color:"#7a9bb5" }}>Share with teachers who need pay-only access</div>
+                  </div>
+                </div>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <div style={{ fontFamily:"'Space Grotesk',sans-serif", fontSize:20, fontWeight:800, color:"#15803d", letterSpacing:2, background:"#f0fdf4", padding:"6px 16px", borderRadius:8, border:"1px solid #d4e8dd" }}>
+                    {appState.assistantCode}
+                  </div>
+                  <button onClick={() => { navigator.clipboard.writeText(appState.assistantCode); showToast("Assistant code copied!"); }}
+                    style={{ padding:"8px 14px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
+                    📋 Copy
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Stats strip */}
+
             {/* Stats strip */}
             <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:24 }}>
               {[
