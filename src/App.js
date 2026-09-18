@@ -2147,9 +2147,11 @@ function ClassroomApp({ user, auth, classroom }) {
             @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-40px)} }
             @keyframes grow { 0%{transform:scale(1)} 50%{transform:scale(1.8)} 100%{transform:scale(1)} }
           `}</style>
-          <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png"
-            alt="EconoClassroom"
-            style={{ height:220, width:"auto", animation:`${["wiggle 0.6s ease 0.8s","spin 0.8s ease 0.8s","bounce 0.6s ease 0.8s","grow 0.6s ease 0.8s"][Math.floor(Math.random()*4)]}` }}/>
+                    <div style={{ background:"#fff", borderRadius:24, padding:"24px 40px", marginBottom:24, boxShadow:"0 8px 40px rgba(0,0,0,0.3)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png"
+              alt="EconoClassroom"
+              style={{ height:200, width:"auto", animation:`${["wiggle 0.6s ease 0.8s","spin 0.8s ease 0.8s","bounce 0.6s ease 0.8s","grow 0.6s ease 0.8s"][Math.floor(Math.random()*4)]}` }}/>
+          </div>
           <div style={{ color:"#15803d", fontSize:15, marginTop:8 }}>Real financial literacy. Real classroom fun.</div>
         </div>
       )}
