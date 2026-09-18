@@ -59,7 +59,7 @@ function LandingPage({ setScreen, pricingCAD, setPricingCAD }) {
       {/* Nav */}
       <nav style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"20px 40px", borderBottom:"1px solid rgba(255,255,255,0.1)" }}>
         <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:52, width:"auto" }}/>
+          <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:52, width:"auto", borderRadius:12, padding:"4px 8px", background:"rgba(255,255,255,0.95)" }}/>
         </div>
         <div style={{ display:"flex", gap:12, alignItems:"center" }}>
           <button onClick={() => setScreen("studentlogin")} style={{ padding:"10px 24px", background:"transparent", color:"#a8d8b5", border:"2px solid rgba(168,216,181,0.4)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>🦕 Student Login</button>
@@ -71,7 +71,7 @@ function LandingPage({ setScreen, pricingCAD, setPricingCAD }) {
 
       {/* Hero */}
       <div style={{ textAlign:"center", padding:"80px 40px 60px", display:"flex", flexDirection:"column", alignItems:"center" }}>
-        <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:220, width:"auto", marginBottom:40, filter:"drop-shadow(0 8px 24px rgba(0,0,0,0.3))" }}/>
+        <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:220, width:"auto", marginBottom:40, borderRadius:24, padding:"16px 24px", background:"rgba(255,255,255,0.95)", boxShadow:"0 8px 40px rgba(0,0,0,0.4)" }}/>
         <div style={{ display:"inline-block", background:"#fff", border:"2px solid #15803d", borderRadius:20, padding:"6px 16px", fontSize:13, color:"#15803d", fontWeight:700, marginBottom:24, marginTop:8, letterSpacing:1 }}>
           🎉 FREE FOR TEACHERS — NO CREDIT CARD REQUIRED
         </div>
