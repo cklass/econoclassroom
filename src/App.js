@@ -48,6 +48,7 @@ export default function App() {
   if (screen === "login") return <LoginScreen auth={auth} setScreen={setScreen}/>;
   if (screen === "register") return <RegisterScreen auth={auth} setScreen={setScreen}/>;
   if (screen === "studentlogin") return <StudentLoginScreen setScreen={setScreen}/>;
+  if (screen === "assistantlogin") return <AssistantLoginScreen setScreen={setScreen}/>;
   if (screen.startsWith("parent-")) return <ParentPortal code={screen.replace("parent-","")} setScreen={setScreen}/>;
   return <LandingPage setScreen={setScreen} pricingCAD={pricingCAD} setPricingCAD={setPricingCAD}/>;
 }
@@ -63,6 +64,7 @@ function LandingPage({ setScreen, pricingCAD, setPricingCAD }) {
         </div>
         <div style={{ display:"flex", gap:12, alignItems:"center" }}>
           <button onClick={() => setScreen("studentlogin")} style={{ padding:"10px 24px", background:"transparent", color:"#a8d8b5", border:"2px solid rgba(168,216,181,0.4)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>🦕 Student Login</button>
+          <button onClick={() => setScreen("assistantlogin")} style={{ padding:"10px 24px", background:"transparent", color:"rgba(255,255,255,0.7)", border:"none", cursor:"pointer", fontSize:15, fontWeight:600 }}>🧑‍🏫 Assistant Login</button>
           <a href="#pricing" style={{ padding:"10px 24px", background:"transparent", color:"rgba(255,255,255,0.7)", border:"none", cursor:"pointer", fontSize:15, fontWeight:600, textDecoration:"none" }}>Pricing</a>
           <button onClick={() => setScreen("login")} style={{ padding:"10px 24px", background:"transparent", color:"#fff", border:"2px solid rgba(255,255,255,0.3)", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Teacher Login</button>
           <button onClick={() => setScreen("register")} style={{ padding:"10px 24px", background:"#22c55e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:15, fontWeight:600 }}>Get Started Free</button>
@@ -599,6 +601,213 @@ function ParentPortal({ code, setScreen }) {
           <div style={{ marginTop:16, fontSize:12, color:"rgba(255,255,255,0.3)" }}>econoclassroom.ca</div>
         </div>
 
+      </div>
+    </div>
+  );
+}
+
+// ── Assistant Login Screen ────────────────────────────────────────────────────
+function AssistantLoginScreen({ setScreen }) {
+  const [code, setCode] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [classroom, setClassroom] = React.useState(null);
+  const [teacherId, setTeacherId] = React.useState(null);
+
+  const findClassroom = async () => {
+    if (!code.trim()) { setError("Enter your assistant code!"); return; }
+    setLoading(true); setError("");
+    const upperCode = code.trim().toUpperCase();
+    const data = await new Promise(resolve => {
+      const unsub = subscribeToFirebase(`classCodes/${upperCode}`, d => { unsub(); resolve(d); });
+    });
+    if (!data || data.type !== "assistant") { setError("Invalid assistant code!"); setLoading(false); return; }
+    const classData = await new Promise(resolve => {
+      const unsub = subscribeToFirebase(`teachers/${data.teacherId}/classroom`, d => { unsub(); resolve(d); });
+    });
+    setClassroom(classData);
+    setTeacherId(data.teacherId);
+    setLoading(false);
+  };
+
+  if (classroom) return <AssistantDashboard classroom={classroom} teacherId={teacherId} setScreen={setScreen}/>;
+
+  return (
+    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#0f1f3d,#1e3a5f)", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Inter',sans-serif", padding:20 }}>
+      <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:24, padding:"48px 40px", width:"100%", maxWidth:420, color:"#fff" }}>
+        <div style={{ textAlign:"center", marginBottom:32 }}>
+          <span style={{ fontSize:48 }}>🧑‍🏫</span>
+          <h2 style={{ fontSize:28, fontWeight:800, margin:"12px 0 4px", fontFamily:"'Space Grotesk',sans-serif" }}>Assistant Login</h2>
+          <p style={{ color:"rgba(255,255,255,0.5)", fontSize:14 }}>Enter your assistant code from the classroom owner</p>
+        </div>
+        <label style={{ fontSize:12, fontWeight:700, color:"rgba(255,255,255,0.5)", display:"block", marginBottom:8, letterSpacing:1 }}>ASSISTANT CODE</label>
+        <input value={code} onChange={e => setCode(e.target.value.toUpperCase())}
+          placeholder="e.g. ASST-AB12" maxLength={9}
+          onKeyDown={e => e.key==="Enter" && findClassroom()}
+          style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:20, fontWeight:800, outline:"none", marginBottom:16, boxSizing:"border-box", textAlign:"center", letterSpacing:3 }}/>
+        {error && <div style={{ color:"#f87171", fontSize:13, marginBottom:12 }}>{error}</div>}
+        <button onClick={findClassroom} disabled={loading}
+          style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#0f1f3d)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:16 }}>
+          {loading ? "Finding classroom..." : "Access Classroom →"}
+        </button>
+        <div style={{ textAlign:"center", marginTop:12 }}>
+          <span onClick={() => setScreen("landing")} style={{ color:"rgba(255,255,255,0.3)", cursor:"pointer", fontSize:13 }}>← Back to home</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Assistant Dashboard ───────────────────────────────────────────────────────
+function AssistantDashboard({ classroom, teacherId, setScreen }) {
+  const [appState, setAppState] = React.useState(classroom);
+  const [toast, setToast] = React.useState(null);
+  const [selected, setSelected] = React.useState(null);
+  const [payAmt, setPayAmt] = React.useState("");
+  const [payReason, setPayReason] = React.useState("Job completed");
+
+  // Subscribe to live updates
+  React.useEffect(() => {
+    const unsub = subscribeToFirebase(`teachers/${teacherId}/classroom`, data => {
+      if (data) setAppState(data);
+    });
+    return unsub;
+  }, [teacherId]);
+
+  const fmt = n => `${appState.currencyEmoji||"🦕"}${Number(n).toLocaleString()}`;
+  const uuid = () => Math.random().toString(36).slice(2);
+  const todayStr = () => new Date().toISOString().slice(0,10);
+
+  const showToast = (msg, color="#15803d") => {
+    setToast({ msg, color });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const students = appState?.students || [];
+  const balances = appState?.balances || {};
+  const totalBalance = Object.values(balances).reduce((a,b) => a+b, 0);
+  const selStudent = students.find(s => s.id === selected);
+
+  const pay = () => {
+    const amt = parseInt(payAmt);
+    if (!amt || amt <= 0) { showToast("Enter a valid amount!", "#ef4444"); return; }
+    if (!selected) { showToast("Select a student first!", "#ef4444"); return; }
+    const tx = { id:uuid(), studentId:selected, amount:amt, reason:`${payReason} (via assistant)`, date:todayStr() };
+    const newBalances = { ...balances, [selected]: (balances[selected]||0) + amt };
+    const newTxLog = [tx, ...(appState.txLog||[])];
+    const next = { ...appState, balances:newBalances, txLog:newTxLog };
+    setAppState(next);
+    saveToFirebase(`teachers/${teacherId}/classroom/balances`, newBalances);
+    saveToFirebase(`teachers/${teacherId}/classroom/txLog`, newTxLog);
+    showToast(`Paid ${fmt(amt)} to ${selStudent?.name}! 💰`);
+    setPayAmt("");
+  };
+
+  return (
+    <div style={{ minHeight:"100vh", background:"#f0f9f4", fontFamily:"'Inter',sans-serif" }}>
+      {/* Toast */}
+      {toast && (
+        <div style={{ position:"fixed", top:20, right:20, background:toast.color, color:"#fff", padding:"12px 24px", borderRadius:12, zIndex:9999, fontWeight:600, fontSize:14 }}>
+          {toast.msg}
+        </div>
+      )}
+
+      {/* Nav */}
+      <nav style={{ background:"linear-gradient(135deg,#0a1628,#0f1f3d)", padding:"16px 32px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+          <img src="https://raw.githubusercontent.com/cklass/econoclassroom/main/EconoClassroomLogo.png" alt="EconoClassroom" style={{ height:40, width:"auto", borderRadius:8, background:"rgba(255,255,255,0.9)", padding:"2px 6px" }}/>
+          <div>
+            <div style={{ color:"#fff", fontSize:15, fontWeight:700, fontFamily:"'Space Grotesk',sans-serif" }}>{appState.name}</div>
+            <div style={{ color:"#15803d", fontSize:12, fontWeight:600 }}>🧑‍🏫 Assistant Access</div>
+          </div>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ fontSize:13, fontWeight:700, color:"#15803d" }}>{fmt(totalBalance)}</div>
+            <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)" }}>total in circulation</div>
+          </div>
+          <button onClick={() => setScreen("landing")} style={{ padding:"8px 16px", background:"rgba(255,255,255,0.1)", color:"#fff", border:"1px solid rgba(255,255,255,0.2)", borderRadius:8, cursor:"pointer", fontSize:13 }}>
+            Sign Out
+          </button>
+        </div>
+      </nav>
+
+      <div style={{ maxWidth:1200, margin:"0 auto", padding:"24px 32px" }}>
+        {/* Assistant notice */}
+        <div style={{ background:"#fff", border:"2px solid #15803d", borderRadius:12, padding:"12px 20px", marginBottom:24, display:"flex", alignItems:"center", gap:12 }}>
+          <span style={{ fontSize:24 }}>🧑‍🏫</span>
+          <div>
+            <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d" }}>Assistant Access — Pay Only</div>
+            <div style={{ fontSize:12, color:"#7a9bb5" }}>You can view balances and pay students. Contact the classroom owner for other changes.</div>
+          </div>
+        </div>
+
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 340px", gap:24, alignItems:"start" }}>
+          {/* Student grid */}
+          <div>
+            <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:16, fontFamily:"'Space Grotesk',sans-serif" }}>
+              👨‍🎓 {students.length} Students
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))", gap:10 }}>
+              {students.sort((a,b) => (balances[b.id]||0) - (balances[a.id]||0)).map(s => {
+                const bal = balances[s.id] || 0;
+                const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
+                const isSelected = selected === s.id;
+                return (
+                  <div key={s.id} onClick={() => setSelected(isSelected ? null : s.id)}
+                    style={{ background:"#fff", borderRadius:12, padding:"14px 12px", cursor:"pointer",
+                      border:`2px solid ${isSelected?"#15803d":"#e2e8f0"}`,
+                      boxShadow: isSelected?"0 4px 20px rgba(21,128,61,0.2)":"0 2px 4px rgba(0,0,0,0.06)",
+                      transition:"all 0.15s" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                      <div style={{ width:32, height:32, borderRadius:8, background:`${dino.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16 }}>
+                        {dino.emoji}
+                      </div>
+                      <div style={{ overflow:"hidden" }}>
+                        <div style={{ fontWeight:700, fontSize:12, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize:20, fontWeight:800, color:"#15803d", fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(bal)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Pay panel */}
+          <div style={{ background:"#fff", borderRadius:16, padding:24, border:"1px solid #e2e8f0", boxShadow:"0 2px 4px rgba(0,0,0,0.06)", position:"sticky", top:24 }}>
+            <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:20, fontFamily:"'Space Grotesk',sans-serif" }}>💵 Pay a Student</div>
+            <div style={{ marginBottom:16, padding:"10px 14px", background: selected?"#f0fdf4":"#f8fafc", borderRadius:10, border:`1px solid ${selected?"#d4e8dd":"#e2e8f0"}`, fontSize:14, color:selected?"#15803d":"#94a3b8", fontWeight:selected?700:400 }}>
+              {selected ? `✅ ${selStudent?.name} selected` : "← Click a student to select"}
+            </div>
+            <div style={{ marginBottom:12 }}>
+              <div style={{ fontSize:12, fontWeight:700, color:"#7a9bb5", marginBottom:6, letterSpacing:0.5 }}>AMOUNT</div>
+              <input type="number" value={payAmt} onChange={e => setPayAmt(e.target.value)} placeholder="10"
+                style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:20, fontWeight:800, outline:"none", boxSizing:"border-box" }}/>
+              <div style={{ display:"flex", gap:6, marginTop:8, flexWrap:"wrap" }}>
+                {[1,2,5,10,20,50].map(a => (
+                  <button key={a} onClick={() => setPayAmt(String(a))}
+                    style={{ padding:"4px 10px", background:"#f0f9f4", border:"none", borderRadius:6, cursor:"pointer", fontSize:12, fontWeight:600, color:"#15803d" }}>{fmt(a)}</button>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:12, fontWeight:700, color:"#7a9bb5", marginBottom:6, letterSpacing:0.5 }}>REASON</div>
+              <input value={payReason} onChange={e => setPayReason(e.target.value)} placeholder="Job completed…"
+                style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box" }}/>
+              <div style={{ display:"flex", gap:6, marginTop:8, flexWrap:"wrap" }}>
+                {["Job completed","Great work!","Bonus","Participation"].map(r => (
+                  <button key={r} onClick={() => setPayReason(r)}
+                    style={{ padding:"4px 10px", background:payReason===r?"#15803d":"#f0f9f4", color:payReason===r?"#fff":"#15803d", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>{r}</button>
+                ))}
+              </div>
+            </div>
+            <button onClick={pay}
+              style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#0f1f3d)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:16, fontWeight:700, fontFamily:"'Space Grotesk',sans-serif" }}>
+              💸 Pay {selStudent?.name || "..."}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1269,8 +1478,10 @@ function SetupWizard({ user, auth }) {
     };
 
     const code = Math.random().toString(36).slice(2,8).toUpperCase();
-    await saveToFirebase(`teachers/${user.uid}/classroom`, { ...classroom, classCode: code });
-    await saveToFirebase(`classCodes/${code}`, { teacherId: user.uid });
+    const assistantCode = "ASST-" + Math.random().toString(36).slice(2,6).toUpperCase();
+    await saveToFirebase(`teachers/${user.uid}/classroom`, { ...classroom, classCode: code, assistantCode });
+    await saveToFirebase(`classCodes/${code}`, { teacherId: user.uid, type:"owner" });
+    await saveToFirebase(`classCodes/${assistantCode}`, { teacherId: user.uid, type:"assistant" });
   };
 
   const stepStyle = (n) => ({
