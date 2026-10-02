@@ -1456,6 +1456,7 @@ const DINO_OPTIONS = [
   { id:"suchomimus",        name:"Suchomimus",         emoji:"🦖", color:"#148F77" },
   { id:"oviraptor",         name:"Oviraptor",          emoji:"🦕", color:"#D4AC0D" },
   { id:"herrerasaurus",     name:"Herrerasaurus",      emoji:"🦖", color:"#5D4037" },
+ { id:"magyarosaurus",     name:"Magyarosaurus",      emoji:"🦕", color:"#8E44AD" },
 ];
 
 function SetupWizard({ user, auth }) {
