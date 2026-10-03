@@ -2253,6 +2253,7 @@ function ClassroomApp({ user, auth, classroom }) {
   const [newItemPrice, setNewItemPrice] = React.useState("");
   const [newItemDesc, setNewItemDesc] = React.useState("");
   const [newItemEmoji, setNewItemEmoji] = React.useState("🎁");
+  const [showAssistantCode, setShowAssistantCode] = React.useState(false);
   const [investStudent, setInvestStudent] = React.useState(null);
   const [newJobName, setNewJobName] = React.useState("");
   const [newJobPay, setNewJobPay] = React.useState("10");
@@ -2496,12 +2497,18 @@ function ClassroomApp({ user, auth, classroom }) {
                 </div>
                 <div style={{ display:"flex", alignItems:"center", gap:10 }}>
                   <div style={{ fontFamily:"'Space Grotesk',sans-serif", fontSize:20, fontWeight:800, color:"#15803d", letterSpacing:2, background:"#f0fdf4", padding:"6px 16px", borderRadius:8, border:"1px solid #d4e8dd" }}>
-                    {appState.assistantCode}
+                    {showAssistantCode ? appState.assistantCode : "••••••••••"}
                   </div>
-                  <button onClick={() => { navigator.clipboard.writeText(appState.assistantCode); showToast("Assistant code copied!"); }}
-                    style={{ padding:"8px 14px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
-                    📋 Copy
+                  <button onClick={() => setShowAssistantCode(s => !s)}
+                    style={{ padding:"8px 14px", background:"#f0f9f4", color:"#15803d", border:"1px solid #d4e8dd", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
+                    {showAssistantCode ? "🙈 Hide" : "👁 Show"}
                   </button>
+                  {showAssistantCode && (
+                    <button onClick={() => { navigator.clipboard.writeText(appState.assistantCode); showToast("Assistant code copied!"); }}
+                      style={{ padding:"8px 14px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
+                      📋 Copy
+                    </button>
+                  )}
                 </div>
               </div>
             )}
