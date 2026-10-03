@@ -2551,7 +2551,7 @@ function ClassroomApp({ user, auth, classroom }) {
                         {dino.emoji}
                       </div>
                       <div style={{ overflow:"hidden" }}>
-                        <div style={{ fontWeight:700, fontSize:12, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+                        <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
                           {isBirthdayToday(s) ? "👑 " : ""}{s.name}
                         </div>
                         <div style={{ fontSize:10, color:"#7a9bb5", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{job ? `${job.emoji} ${job.name}` : "No job"}</div>
