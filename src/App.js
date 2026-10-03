@@ -2462,6 +2462,28 @@ function ClassroomApp({ user, auth, classroom }) {
               </div>
             )}
 
+            {/* Class Code */}
+            {appState?.classCode && (
+              <div style={{ background:"#fff", borderRadius:14, padding:"14px 20px", marginBottom:12, border:"1px solid #e2e8f0", display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  <span style={{ fontSize:24 }}>🔑</span>
+                  <div>
+                    <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d" }}>Student Class Code</div>
+                    <div style={{ fontSize:11, color:"#7a9bb5" }}>Students enter this code to log in</div>
+                  </div>
+                </div>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <div style={{ fontFamily:"'Space Grotesk',sans-serif", fontSize:24, fontWeight:800, color:"#0f1f3d", letterSpacing:4, background:"#f8fafc", padding:"6px 16px", borderRadius:8, border:"1px solid #e2e8f0" }}>
+                    {appState.classCode}
+                  </div>
+                  <button onClick={() => { navigator.clipboard.writeText(appState.classCode); showToast("Class code copied!"); }}
+                    style={{ padding:"8px 14px", background:"#0f1f3d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:600 }}>
+                    📋 Copy
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Assistant Code */}
             {appState?.assistantCode && (
               <div style={{ background:"#fff", borderRadius:14, padding:"14px 20px", marginBottom:16, border:"1px solid #e2e8f0", display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap" }}>
