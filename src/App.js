@@ -287,6 +287,11 @@ function ParentPortal({ code, setScreen }) {
             setStudent(stu);
             setTeacherId(val.teacherId);
             setLoading(false);
+            // Mark messages as read
+            saveToFirebase(`teachers/${teacherId}/classroom/parentPortalActivity/${stu.id}`, {
+            lastRead: Date.now(),
+            lastVisit: new Date().toISOString().slice(0,10)
+           });
           }
         });
       });
@@ -3086,22 +3091,77 @@ function ClassroomApp({ user, auth, classroom }) {
               </button>
             </div>
 
-            {/* Parent Portal Links */}
+                        {/* Parent Portal Links */}
             <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
-              <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:8 }}>🔗 Parent Portal Links</div>
-              <p style={{ fontSize:13, color:"#7a9bb5", marginBottom:16 }}>Share these links with parents. Each link is unique to their child and requires no login.</p>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:10 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+                <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d" }}>🔗 Parent Portal Links</div>
+                <div style={{ fontSize:12, color:"#7a9bb5" }}>{students.filter(s => s.parentEmail).length}/{students.length} emails added</div>
+              </div>
+              <p style={{ fontSize:13, color:"#7a9bb5", marginBottom:16 }}>Add parent emails and share portal links. Parents can view their child's balance, transactions and messages.</p>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:12 }}>
                 {students.map(s => {
                   const parentCode = s.parentCode || s.id.slice(0,8).toUpperCase();
                   const link = `${window.location.origin}${window.location.pathname}#parent-${parentCode}`;
+                  const lastRead = appState?.parentPortalActivity?.[s.id]?.lastRead;
+                  const lastMessage = (appState?.parentMessages||[]).filter(m => m.to==="all" || m.to===s.id).sort((a,b) => b.timestamp-a.timestamp)[0];
+                  const hasUnread = lastMessage && (!lastRead || lastRead < lastMessage.timestamp);
                   return (
-                    <div key={s.id} style={{ background:"#f0f9f4", borderRadius:12, padding:"12px 16px", border:"1px solid #d4e8dd" }}>
-                      <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d", marginBottom:4 }}>{s.name}</div>
-                      <div style={{ fontSize:11, color:"#7a9bb5", marginBottom:8, wordBreak:"break-all" }}>{link}</div>
-                      <button onClick={() => { navigator.clipboard.writeText(link); showToast(`📋 Copied ${s.name}'s parent link!`); }}
-                        style={{ padding:"6px 12px", background:"#15803d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>
-                        📋 Copy Link
-                      </button>
+                    <div key={s.id} style={{ background:"#f8fafc", borderRadius:12, padding:"14px 16px", border:`1px solid ${hasUnread?"#fcd34d":"#e2e8f0"}` }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+                        <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d" }}>{s.name}</div>
+                        {lastMessage && (
+                          <div style={{ fontSize:11, fontWeight:600, color:hasUnread?"#d97706":"#15803d", background:hasUnread?"#fef9c3":"#f0fdf4", padding:"2px 8px", borderRadius:20, border:`1px solid ${hasUnread?"#fcd34d":"#d4e8dd"}` }}>
+                            {hasUnread ? "📬 Unread" : "✅ Read"}
+                          </div>
+                        )}
+                      </div>
+                      {/* Parent email input */}
+                      <div style={{ display:"flex", gap:6, marginBottom:8 }}>
+                        <input
+                          placeholder="parent@email.com"
+                          defaultValue={s.parentEmail||""}
+                          onBlur={e => {
+                            const email = e.target.value.trim();
+                            if (email !== (s.parentEmail||"")) {
+                              update(prev => ({
+                                ...prev,
+                                students: prev.students.map(st => st.id===s.id ? {...st, parentEmail:email} : st)
+                              }));
+                              showToast(`📧 Saved ${s.name}'s parent email!`);
+                            }
+                          }}
+                          style={{ flex:1, padding:"6px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff" }}/>
+                      </div>
+                      {/* Parent name input */}
+                      <div style={{ display:"flex", gap:6, marginBottom:10 }}>
+                        <input
+                          placeholder="Parent/Guardian name"
+                          defaultValue={s.parentName||""}
+                          onBlur={e => {
+                            const name = e.target.value.trim();
+                            if (name !== (s.parentName||"")) {
+                              update(prev => ({
+                                ...prev,
+                                students: prev.students.map(st => st.id===s.id ? {...st, parentName:name} : st)
+                              }));
+                            }
+                          }}
+                          style={{ flex:1, padding:"6px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff" }}/>
+                      </div>
+                      {/* Portal link */}
+                      <div style={{ fontSize:10, color:"#94a3b8", marginBottom:8, wordBreak:"break-all", background:"#f1f5f9", padding:"4px 8px", borderRadius:6 }}>{link}</div>
+                      <div style={{ display:"flex", gap:6" }}>
+                        <button onClick={() => { navigator.clipboard.writeText(link); showToast(`📋 Copied ${s.name}'s parent link!`); }}
+                          style={{ flex:1, padding:"6px 10px", background:"#0f1f3d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>
+                          📋 Copy Link
+                        </button>
+                        {s.parentEmail && (
+                          <button onClick={() => { navigator.clipboard.writeText(`Hi ${s.parentName||"there"}! Here is your parent portal link for ${s.name}'s EconoClassroom account: ${link}`); showToast(`📧 Message copied for ${s.name}'s parents!`); }}
+                            style={{ flex:1, padding:"6px 10px", background:"#15803d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>
+                            📧 Copy Message
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
