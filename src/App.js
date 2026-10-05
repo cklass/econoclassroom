@@ -3150,7 +3150,7 @@ function ClassroomApp({ user, auth, classroom }) {
                       </div>
                       {/* Portal link */}
                       <div style={{ fontSize:10, color:"#94a3b8", marginBottom:8, wordBreak:"break-all", background:"#f1f5f9", padding:"4px 8px", borderRadius:6 }}>{link}</div>
-                      <div style={{ display:"flex", gap:6" }}>
+                      <div style={{ display:"flex", gap:6 }}>
                         <button onClick={() => { navigator.clipboard.writeText(link); showToast(`📋 Copied ${s.name}'s parent link!`); }}
                           style={{ flex:1, padding:"6px 10px", background:"#0f1f3d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>
                           📋 Copy Link
