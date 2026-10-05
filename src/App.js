@@ -2264,6 +2264,7 @@ function ClassroomApp({ user, auth, classroom }) {
   const [activeProGame, setActiveProGame] = React.useState(null);
   const [parentMessage, setParentMessage] = React.useState("");
   const [parentMessageStudent, setParentMessageStudent] = React.useState("all");
+  const [parentMessageContact, setParentMessageContact] = React.useState(null);
   const [parentSubject, setParentSubject] = React.useState("");
   const [newExpenseName, setNewExpenseName] = React.useState("");
   const [newExpenseAmount, setNewExpenseAmount] = React.useState("");
@@ -3042,34 +3043,54 @@ function ClassroomApp({ user, auth, classroom }) {
           </div>
         )}
         
-{/* ═══ PARENTS ═══ */}
+        {/* ═══ PARENTS ═══ */}
         {tab==="parents" && (
-          <div style={{ maxWidth:900, margin:"0 auto" }}>
+          <div style={{ maxWidth:1000, margin:"0 auto" }}>
             <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", marginBottom:8 }}>👨‍👩‍👧 Parent Communication</h2>
-            <p style={{ fontSize:14, color:"#7a9bb5", marginBottom:24 }}>Send messages to parents and share their child's progress. Parents access via a unique link — no account needed.</p>
+            <p style={{ fontSize:14, color:"#7a9bb5", marginBottom:24 }}>Manage contacts, send messages and track who has read them. Each contact gets their own private portal link.</p>
 
             {/* Send Message */}
             <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
-              <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:20 }}>✉️ Send a Message</div>
-              
+              <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:20 }}>✉️ Compose Message</div>
               <div style={{ marginBottom:16 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:"#7a9bb5", display:"block", marginBottom:8, letterSpacing:0.5 }}>SEND TO</label>
                 <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-                  <button onClick={() => setParentMessageStudent("all")}
+                  <button onClick={() => { setParentMessageStudent("all"); setParentMessageContact(null); }}
                     style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${parentMessageStudent==="all"?"#15803d":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
                       background:parentMessageStudent==="all"?"#15803d":"#fff", color:parentMessageStudent==="all"?"#fff":"#4a6580" }}>
-                    🌍 All Parents
+                    🌍 All Contacts
                   </button>
                   {students.map(s => (
-                    <button key={s.id} onClick={() => setParentMessageStudent(s.id)}
+                    <button key={s.id} onClick={() => { setParentMessageStudent(s.id); setParentMessageContact(null); }}
                       style={{ padding:"8px 16px", borderRadius:8, border:`2px solid ${parentMessageStudent===s.id?"#15803d":"#e2e8f0"}`, cursor:"pointer", fontSize:13, fontWeight:600,
                         background:parentMessageStudent===s.id?"#15803d":"#fff", color:parentMessageStudent===s.id?"#fff":"#4a6580" }}>
                       {s.name}
                     </button>
                   ))}
                 </div>
+                {/* Show individual contacts when a student is selected */}
+                {parentMessageStudent && parentMessageStudent !== "all" && (() => {
+                  const stu = students.find(s => s.id === parentMessageStudent);
+                  const contacts = stu?.contacts || [];
+                  if (contacts.length === 0) return <div style={{ fontSize:12, color:"#94a3b8", marginTop:8 }}>No contacts added for {stu?.name} yet.</div>;
+                  return (
+                    <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:10 }}>
+                      <button onClick={() => setParentMessageContact(null)}
+                        style={{ padding:"6px 12px", borderRadius:8, border:`2px solid ${!parentMessageContact?"#7c3aed":"#e2e8f0"}`, cursor:"pointer", fontSize:12, fontWeight:600,
+                          background:!parentMessageContact?"#7c3aed":"#fff", color:!parentMessageContact?"#fff":"#4a6580" }}>
+                        👨‍👩‍👧 All of {stu?.name}'s contacts
+                      </button>
+                      {contacts.map(c => (
+                        <button key={c.id} onClick={() => setParentMessageContact(c.id)}
+                          style={{ padding:"6px 12px", borderRadius:8, border:`2px solid ${parentMessageContact===c.id?"#7c3aed":"#e2e8f0"}`, cursor:"pointer", fontSize:12, fontWeight:600,
+                            background:parentMessageContact===c.id?"#7c3aed":"#fff", color:parentMessageContact===c.id?"#fff":"#4a6580" }}>
+                          {c.relationship ? `${c.relationship} (${c.name})` : c.name}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
-
               <div style={{ marginBottom:16 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:"#7a9bb5", display:"block", marginBottom:8, letterSpacing:0.5 }}>SUBJECT</label>
                 <input value={parentSubject} onChange={e => setParentSubject(e.target.value)} placeholder="e.g. Weekly Update, Important Notice..."
@@ -3081,13 +3102,11 @@ function ClassroomApp({ user, auth, classroom }) {
                   ))}
                 </div>
               </div>
-
               <div style={{ marginBottom:20 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:"#7a9bb5", display:"block", marginBottom:8, letterSpacing:0.5 }}>MESSAGE</label>
-                <textarea value={parentMessage} onChange={e => setParentMessage(e.target.value)} placeholder="Type your message to parents here..." rows={5}
+                <textarea value={parentMessage} onChange={e => setParentMessage(e.target.value)} placeholder="Type your message here..." rows={5}
                   style={{ width:"100%", padding:"12px 16px", borderRadius:10, border:"2px solid #e2e8f0", fontSize:14, outline:"none", boxSizing:"border-box", resize:"vertical", fontFamily:"'Inter',sans-serif" }}/>
               </div>
-
               <button onClick={() => {
                 if (!parentSubject.trim() || !parentMessage.trim()) { showToast("Please add a subject and message!", "#ef4444"); return; }
                 const msg = {
@@ -3095,112 +3114,135 @@ function ClassroomApp({ user, auth, classroom }) {
                   subject: parentSubject,
                   message: parentMessage,
                   to: parentMessageStudent,
+                  contactId: parentMessageContact || "all",
                   date: todayStr(),
                   timestamp: Date.now(),
                   replies: [],
                 };
-                update(prev => ({
-                  ...prev,
-                  parentMessages: [msg, ...(prev.parentMessages||[])],
-                }));
-                showToast(`✉️ Message sent to ${parentMessageStudent==="all"?"all parents":students.find(s=>s.id===parentMessageStudent)?.name+"'s parents"}!`);
+                update(prev => ({ ...prev, parentMessages: [msg, ...(prev.parentMessages||[])] }));
+                const recipientDesc = parentMessageStudent==="all" ? "all contacts" :
+                  parentMessageContact ? students.find(s=>s.id===parentMessageStudent)?.contacts?.find(c=>c.id===parentMessageContact)?.name :
+                  `all of ${students.find(s=>s.id===parentMessageStudent)?.name}'s contacts`;
+                showToast(`✉️ Message sent to ${recipientDesc}!`);
                 setParentMessage(""); setParentSubject("");
               }} style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#0f1f3d)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:16, fontWeight:700, fontFamily:"'Space Grotesk',sans-serif" }}>
                 ✉️ Send Message
               </button>
             </div>
 
-                        {/* Parent Portal Links */}
-            <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d" }}>🔗 Parent Portal Links</div>
-                <div style={{ fontSize:12, color:"#7a9bb5" }}>{students.filter(s => s.parentEmail).length}/{students.length} emails added</div>
-              </div>
-              <p style={{ fontSize:13, color:"#7a9bb5", marginBottom:16 }}>Add parent emails and share portal links. Parents can view their child's balance, transactions and messages.</p>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:12 }}>
-                {students.map(s => {
-                  const parentCode = s.parentCode || s.id.slice(0,8).toUpperCase();
-                  const link = `${window.location.origin}${window.location.pathname}#parent-${parentCode}`;
-                  const lastRead = appState?.parentPortalActivity?.[s.id]?.lastRead;
-                  const lastMessage = (appState?.parentMessages||[]).filter(m => m.to==="all" || m.to===s.id).sort((a,b) => b.timestamp-a.timestamp)[0];
-                  const hasUnread = lastMessage && (!lastRead || lastRead < lastMessage.timestamp);
-                  return (
-                    <div key={s.id} style={{ background:"#f8fafc", borderRadius:12, padding:"14px 16px", border:`1px solid ${hasUnread?"#fcd34d":"#e2e8f0"}` }}>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                        <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d" }}>{s.name}</div>
-                        {lastMessage && (
-                          <div style={{ fontSize:11, fontWeight:600, color:hasUnread?"#d97706":"#15803d", background:hasUnread?"#fef9c3":"#f0fdf4", padding:"2px 8px", borderRadius:20, border:`1px solid ${hasUnread?"#fcd34d":"#d4e8dd"}` }}>
-                            {hasUnread ? "📬 Unread" : "✅ Read"}
-                          </div>
-                        )}
+            {/* Student contact cards */}
+            <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+              {students.map(s => {
+                const contacts = s.contacts || [];
+                return (
+                  <div key={s.id} style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
+                    {/* Student header */}
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                        <div style={{ width:36, height:36, borderRadius:10, background:"#f0fdf4", display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>
+                          {(DINO_OPTIONS.find(d => d.id === s.dinoId)||DINO_OPTIONS[0]).emoji}
+                        </div>
+                        <div style={{ fontWeight:800, fontSize:16, color:"#0f1f3d", fontFamily:"'Space Grotesk',sans-serif" }}>{s.name}</div>
                       </div>
-                      {/* Parent email input */}
-                      <div style={{ display:"flex", gap:6, marginBottom:8 }}>
-                        <input
-                          placeholder="parent@email.com"
-                          defaultValue={s.parentEmail||""}
-                          onBlur={e => {
-                            const email = e.target.value.trim();
-                            if (email !== (s.parentEmail||"")) {
-                              update(prev => ({
-                                ...prev,
-                                students: prev.students.map(st => st.id===s.id ? {...st, parentEmail:email} : st)
-                              }));
-                              showToast(`📧 Saved ${s.name}'s parent email!`);
-                            }
-                          }}
-                          style={{ flex:1, padding:"6px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff" }}/>
-                      </div>
-                      {/* Parent name input */}
-                      <div style={{ display:"flex", gap:6, marginBottom:10 }}>
-                        <input
-                          placeholder="Parent/Guardian name"
-                          defaultValue={s.parentName||""}
-                          onBlur={e => {
-                            const name = e.target.value.trim();
-                            if (name !== (s.parentName||"")) {
-                              update(prev => ({
-                                ...prev,
-                                students: prev.students.map(st => st.id===s.id ? {...st, parentName:name} : st)
-                              }));
-                            }
-                          }}
-                          style={{ flex:1, padding:"6px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff" }}/>
-                      </div>
-                      {/* Portal link */}
-                      <div style={{ fontSize:10, color:"#94a3b8", marginBottom:8, wordBreak:"break-all", background:"#f1f5f9", padding:"4px 8px", borderRadius:6 }}>{link}</div>
-                      <div style={{ display:"flex", gap:6 }}>
-                        <button onClick={() => { navigator.clipboard.writeText(link); showToast(`📋 Copied ${s.name}'s parent link!`); }}
-                          style={{ flex:1, padding:"6px 10px", background:"#0f1f3d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>
-                          📋 Copy Link
-                        </button>
-                        {s.parentEmail && (
-                          <button onClick={() => { navigator.clipboard.writeText(`Hi ${s.parentName||"there"}! Here is your parent portal link for ${s.name}'s EconoClassroom account: ${link}`); showToast(`📧 Message copied for ${s.name}'s parents!`); }}
-                            style={{ flex:1, padding:"6px 10px", background:"#15803d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>
-                            📧 Copy Message
-                          </button>
-                        )}
-                      </div>
+                      <button onClick={() => {
+                        const newContact = { id:uuid(), name:"", email:"", phone:"", relationship:"", portalCode:`${s.id.slice(0,4).toUpperCase()}-${Math.random().toString(36).slice(2,6).toUpperCase()}` };
+                        update(prev => ({ ...prev, students: prev.students.map(st => st.id===s.id ? { ...st, contacts:[...(st.contacts||[]), newContact] } : st) }));
+                      }} style={{ padding:"6px 14px", background:"#f0fdf4", color:"#15803d", border:"1px solid #d4e8dd", borderRadius:8, cursor:"pointer", fontSize:12, fontWeight:700 }}>
+                        + Add Contact
+                      </button>
                     </div>
-                  );
-                })}
-              </div>
+
+                    {/* Contacts */}
+                    {contacts.length === 0 ? (
+                      <div style={{ textAlign:"center", padding:"16px", color:"#94a3b8", fontSize:13, background:"#f8fafc", borderRadius:10 }}>
+                        No contacts yet — click + Add Contact
+                      </div>
+                    ) : (
+                      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:12 }}>
+                        {contacts.map((c, ci) => {
+                          const portalCode = c.portalCode || `${s.id.slice(0,4).toUpperCase()}-${c.id.slice(0,4).toUpperCase()}`;
+                          const link = `${window.location.origin}${window.location.pathname}#parent-${portalCode}`;
+                          const lastRead = appState?.parentPortalActivity?.[portalCode]?.lastRead;
+                          const myMessages = (appState?.parentMessages||[]).filter(m =>
+                            (m.to==="all") ||
+                            (m.to===s.id && (!m.contactId || m.contactId==="all")) ||
+                            (m.to===s.id && m.contactId===c.id)
+                          );
+                          const lastMsg = myMessages.sort((a,b) => b.timestamp-a.timestamp)[0];
+                          const hasUnread = lastMsg && (!lastRead || lastRead < lastMsg.timestamp);
+                          return (
+                            <div key={c.id} style={{ background:"#f8fafc", borderRadius:12, padding:"14px", border:`1.5px solid ${hasUnread?"#fcd34d":"#e2e8f0"}` }}>
+                              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+                                <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d" }}>Contact {ci+1}</div>
+                                <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                                  {lastMsg && (
+                                    <div style={{ fontSize:10, fontWeight:600, color:hasUnread?"#d97706":"#15803d", background:hasUnread?"#fef9c3":"#f0fdf4", padding:"2px 8px", borderRadius:20 }}>
+                                      {hasUnread?"📬 Unread":"✅ Read"}
+                                    </div>
+                                  )}
+                                  <button onClick={() => update(prev => ({ ...prev, students: prev.students.map(st => st.id===s.id ? { ...st, contacts:st.contacts.filter(x=>x.id!==c.id) } : st) }))}
+                                    style={{ background:"none", border:"none", cursor:"pointer", color:"#ef4444", fontSize:14, padding:"0 2px" }}>✕</button>
+                                </div>
+                              </div>
+                              {/* Contact fields */}
+                              {[
+                                { key:"name", placeholder:"Full name", label:"Name" },
+                                { key:"relationship", placeholder:"e.g. Mom, Dad, Grandma", label:"Relationship" },
+                                { key:"email", placeholder:"email@address.com", label:"Email" },
+                                { key:"phone", placeholder:"Phone (optional)", label:"Phone" },
+                              ].map(field => (
+                                <input key={field.key}
+                                  placeholder={field.placeholder}
+                                  defaultValue={c[field.key]||""}
+                                  onBlur={e => {
+                                    const val = e.target.value.trim();
+                                    update(prev => ({ ...prev, students: prev.students.map(st => st.id===s.id ? { ...st, contacts:st.contacts.map(x => x.id===c.id ? {...x, [field.key]:val} : x) } : st) }));
+                                  }}
+                                  style={{ width:"100%", padding:"7px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff", marginBottom:6, boxSizing:"border-box" }}/>
+                              ))}
+                              {/* Portal link */}
+                              <div style={{ fontSize:10, color:"#94a3b8", background:"#f1f5f9", padding:"4px 8px", borderRadius:6, marginBottom:8, wordBreak:"break-all" }}>{link}</div>
+                              <div style={{ display:"flex", gap:6 }}>
+                                <button onClick={() => { navigator.clipboard.writeText(link); showToast(`📋 Copied ${c.name||"contact"}'s link!`); }}
+                                  style={{ flex:1, padding:"6px 8px", background:"#0f1f3d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>
+                                  📋 Copy Link
+                                </button>
+                                <button onClick={() => {
+                                  const msg = `Hi ${c.name||"there"}! Here is your parent portal link for ${s.name}'s EconoClassroom account: ${link}`;
+                                  navigator.clipboard.writeText(msg);
+                                  showToast(`📧 Message copied for ${c.name||"contact"}!`);
+                                }} style={{ flex:1, padding:"6px 8px", background:"#15803d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:600 }}>
+                                  📧 Copy Email
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Message History */}
-            <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
+            <div style={{ background:"#fff", borderRadius:16, padding:28, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginTop:24 }}>
               <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:16 }}>📬 Message History</div>
               {(appState?.parentMessages||[]).length === 0 ? (
                 <div style={{ textAlign:"center", padding:32, color:"#7a9bb5", fontSize:14 }}>No messages sent yet!</div>
               ) : (
                 (appState?.parentMessages||[]).map(msg => {
-                  const recipient = msg.to === "all" ? "All Parents" : students.find(s=>s.id===msg.to)?.name + "'s Parents";
+                  const stu = students.find(s => s.id === msg.to);
+                  const contact = stu?.contacts?.find(c => c.id === msg.contactId);
+                  const recipient = msg.to==="all" ? "All Contacts" :
+                    contact ? `${stu?.name}'s ${contact.relationship||contact.name}` :
+                    `All of ${stu?.name}'s contacts`;
                   return (
                     <div key={msg.id} style={{ padding:"16px 0", borderBottom:"1px solid #f0f9f4" }}>
                       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
                         <div>
                           <div style={{ fontWeight:700, fontSize:15, color:"#0f1f3d" }}>{msg.subject}</div>
-                          <div style={{ fontSize:12, color:"#7a9bb5" }}>To: {recipient} · {formatFullDate(msg.date)}</div>
+                          <div style={{ fontSize:12, color:"#7a9bb5" }}>To: {recipient} · {msg.date}</div>
                         </div>
                         {(msg.replies||[]).length > 0 && (
                           <div style={{ background:"#f0fdf4", border:"1px solid #d4e8dd", borderRadius:20, padding:"3px 10px", fontSize:11, color:"#15803d", fontWeight:600 }}>
@@ -3211,7 +3253,7 @@ function ClassroomApp({ user, auth, classroom }) {
                       <div style={{ fontSize:13, color:"#4a6580", lineHeight:1.6, background:"#f8fafc", borderRadius:8, padding:"10px 14px" }}>{msg.message}</div>
                       {(msg.replies||[]).map((r,i) => (
                         <div key={i} style={{ marginTop:8, marginLeft:24, background:"#f0f9f4", borderRadius:8, padding:"10px 14px", border:"1px solid #d4e8dd" }}>
-                          <div style={{ fontSize:11, color:"#7a9bb5", marginBottom:4 }}>💬 Parent reply · {r.date}</div>
+                          <div style={{ fontSize:11, color:"#7a9bb5", marginBottom:4 }}>💬 {r.from||"Parent"} replied · {r.date}</div>
                           <div style={{ fontSize:13, color:"#0f1f3d" }}>{r.message}</div>
                         </div>
                       ))}
