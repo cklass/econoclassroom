@@ -287,7 +287,7 @@ function ParentPortal({ code, setScreen }) {
             setStudent(stu);
             setTeacherId(val.teacherId);
             setLoading(false);
-           // Mark messages as read
+            // Mark messages as read
             (async () => {
               try {
                 const { getDatabase, ref, set } = await import("firebase/database");
@@ -306,19 +306,12 @@ function ParentPortal({ code, setScreen }) {
                 });
               } catch(e) { console.log("Read receipt error:", e); }
             })();
+          }
+        });
       });
       setTimeout(() => { if (!found) { setError("Link not found."); setLoading(false); } }, 3000);
     });
   }, [code]);
-
-  if (loading) return (
-    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(135deg,#0a1628,#0f1f3d)", fontFamily:"'Inter',sans-serif" }}>
-      <div style={{ textAlign:"center", color:"#fff" }}>
-        <div style={{ fontSize:64, marginBottom:16 }}>🦕</div>
-        <div style={{ fontSize:18, fontWeight:600 }}>Loading your child's profile...</div>
-      </div>
-    </div>
-  );
 
   if (error || !data || !student) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(135deg,#0a1628,#0f1f3d)", fontFamily:"'Inter',sans-serif" }}>
