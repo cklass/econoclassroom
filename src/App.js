@@ -373,19 +373,30 @@ function ParentPortal({ code, setScreen }) {
 
       <div style={{ maxWidth:680, margin:"0 auto", padding:"24px 20px" }}>
 
-              {/* Page guide */}
+                      {/* Page guide */}
         <div style={{ background:"rgba(15,31,61,0.06)", border:"1px solid #d4e8dd", borderRadius:14, padding:"14px 20px", marginBottom:20, display:"flex", gap:16, flexWrap:"wrap", alignItems:"center" }}>
           <div style={{ fontSize:13, fontWeight:700, color:"#0f1f3d" }}>On this page:</div>
           {[
-            { icon:"🦕", label:"Your child's balance" },
-            { icon:"📊", label:"This week's activity" },
-            { icon:"📈", label:"Balance history" },
-            { icon:"✉️", label:"Teacher messages" },
-            { icon:"📋", label:"Recent transactions" },
-            { icon:"📅", label:"School calendar" },
+            { icon:"🦕", label:"Your child's balance", highlight:false },
+            { icon:"📊", label:"This week's activity", highlight:false },
+            { icon:"📈", label:"Balance history", highlight:false },
+            { icon:"✉️", label:"Teacher messages", highlight:myMessages.length > 0 },
+            { icon:"📋", label:"Recent transactions", highlight:false },
+            { icon:"📅", label:"School calendar", highlight:false },
           ].map(item => (
-            <div key={item.label} style={{ display:"flex", alignItems:"center", gap:6, fontSize:12, color:"#4a6580", background:"#fff", borderRadius:20, padding:"4px 12px", border:"1px solid #e2e8f0" }}>
-              <span>{item.icon}</span>{item.label}
+            <div key={item.label} style={{
+              display:"flex", alignItems:"center", gap:6, fontSize:12,
+              color: item.highlight ? "#fff" : "#4a6580",
+              background: item.highlight ? "#dc2626" : "#fff",
+              borderRadius:20, padding:"4px 12px",
+              border: item.highlight ? "2px solid #dc2626" : "1px solid #e2e8f0",
+              fontWeight: item.highlight ? 700 : 400,
+              animation: item.highlight ? "pulse 1.5s ease infinite" : "none",
+              boxShadow: item.highlight ? "0 0 12px rgba(220,38,38,0.4)" : "none",
+            }}>
+              <span>{item.icon}</span>
+              {item.label}
+              {item.highlight && <span style={{ background:"#fff", color:"#dc2626", borderRadius:10, padding:"0px 6px", fontSize:10, fontWeight:800, marginLeft:4 }}>NEW!</span>}
             </div>
           ))}
         </div>
