@@ -354,7 +354,10 @@ function ParentPortal({ code, setScreen }) {
   };
 
   return (
-    <div style={{ minHeight:"100vh", background:"#f0f9f4", fontFamily:"'Inter',sans-serif" }}>
+     <div style={{ minHeight:"100vh", background:"#f0f9f4", fontFamily:"'Inter',sans-serif" }}>
+      <style>{`
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.85;transform:scale(1.05)} }
+      `}</style>
       {/* Header */}
       <div style={{ background:"linear-gradient(135deg,#0a1628,#0f1f3d)", padding:"20px 24px" }}>
         <div style={{ maxWidth:680, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
