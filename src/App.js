@@ -278,9 +278,18 @@ function ParentPortal({ code, setScreen }) {
       Object.entries(codes).forEach(([, val]) => {
         subscribeToFirebase(`teachers/${val.teacherId}/classroom`, classroom => {
           if (!classroom || found) return;
-          const stu = (classroom.students||[]).find(s =>
+          // Check old-style parentCode first
+          let stu = (classroom.students||[]).find(s => 
             (s.parentCode || s.id.slice(0,8).toUpperCase()) === code.toUpperCase()
           );
+          let contactId = null;
+          // Check new-style contact portalCodes
+          if (!stu) {
+            for (const s of (classroom.students||[])) {
+              const contact = (s.contacts||[]).find(c => c.portalCode === code.toUpperCase());
+              if (contact) { stu = s; contactId = contact.id; break; }
+            }
+          }
           if (stu) {
             found = true;
             setData(classroom);
@@ -3186,16 +3195,16 @@ function ClassroomApp({ user, auth, classroom }) {
                               </div>
                               {/* Contact fields */}
                               {[
-                                { key:"name", placeholder:"Full name", label:"Name" },
-                                { key:"relationship", placeholder:"e.g. Mom, Dad, Grandma", label:"Relationship" },
-                                { key:"email", placeholder:"email@address.com", label:"Email" },
-                                { key:"phone", placeholder:"Phone (optional)", label:"Phone" },
+                                { key:"name", placeholder:"Full name" },
+                                { key:"relationship", placeholder:"e.g. Mom, Dad, Grandma" },
+                                { key:"email", placeholder:"email@address.com" },
+                                { key:"phone", placeholder:"Phone (optional)" },
                               ].map(field => (
                                 <input key={field.key}
                                   placeholder={field.placeholder}
-                                  defaultValue={c[field.key]||""}
-                                  onBlur={e => {
-                                    const val = e.target.value.trim();
+                                  value={c[field.key]||""}
+                                  onChange={e => {
+                                    const val = e.target.value;
                                     update(prev => ({ ...prev, students: prev.students.map(st => st.id===s.id ? { ...st, contacts:st.contacts.map(x => x.id===c.id ? {...x, [field.key]:val} : x) } : st) }));
                                   }}
                                   style={{ width:"100%", padding:"7px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff", marginBottom:6, boxSizing:"border-box" }}/>
