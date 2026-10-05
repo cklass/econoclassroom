@@ -288,22 +288,24 @@ function ParentPortal({ code, setScreen }) {
             setTeacherId(val.teacherId);
             setLoading(false);
            // Mark messages as read
-            const { getDatabase, ref, set } = await import("firebase/database");
-            const { getApps, initializeApp } = await import("firebase/app");
-            const firebaseConfig = {
-              apiKey: "AIzaSyAtc1-Jp4NudoGc-u-yRBvII0ZgD4DFifQ",
-              authDomain: "econoclassroom-9780e.firebaseapp.com",
-              databaseURL: "https://econoclassroom-9780e-default-rtdb.firebaseio.com",
-              projectId: "econoclassroom-9780e",
-            };
-            const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-            const db = getDatabase(app);
-            set(ref(db, `teachers/${val.teacherId}/classroom/parentPortalActivity/${stu.id}`), {
-              lastRead: Date.now(),
-              lastVisit: new Date().toISOString().slice(0,10)
-            });
-          }
-        });
+            (async () => {
+              try {
+                const { getDatabase, ref, set } = await import("firebase/database");
+                const { getApps, initializeApp } = await import("firebase/app");
+                const firebaseConfig = {
+                  apiKey: "AIzaSyAtc1-Jp4NudoGc-u-yRBvII0ZgD4DFifQ",
+                  authDomain: "econoclassroom-9780e.firebaseapp.com",
+                  databaseURL: "https://econoclassroom-9780e-default-rtdb.firebaseio.com",
+                  projectId: "econoclassroom-9780e",
+                };
+                const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+                const db = getDatabase(app);
+                set(ref(db, `teachers/${val.teacherId}/classroom/parentPortalActivity/${stu.id}`), {
+                  lastRead: Date.now(),
+                  lastVisit: new Date().toISOString().slice(0,10)
+                });
+              } catch(e) { console.log("Read receipt error:", e); }
+            })();
       });
       setTimeout(() => { if (!found) { setError("Link not found."); setLoading(false); } }, 3000);
     });
