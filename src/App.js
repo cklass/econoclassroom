@@ -736,7 +736,8 @@ function AssistantDashboard({ classroom, teacherId, setScreen }) {
   };
 
   const students = appState?.students || [];
-  const balances = appState?.balances || {};
+  const calcBalance = (studentId) => (appState?.txLog||[]).filter(t => t.studentId===studentId).reduce((sum,t) => sum+t.amount, 0);
+  const balances = Object.fromEntries((students).map(s => [s.id, Math.max(0, calcBalance(s.id))]));
   const totalBalance = Object.values(balances).reduce((a,b) => a+b, 0);
   const selStudent = students.find(s => s.id === selected);
 
@@ -2395,7 +2396,8 @@ function ClassroomApp({ user, auth, classroom }) {
   }, [appState?.students]);
 
   const students = appState?.students || [];
-  const balances = appState?.balances || {};
+  const calcBalance = (studentId) => (appState?.txLog||[]).filter(t => t.studentId===studentId).reduce((sum,t) => sum+t.amount, 0);
+  const balances = Object.fromEntries((students).map(s => [s.id, Math.max(0, calcBalance(s.id))]));
   const selStudent = students.find(s => s.id === selected);
   const totalBalance = Object.values(balances).reduce((a,b) => a+b, 0);
 
