@@ -2334,7 +2334,6 @@ function ClassroomApp({ user, auth, classroom }) {
     update(prev => ({
       ...prev,
       txLog: [{ id:uuid(), studentId, amount, reason, date:todayStr() }, ...(prev.txLog||[])],
-      balances: { ...prev.balances, [studentId]: Math.max(0, (prev.balances[studentId]||0) + amount) },
     }));
   };
 
@@ -2699,11 +2698,13 @@ function ClassroomApp({ user, auth, classroom }) {
                 if (!amt || amt <= 0) { showToast("Enter a valid amount!", "#ef4444"); return; }
                 if (payMulti) {
                   if (multiSelected.length === 0) { showToast("Select at least one student!", "#ef4444"); return; }
-                  multiSelected.forEach(id => addTx(id, amt, payReason));
+                  const newTxs = multiSelected.map(id => ({ id:uuid(), studentId:id, amount:amt, reason:payReason, date:todayStr() }));
+                  update(prev => ({ ...prev, txLog: [...newTxs, ...(prev.txLog||[])] }));
                   showToast(`Paid ${fmt(amt)} to ${multiSelected.length} students! 🎉`);
                   setMultiSelected([]);
                 } else if (selected === "all") {
-                  students.forEach(s => addTx(s.id, amt, payReason));
+                  const newTxs = students.map(s => ({ id:uuid(), studentId:s.id, amount:amt, reason:payReason, date:todayStr() }));
+                  update(prev => ({ ...prev, txLog: [...newTxs, ...(prev.txLog||[])] }));
                   showToast(`Paid ${fmt(amt)} to all ${students.length} students! 🎉`);
                 } else if (selected) {
                   addTx(selected, amt, payReason);
