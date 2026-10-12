@@ -2318,7 +2318,6 @@ function ClassroomApp({ user, auth, classroom }) {
   const [multiSelected, setMultiSelected] = React.useState([]);
 
   const fmt = n => `${appState.currencyEmoji}${Number(n).toLocaleString()}`;
-  const fmt = n => `${appState?.currencyEmoji||"🦕"}${Number(n).toLocaleString()}`;
   const toArray = (val) => {
     if (!val) return [];
     if (Array.isArray(val)) return val;
