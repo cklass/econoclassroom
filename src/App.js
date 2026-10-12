@@ -2602,7 +2602,7 @@ function ClassroomApp({ user, auth, classroom }) {
                         <div style={{ fontWeight:700, fontSize:20, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
                           {isBirthdayToday(s) ? "👑 " : ""}{s.name}
                         </div>
-                        <div style={{ fontSize:15, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", fontWeight:500 }}>{job ? job.name : "No job"}</div>
+                        <div style={{ fontSize:15, color:"#0f1f3d", fontWeight:500, lineHeight:1.3 }}>{job ? job.name : "No job"}</div>
                       </div>
                       <div style={{ fontSize:30, lineHeight:1, marginLeft:8, flexShrink:0 }}>{job ? job.emoji : "—"}</div>
                     </div>
