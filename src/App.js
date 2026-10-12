@@ -813,7 +813,7 @@ function AssistantDashboard({ classroom, teacherId, setScreen }) {
                 const isSelected = selected === s.id;
                 return (
                   <div key={s.id} onClick={() => setSelected(isSelected ? null : s.id)}
-                    style={{ background:"#fff", borderRadius:12, padding:"14px 12px", cursor:"pointer",
+                    style={{ background:"#fff", borderRadius:12, padding:"10px 8px", cursor:"pointer",
                       border:`2px solid ${isSelected?"#15803d":"#e2e8f0"}`,
                       boxShadow: isSelected?"0 4px 20px rgba(21,128,61,0.2)":"0 2px 4px rgba(0,0,0,0.06)",
                       transition:"all 0.15s" }}>
@@ -2604,7 +2604,7 @@ function ClassroomApp({ user, auth, classroom }) {
                         </div>
                         <div style={{ fontSize:15, color:"#0f1f3d", fontWeight:500, lineHeight:1.3 }}>{job ? job.name : "No job"}</div>
                       </div>
-                      <div style={{ fontSize:60, lineHeight:1, marginLeft:1, flexShrink:0 }}>{job ? job.emoji : "—"}</div>
+                      <div style={{ fontSize:60, lineHeight:1, marginLeft:8, flexShrink:0 }}>{job ? job.emoji : "—"}</div>
                     </div>
                     <div style={{ fontSize:25, fontWeight:800, color:"#15803d" }}>{fmt(bal)}</div>
                     {isSelected && (
