@@ -3703,6 +3703,19 @@ function ClassroomApp({ user, auth, classroom }) {
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
               <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", margin:0 }}>👷 Classroom Jobs</h2>
               <button onClick={() => {
+                const jobList = toArray(appState?.jobs);
+                if (jobList.length === 0) { showToast("Add jobs first!", "#f59e0b"); return; }
+                const shuffled = [...jobList].sort(() => Math.random() - 0.5);
+                const newAssigned = {};
+                students.forEach((s, i) => {
+                  newAssigned[s.id] = shuffled[i % shuffled.length].id;
+                });
+                update(prev => ({ ...prev, assigned: newAssigned }));
+                showToast("🎲 Jobs randomly assigned!");
+              }} style={{ padding:"12px 24px", background:"linear-gradient(135deg,#7c3aed,#6d28d9)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700, boxShadow:"0 4px 12px rgba(124,58,237,0.3)", marginRight:8 }}>
+                🎲 Random Assign
+              </button>
+              <button onClick={() => {
                 const salaries = (appState?.students||[]).map(s => {
                   const job = toArray(appState?.jobs).find(j => j.id === (appState?.assigned||{})[s.id]);
                   return { student:s, job };
