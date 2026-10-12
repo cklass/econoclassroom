@@ -980,6 +980,11 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
   const [studentActiveGame, setStudentActiveGame] = React.useState(null);
   const [appState, setAppState] = React.useState(classroom);
   const fmt = n => `${appState.currencyEmoji}${Number(n).toLocaleString()}`;
+  const toArray = (val) => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    return Object.values(val);
+  };
   // Calculate balance from txLog — more secure than reading balances directly
   const balance = (appState?.txLog||[])
     .filter(t => t.studentId === studentUser.id)
