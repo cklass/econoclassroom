@@ -729,7 +729,11 @@ function AssistantDashboard({ classroom, teacherId, setScreen }) {
   const fmt = n => `${appState.currencyEmoji||"🦕"}${Number(n).toLocaleString()}`;
   const uuid = () => Math.random().toString(36).slice(2);
   const todayStr = () => new Date().toISOString().slice(0,10);
-
+  const toArray = (val) => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    return Object.values(val);
+  };
   const showToast = (msg, color="#15803d") => {
     setToast({ msg, color });
     setTimeout(() => setToast(null), 3000);
