@@ -800,6 +800,7 @@ function AssistantDashboard({ classroom, teacherId, setScreen }) {
         </div>
 
         <div style={{ display:"grid", gridTemplateColumns:"1fr 340px", gap:24, alignItems:"start" }}>
+          
           {/* Student grid */}
           <div>
             <div style={{ fontSize:16, fontWeight:800, color:"#0f1f3d", marginBottom:16, fontFamily:"'Space Grotesk',sans-serif" }}>
@@ -2583,7 +2584,7 @@ function ClassroomApp({ user, auth, classroom }) {
             </div>
 
             {/* Student grid - compact to fit all on screen */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))", gap:10 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", gap:10 }}>
               {students.sort((a,b) => (balances[b.id]||0) - (balances[a.id]||0)).map(s => {
                 const bal = balances[s.id] || 0;
                 const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
