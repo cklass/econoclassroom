@@ -2584,7 +2584,7 @@ function ClassroomApp({ user, auth, classroom }) {
             </div>
 
             {/* Student grid - compact to fit all on screen */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", gap:10 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", gap:8 }}>
               {students.sort((a,b) => (balances[b.id]||0) - (balances[a.id]||0)).map(s => {
                 const bal = balances[s.id] || 0;
                 const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
@@ -2592,23 +2592,22 @@ function ClassroomApp({ user, auth, classroom }) {
                 const job = toArray(appState?.jobs).find(j => j.id === (appState?.assigned||{})[s.id]);
                 return (
                   <div key={s.id} onClick={() => setSelected(isSelected ? null : s.id)}
-                    style={{ background:"#fff", borderRadius:12, padding:"14px 12px", cursor:"pointer",
+                    style={{ background:"#fff", borderRadius:12, padding:"10px", cursor:"pointer",
                       border:`2px solid ${isSelected?"#15803d":"#e2e8f0"}`,
                       boxShadow: isSelected?"0 4px 16px rgba(34,197,94,0.15)":"0 1px 3px rgba(0,0,0,0.06)",
-                      transition:"all 0.15s" }}>
-                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
-                      
-                      <div style={{ overflow:"hidden", flex:1 }}>
-                        <div style={{ fontWeight:700, fontSize:20, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+                      transition:"all 0.15s", overflow:"hidden" }}>
+                    <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:6, minWidth:0 }}>
+                      <div style={{ minWidth:0, flex:1, paddingRight:4 }}>
+                        <div style={{ fontWeight:700, fontSize:13, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
                           {isBirthdayToday(s) ? "👑 " : ""}{s.name}
                         </div>
-                        <div style={{ fontSize:15, color:"#0f1f3d", fontWeight:500, lineHeight:1.3 }}>{job ? job.name : "No job"}</div>
+                        <div style={{ fontSize:10, color:"#4a6580", fontWeight:500, lineHeight:1.3, marginTop:2 }}>{job ? job.name : "No job"}</div>
                       </div>
-                      <div style={{ fontSize:60, lineHeight:1, marginLeft:8, flexShrink:0 }}>{job ? job.emoji : "—"}</div>
+                      <div style={{ fontSize:32, lineHeight:1, flexShrink:0 }}>{job ? job.emoji : "—"}</div>
                     </div>
-                    <div style={{ fontSize:25, fontWeight:800, color:"#15803d" }}>{fmt(bal)}</div>
+                    <div style={{ fontSize:22, fontWeight:800, color:"#15803d" }}>{fmt(bal)}</div>
                     {isSelected && (
-                      <div style={{ display:"flex", gap:6, marginTop:10 }}>
+                      <div style={{ display:"flex", gap:6, marginTop:8 }}>
                         <button onClick={e => { e.stopPropagation(); setTab("pay"); }}
                           style={{ flex:1, padding:"6px", background:"#15803d", color:"#fff", border:"none", borderRadius:6, cursor:"pointer", fontSize:11, fontWeight:700 }}>💵 Pay</button>
                         <button onClick={e => { e.stopPropagation(); setDeductModal(true); }}
