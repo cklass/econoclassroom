@@ -2582,14 +2582,13 @@ function ClassroomApp({ user, auth, classroom }) {
                       boxShadow: isSelected?"0 4px 16px rgba(34,197,94,0.15)":"0 1px 3px rgba(0,0,0,0.06)",
                       transition:"all 0.15s" }}>
                     <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
-                      <div style={{ width:32, height:32, borderRadius:8, background:`${dino.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>
-                        {dino.emoji}
-                      </div>
+                      
                       <div style={{ overflow:"hidden" }}>
                         <div style={{ fontWeight:700, fontSize:15, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
                           {isBirthdayToday(s) ? "👑 " : ""}{s.name}
                         </div>
-                        <div style={{ fontSize:11, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", fontWeight:500 }}>{job ? `${job.emoji} ${job.name}` : "No job"}</div>
+                        <div style={{ fontSize:18, lineHeight:1, marginBottom:2 }}>{job ? job.emoji : "—"}</div>
+<div style={{ fontSize:10, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", fontWeight:500 }}>{job ? job.name : "No job"}</div>
                       </div>
                     </div>
                     <div style={{ fontSize:20, fontWeight:800, color:"#15803d" }}>{fmt(bal)}</div>
