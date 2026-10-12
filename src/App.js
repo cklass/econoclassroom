@@ -333,12 +333,6 @@ function ParentPortal({ code, setScreen }) {
   );
 
   const fmt = n => `${data.currencyEmoji||"🦕"}${Number(n).toLocaleString()}`;
-  const fmt = n => `${appState?.currencyEmoji||"🦕"}${Number(n).toLocaleString()}`;
-  const toArray = (val) => {
-    if (!val) return [];
-    if (Array.isArray(val)) return val;
-    return Object.values(val);
-  };
   const balance = data?.balances?.[student.id] || 0;
   const myTx = (data?.txLog||[]).filter(t => t.studentId === student.id);
   const myMessages = (data?.parentMessages||[]).filter(m => m.to === "all" || m.to === student.id);
@@ -2319,6 +2313,12 @@ function ClassroomApp({ user, auth, classroom }) {
   const [multiSelected, setMultiSelected] = React.useState([]);
 
   const fmt = n => `${appState.currencyEmoji}${Number(n).toLocaleString()}`;
+  const fmt = n => `${appState?.currencyEmoji||"🦕"}${Number(n).toLocaleString()}`;
+  const toArray = (val) => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    return Object.values(val);
+  };
   const uuid = () => Math.random().toString(36).slice(2);
   const todayStr = () => new Date().toISOString().slice(0, 10);
 
