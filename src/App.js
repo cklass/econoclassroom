@@ -2802,7 +2802,7 @@ function ClassroomApp({ user, auth, classroom }) {
                 <button onClick={() => {
                   // Pay salaries
                   students.forEach(s => {
-                    const job = (appState?.jobs||[]).find(j => j.id === (appState?.assigned||{})[s.id]);
+                    const job = toArray(appState?.jobs).find(j => j.id === (appState?.assigned||{})[s.id]);
                     if (job) addTx(s.id, job.pay, `${job.emoji} ${job.name} salary`);
                   });
                   // Deduct expenses
@@ -3704,7 +3704,7 @@ function ClassroomApp({ user, auth, classroom }) {
               <h2 style={{ fontSize:22, fontWeight:800, color:"#0f1f3d", margin:0 }}>👷 Classroom Jobs</h2>
               <button onClick={() => {
                 const salaries = (appState?.students||[]).map(s => {
-                  const job = (appState?.jobs||[]).find(j => j.id === (appState?.assigned||{})[s.id]);
+                  const job = toArray(appState?.jobs).find(j => j.id === (appState?.assigned||{})[s.id]);
                   return { student:s, job };
                 }).filter(x => x.job);
                 if (salaries.length === 0) { showToast("No jobs assigned yet!", "#f59e0b"); return; }
@@ -3738,11 +3738,11 @@ function ClassroomApp({ user, auth, classroom }) {
             </div>
 
             {/* Jobs list */}
-            {(appState?.jobs||[]).length > 0 && (
+            {toArray(appState?.jobs).length > 0 && (
               <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0", marginBottom:24 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:12, letterSpacing:0.5 }}>AVAILABLE JOBS</label>
                 <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-                  {(appState?.jobs||[]).map(job => (
+                  {toArray(appState?.jobs).map(job => (
                     <div key={job.id} style={{ display:"flex", alignItems:"center", gap:8, background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"8px 14px" }}>
                       <span style={{ fontSize:20 }}>{job.emoji}</span>
                       <div>
@@ -3760,14 +3760,14 @@ function ClassroomApp({ user, auth, classroom }) {
             {/* Assign jobs to students */}
             <div style={{ background:"#fff", borderRadius:16, padding:24, boxShadow:"0 1px 3px rgba(0,0,0,0.06)", border:"1px solid #e2e8f0" }}>
               <label style={{ fontSize:12, fontWeight:700, color:"#4a6580", display:"block", marginBottom:16, letterSpacing:0.5 }}>ASSIGN JOBS TO STUDENTS</label>
-              {(appState?.jobs||[]).length === 0 ? (
+              {toArray(appState?.jobs).length === 0 ? (
                 <div style={{ textAlign:"center", padding:32, color:"#7a9bb5", fontSize:14 }}>Add jobs above first!</div>
               ) : (
                 <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:12 }}>
                   {students.map(s => {
                     const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
                     const assignedJobId = (appState?.assigned||{})[s.id];
-                    const assignedJob = (appState?.jobs||[]).find(j => j.id === assignedJobId);
+                    const assignedJob = toArray(appState?.jobs).find(j => j.id === assignedJobId);
                     return (
                       <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 16px", background:"#f8fafc", borderRadius:12, border:"1px solid #e2e8f0" }}>
                         <div style={{ width:36, height:36, borderRadius:10, background:`${dino.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>
@@ -3780,7 +3780,7 @@ function ClassroomApp({ user, auth, classroom }) {
                         <select value={assignedJobId||""} onChange={e => update(prev => ({ ...prev, assigned: { ...(prev.assigned||{}), [s.id]: e.target.value||null } }))}
                           style={{ padding:"6px 10px", borderRadius:8, border:"1.5px solid #e2e8f0", fontSize:12, outline:"none", background:"#fff", color:"#0f1f3d", cursor:"pointer" }}>
                           <option value="">No job</option>
-                          {(appState?.jobs||[]).map(j => <option key={j.id} value={j.id}>{j.emoji} {j.name}</option>)}
+                          {toArray(appState?.jobs).map(j => <option key={j.id} value={j.id}>{j.emoji} {j.name}</option>)}
                         </select>
                       </div>
                     );
