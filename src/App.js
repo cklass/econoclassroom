@@ -2599,14 +2599,14 @@ function ClassroomApp({ user, auth, classroom }) {
                     <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
                       
                       <div style={{ overflow:"hidden", flex:1 }}>
-                        <div style={{ fontWeight:700, fontSize:15, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+                        <div style={{ fontWeight:700, fontSize:20, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
                           {isBirthdayToday(s) ? "👑 " : ""}{s.name}
                         </div>
-                        <div style={{ fontSize:10, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", fontWeight:500 }}>{job ? job.name : "No job"}</div>
+                        <div style={{ fontSize:15, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", fontWeight:500 }}>{job ? job.name : "No job"}</div>
                       </div>
-                      <div style={{ fontSize:28, lineHeight:1, marginLeft:8, flexShrink:0 }}>{job ? job.emoji : "—"}</div>
+                      <div style={{ fontSize:30, lineHeight:1, marginLeft:8, flexShrink:0 }}>{job ? job.emoji : "—"}</div>
                     </div>
-                    <div style={{ fontSize:20, fontWeight:800, color:"#15803d" }}>{fmt(bal)}</div>
+                    <div style={{ fontSize:25, fontWeight:800, color:"#15803d" }}>{fmt(bal)}</div>
                     {isSelected && (
                       <div style={{ display:"flex", gap:6, marginTop:10 }}>
                         <button onClick={e => { e.stopPropagation(); setTab("pay"); }}
