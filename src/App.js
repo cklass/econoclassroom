@@ -2603,7 +2603,7 @@ function ClassroomApp({ user, auth, classroom }) {
                         </div>
                         <div style={{ fontSize:10, color:"#4a6580", fontWeight:500, lineHeight:1.3, marginTop:2 }}>{job ? job.name : "No job"}</div>
                       </div>
-                      <div style={{ fontSize:44, lineHeight:1, flexShrink:0 }}>{job ? job.emoji : "—"}</div>
+                      <div style={{ fontSize:52, lineHeight:1, flexShrink:0 }}>{job ? job.emoji : "—"}</div>
                     </div>
                     <div style={{ fontSize:22, fontWeight:800, color:"#15803d" }}>{fmt(bal)}</div>
                     {isSelected && (
