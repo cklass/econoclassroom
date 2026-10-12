@@ -2574,7 +2574,7 @@ function ClassroomApp({ user, auth, classroom }) {
                 const bal = balances[s.id] || 0;
                 const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
                 const isSelected = selected === s.id;
-                const job = (appState?.jobs||[]).find(j => j.id === (appState?.assigned||{})[s.id]);
+                const job = toArray(appState?.jobs).find(j => j.id === (appState?.assigned||{})[s.id]);
                 return (
                   <div key={s.id} onClick={() => setSelected(isSelected ? null : s.id)}
                     style={{ background:"#fff", borderRadius:12, padding:"14px 12px", cursor:"pointer",
