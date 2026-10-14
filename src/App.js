@@ -2584,7 +2584,7 @@ function ClassroomApp({ user, auth, classroom }) {
             </div>
 
             {/* Student grid - compact to fit all on screen */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", gap:8 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", gridTemplateRows:"repeat(4, 1fr)", gap:8, height:"calc(100vh - 280px)" }}>
               {students.sort((a,b) => (balances[b.id]||0) - (balances[a.id]||0)).map(s => {
                 const bal = balances[s.id] || 0;
                 const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
@@ -2595,7 +2595,7 @@ function ClassroomApp({ user, auth, classroom }) {
                     style={{ background:"#fff", borderRadius:12, padding:"10px", cursor:"pointer",
                       border:`2px solid ${isSelected?"#15803d":"#e2e8f0"}`,
                       boxShadow: isSelected?"0 4px 16px rgba(34,197,94,0.15)":"0 1px 3px rgba(0,0,0,0.06)",
-                      transition:"all 0.15s", overflow:"hidden" }}>
+                      transition:"all 0.15s", overflow:"hidden", height:"100%" }}>
                     <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:6, minWidth:0 }}>
                       <div style={{ minWidth:0, flex:1, paddingRight:4 }}>
                         <div style={{ fontWeight:700, fontSize:20, color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
