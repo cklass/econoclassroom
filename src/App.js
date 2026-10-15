@@ -1146,11 +1146,11 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
         <div style={{ color:"#fff", fontSize:16, fontWeight:700, marginBottom:16 }}>📈 Dino Stock Market</div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))", gap:12 }}>
           {[
-            { id:"bananas",  name:"Brachiosaur Bananas",  emoji:"🦕", color:"#15803d", startPrice:20, desc:"Staples & Grocery" },
-            { id:"trextech", name:"T-Rex Tech",           emoji:"🦖", color:"#7c3aed", startPrice:50, desc:"Technology" },
-            { id:"airways",  name:"Pterodactyl Airways",  emoji:"🐉", color:"#0f1f3d", startPrice:35, desc:"Travel & Leisure" },
-            { id:"energy",   name:"DinoEgg Energy",       emoji:"🥚", color:"#d97706", startPrice:15, desc:"Energy & Utilities" },
-            { id:"steel",    name:"Stegosaurus Steel",    emoji:"💎", color:"#64748b", startPrice:28, desc:"Industrials" },
+            { id:"bananas",  name:"Brachiosaur Bananas",  emoji:"🦕", color:"#15803d", startPrice:20, desc:"Staples & Grocery",  tickerNames:["Loblaw","Metro","Couche-Tard"] },
+            { id:"trextech", name:"T-Rex Tech",           emoji:"🦖", color:"#7c3aed", startPrice:50, desc:"Technology",         tickerNames:["Shopify","Celestica","MDA Space"] },
+            { id:"airways",  name:"Pterodactyl Airways",  emoji:"🐉", color:"#0f1f3d", startPrice:35, desc:"Travel & Leisure",   tickerNames:["Air Canada","BRP","Cargojet"] },
+            { id:"energy",   name:"DinoEgg Energy",       emoji:"🥚", color:"#d97706", startPrice:15, desc:"Energy & Utilities", tickerNames:["Enbridge","Fortis","TC Energy"] },
+            { id:"steel",    name:"Stegosaurus Steel",    emoji:"💎", color:"#64748b", startPrice:28, desc:"Industrials",        tickerNames:["CN Rail","CAE","WSP Global"] },
           ].map(stock => {
             const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
             const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
@@ -1171,6 +1171,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                     <div>
                       <div style={{ fontWeight:700, fontSize:13, color:"#fff" }}>{stock.name}</div>
                       <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)" }}>{stock.desc}</div>
+                      
                     </div>
                   </div>
                   <div style={{ textAlign:"right" }}>
@@ -3310,11 +3311,11 @@ function ClassroomApp({ user, auth, classroom }) {
             {/* Stock prices */}
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:16, marginBottom:24 }}>
               {[
-                { id:"bananas",  name:"Brachiosaur Bananas",  emoji:"🦕", color:"#15803d", startPrice:20, desc:"Staples & Grocery",   tickers:["L.TO","MRU.TO","ATD.TO"] },
-                { id:"trextech", name:"T-Rex Tech",           emoji:"🦖", color:"#7c3aed", startPrice:50, desc:"Technology",          tickers:["SHOP.TO","CSU.TO","CLS.TO"] },
-                { id:"airways",  name:"Pterodactyl Airways",  emoji:"🐉", color:"#0f1f3d", startPrice:35, desc:"Travel & Leisure",    tickers:["AC.TO","DOO.TO","CJT.TO"] },
-                { id:"energy",   name:"DinoEgg Energy",       emoji:"🥚", color:"#d97706", startPrice:15, desc:"Energy & Utilities",  tickers:["ENB.TO","FTS.TO","TRP.TO"] },
-                { id:"steel",    name:"Stegosaurus Steel",    emoji:"💎", color:"#64748b", startPrice:28, desc:"Industrials",         tickers:["CNR.TO","CAE.TO","WSP.TO"] },
+                { id:"bananas",  name:"Brachiosaur Bananas",  emoji:"🦕", color:"#15803d", startPrice:20, desc:"Staples & Grocery",   tickers:["L.TO","MRU.TO","ATD.TO"],    tickerNames:["Loblaw","Metro","Couche-Tard"] },
+                { id:"trextech", name:"T-Rex Tech",           emoji:"🦖", color:"#7c3aed", startPrice:50, desc:"Technology",          tickers:["SHOP.TO","CLS.TO","MDA.TO"], tickerNames:["Shopify","Celestica","MDA Space"] },
+                { id:"airways",  name:"Pterodactyl Airways",  emoji:"🐉", color:"#0f1f3d", startPrice:35, desc:"Travel & Leisure",    tickers:["AC.TO","DOO.TO","CJT.TO"],   tickerNames:["Air Canada","BRP","Cargojet"] },
+                { id:"energy",   name:"DinoEgg Energy",       emoji:"🥚", color:"#d97706", startPrice:15, desc:"Energy & Utilities",  tickers:["ENB.TO","FTS.TO","TRP.TO"],  tickerNames:["Enbridge","Fortis","TC Energy"] },
+                { id:"steel",    name:"Stegosaurus Steel",    emoji:"💎", color:"#64748b", startPrice:28, desc:"Industrials",         tickers:["CNR.TO","CAE.TO","WSP.TO"],  tickerNames:["CN Rail","CAE","WSP Global"] },
               ].map(stock => {
                 const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
                 const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
