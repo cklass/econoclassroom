@@ -3360,11 +3360,11 @@ function ClassroomApp({ user, auth, classroom }) {
                   const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
                   const portfolio = appState?.portfolios?.[s.id] || {};
                   const STOCKS = [
-                    { id:"bananas", name:"Brachiosaur Bananas", emoji:"🦕", startPrice:20 },
-                    { id:"trextech", name:"T-Rex Tech", emoji:"🦖", startPrice:50 },
-                    { id:"airways", name:"Pterodactyl Airways", emoji:"🐉", startPrice:35 },
-                    { id:"energy", name:"DinoEgg Energy", emoji:"🥚", startPrice:15 },
-                    { id:"steel", name:"Stegosaurus Steel", emoji:"💎", startPrice:28 },
+                    { id:"bananas", name:"Brachiosaur Bananas", emoji:"🦕", startPrice:20, tickerNames:["Loblaw","Metro","Couche-Tard"] },
+                    { id:"trextech", name:"T-Rex Tech", emoji:"🦖", startPrice:50, tickerNames:["Shopify","Celestica","MDA Space"] },
+                    { id:"airways", name:"Pterodactyl Airways", emoji:"🐉", startPrice:35, tickerNames:["Air Canada","BRP","Cargojet"] },
+                    { id:"energy", name:"DinoEgg Energy", emoji:"🥚", startPrice:15, tickerNames:["Enbridge","Fortis","TC Energy"] },
+                    { id:"steel", name:"Stegosaurus Steel", emoji:"💎", startPrice:28, tickerNames:["CN Rail","CAE","WSP Global"] },
                   ];
                   const portfolioValue = STOCKS.reduce((sum, stock) => {
                     const shares = portfolio[stock.id] || 0;
