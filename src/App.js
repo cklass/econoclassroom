@@ -2595,7 +2595,7 @@ function ClassroomApp({ user, auth, classroom }) {
                     style={{ background:"#fff", borderRadius:12, padding:"10px", cursor:"pointer",
                       border:`2px solid ${isSelected?"#15803d":"#e2e8f0"}`,
                       boxShadow: isSelected?"0 4px 16px rgba(34,197,94,0.15)":"0 1px 3px rgba(0,0,0,0.06)",
-                      transition:"all 0.15s", overflow:"hidden", height:"100%" }}>
+                      transition:"all 0.15s", overflow:"hidden" }}>
                     <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:6, minWidth:0 }}>
                       <div style={{ minWidth:0, flex:1, paddingRight:4 }}>
                         <div style={{ fontWeight:700, fontSize:"1.1vw", color:"#0f1f3d", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
