@@ -2584,7 +2584,7 @@ function ClassroomApp({ user, auth, classroom }) {
             </div>
 
             {/* Student grid - compact to fit all on screen */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", gridTemplateRows:"repeat(4, 1fr)", gap:12, height:"calc(100vh - 240px)" }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(7, 1fr)", gridTemplateRows:"repeat(4, 1fr)", gap:16, height:"calc(100vh - 180px)" }}>
               {students.sort((a,b) => (balances[b.id]||0) - (balances[a.id]||0)).map(s => {
                 const bal = balances[s.id] || 0;
                 const dino = DINO_OPTIONS.find(d => d.id === s.dinoId) || DINO_OPTIONS[0];
