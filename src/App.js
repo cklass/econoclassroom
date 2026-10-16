@@ -3330,6 +3330,7 @@ function ClassroomApp({ user, auth, classroom }) {
                         <div>
                           <div style={{ fontWeight:700, fontSize:14, color:"#0f1f3d", fontFamily:"'Space Grotesk',sans-serif" }}>{stock.name}</div>
                           <div style={{ fontSize:11, color:"#7a9bb5" }}>{stock.desc}</div>
+                          <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>Tracks: {(stock.tickerNames||[]).join(" · ")}</div>
                         </div>
                       </div>
                       <div style={{ textAlign:"right" }}>
