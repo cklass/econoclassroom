@@ -1170,8 +1170,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                     <span style={{ fontSize:24 }}>{stock.emoji}</span>
                     <div>
                       <div style={{ fontWeight:700, fontSize:13, color:"#fff" }}>{stock.name}</div>
-                      <div style={{ fontSize:11, color:"rgba(255,255,255,0.4)" }}>{stock.desc}</div>
-                      <div style={{ fontSize:10, color:"rgba(255,255,255,0.3)", marginTop:2 }}>Tracks: {(stock.tickerNames||[]).join(" · ")}</div>
+                      <div style={{ fontSize:10, color:"rgba(255,255,255,0.6)", marginTop:2 }}>Tracks: {(stock.tickerNames||[]).join(" · ")}</div>
                     </div>
                   </div>
                   <div style={{ textAlign:"right" }}>
