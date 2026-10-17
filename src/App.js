@@ -1005,9 +1005,13 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
   const [showBirthday, setShowBirthday] = React.useState(false);
 
   // Subscribe to live updates
+  const savingsRef = React.useRef(null);
   React.useEffect(() => {
     const unsub = subscribeToFirebase(`teachers/${studentUser.teacherId}/classroom`, data => {
-      if (data) setAppState(prev => ({ ...data, savings: { ...(data.savings||{}), ...(prev?.savings||{}) } }));
+      if (data) setAppState(prev => ({
+        ...data,
+        savings: savingsRef.current !== null ? savingsRef.current : (data.savings || {})
+      }));
     });
     return unsub;
   }, [studentUser.teacherId]);
@@ -1332,7 +1336,9 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                 const newTxLog = [newTx, ...(appState.txLog||[])];
                 setAppState(prev => ({ ...prev, txLog:newTxLog, savings:{ ...(prev.savings||{}), [studentUser.id]:newSavings } }));
                 saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, newTxLog);
-                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings`, { ...(appState.savings||{}), [studentUser.id]: newSavings });
+                const newSavingsObj = { ...(appState.savings||{}), [studentUser.id]: newSavings };
+                savingsRef.current = newSavingsObj;
+                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings`, newSavingsObj);
                 document.getElementById("savings-deposit").value = "";
               }} style={{ padding:"8px 14px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Save</button>
             </div>
@@ -1353,7 +1359,9 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                 const newTxLog2 = [newTx2, ...(appState.txLog||[])];
                 setAppState(prev => ({ ...prev, txLog:newTxLog2, savings:{ ...(prev.savings||{}), [studentUser.id]:newSavings2 } }));
                 saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, newTxLog2);
-                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings`, { ...(appState.savings||{}), [studentUser.id]: newSavings2 });
+                const newSavingsObj2 = { ...(appState.savings||{}), [studentUser.id]: newSavings2 };
+                savingsRef.current = newSavingsObj2;
+                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings`, newSavingsObj2);
                 document.getElementById("savings-withdraw").value = "";
               }} style={{ padding:"8px 14px", background:"#dc2626", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Withdraw</button>
             </div>
