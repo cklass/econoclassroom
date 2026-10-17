@@ -1300,6 +1300,9 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
             5% interest every Friday!
           </div>
         </div>
+        <div style={{ fontSize:13, color:"rgba(255,255,255,0.6)", marginBottom:16, lineHeight:1.6, background:"rgba(255,255,255,0.05)", borderRadius:10, padding:"10px 14px" }}>
+          💡 Move some of your Dino Bucks here to save them! Your savings grow by <strong style={{color:"#a8f0c0"}}>5% every Friday</strong> — that means free money just for saving! You can withdraw anytime, but money in savings can't be spent directly in the store.
+        </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:16 }}>
           <div style={{ background:"rgba(21,128,61,0.2)", borderRadius:12, padding:16, textAlign:"center" }}>
             <div style={{ fontSize:11, color:"rgba(255,255,255,0.6)", marginBottom:4 }}>SAVINGS BALANCE</div>
