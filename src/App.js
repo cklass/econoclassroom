@@ -766,7 +766,7 @@ function AssistantLoginScreen({ setScreen }) {
         </div>
         <label style={{ fontSize:12, fontWeight:700, color:"rgba(255,255,255,0.5)", display:"block", marginBottom:8, letterSpacing:1 }}>ASSISTANT CODE</label>
         <input value={code} onChange={e => setCode(e.target.value.toUpperCase())}
-          placeholder="e.g. ASST-AB12" maxLength={9}
+          placeholder="e.g. ASST-AB12" maxLength={12}
           onKeyDown={e => e.key==="Enter" && findClassroom()}
           style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:20, fontWeight:800, outline:"none", marginBottom:16, boxSizing:"border-box", textAlign:"center", letterSpacing:3 }}/>
         {error && <div style={{ color:"#f87171", fontSize:13, marginBottom:12 }}>{error}</div>}
