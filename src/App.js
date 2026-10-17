@@ -1288,6 +1288,72 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
         )}
       </div>
 
+            {/* Savings Account */}
+      <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:16, padding:20, marginBottom:16 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+          <div style={{ color:"#fff", fontSize:16, fontWeight:700 }}>🏦 Savings Account</div>
+          <div style={{ background:"rgba(21,128,61,0.3)", border:"1px solid rgba(21,128,61,0.5)", borderRadius:20, padding:"4px 12px", fontSize:12, color:"#a8f0c0", fontWeight:600 }}>
+            5% interest every Friday!
+          </div>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:16 }}>
+          <div style={{ background:"rgba(21,128,61,0.2)", borderRadius:12, padding:16, textAlign:"center" }}>
+            <div style={{ fontSize:11, color:"rgba(255,255,255,0.6)", marginBottom:4 }}>SAVINGS BALANCE</div>
+            <div style={{ fontSize:28, fontWeight:800, color:"#a8f0c0", fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(savingsBalance)}</div>
+            <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", marginTop:4 }}>Earns {fmt(Math.floor(savingsBalance * 0.05))} next Friday</div>
+          </div>
+          <div style={{ background:"rgba(255,255,255,0.07)", borderRadius:12, padding:16, textAlign:"center" }}>
+            <div style={{ fontSize:11, color:"rgba(255,255,255,0.6)", marginBottom:4 }}>CHEQUING BALANCE</div>
+            <div style={{ fontSize:28, fontWeight:800, color:"#fff", fontFamily:"'Space Grotesk',sans-serif" }}>{fmt(balance)}</div>
+            <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", marginTop:4 }}>Available to spend</div>
+          </div>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+          <div>
+            <div style={{ fontSize:11, color:"rgba(255,255,255,0.5)", marginBottom:6 }}>DEPOSIT TO SAVINGS</div>
+            <div style={{ display:"flex", gap:6 }}>
+              <input id="savings-deposit" type="number" placeholder="Amount" min="1"
+                style={{ flex:1, padding:"8px 10px", borderRadius:8, border:"1.5px solid rgba(21,128,61,0.5)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:13, outline:"none" }}/>
+              <button onClick={() => {
+                const amt = parseInt(document.getElementById("savings-deposit")?.value);
+                if (!amt || amt <= 0) return;
+                if (amt > balance - 25) { alert(`Keep ${fmt(25)} minimum in chequing!`); return; }
+                const uid = () => Math.random().toString(36).slice(2);
+                const tds = () => new Date().toISOString().slice(0,10);
+                const newTx = { id:uid(), studentId:studentUser.id, amount:-amt, reason:`🏦 Deposited to savings`, date:tds() };
+                const newSavings = savingsBalance + amt;
+                const newTxLog = [newTx, ...(appState.txLog||[])];
+                setAppState(prev => ({ ...prev, txLog:newTxLog, savings:{ ...(prev.savings||{}), [studentUser.id]:newSavings } }));
+                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, newTxLog);
+                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings/${studentUser.id}`, newSavings);
+                document.getElementById("savings-deposit").value = "";
+              }} style={{ padding:"8px 14px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Save</button>
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize:11, color:"rgba(255,255,255,0.5)", marginBottom:6 }}>WITHDRAW FROM SAVINGS</div>
+            <div style={{ display:"flex", gap:6 }}>
+              <input id="savings-withdraw" type="number" placeholder="Amount" min="1"
+                style={{ flex:1, padding:"8px 10px", borderRadius:8, border:"1.5px solid rgba(239,68,68,0.5)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:13, outline:"none" }}/>
+              <button onClick={() => {
+                const amt = parseInt(document.getElementById("savings-withdraw")?.value);
+                if (!amt || amt <= 0) return;
+                if (amt > savingsBalance) { alert("Not enough in savings!"); return; }
+                const uid2 = () => Math.random().toString(36).slice(2);
+                const tds2 = () => new Date().toISOString().slice(0,10);
+                const newTx2 = { id:uid2(), studentId:studentUser.id, amount:amt, reason:`🏦 Withdrew from savings`, date:tds2() };
+                const newSavings2 = savingsBalance - amt;
+                const newTxLog2 = [newTx2, ...(appState.txLog||[])];
+                setAppState(prev => ({ ...prev, txLog:newTxLog2, savings:{ ...(prev.savings||{}), [studentUser.id]:newSavings2 } }));
+                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, newTxLog2);
+                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings/${studentUser.id}`, newSavings2);
+                document.getElementById("savings-withdraw").value = "";
+              }} style={{ padding:"8px 14px", background:"#dc2626", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Withdraw</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Recent transactions */}
       <div style={{ background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:16, padding:20 }}>
         <div style={{ color:"#fff", fontSize:16, fontWeight:700, marginBottom:16 }}>📋 Recent Transactions</div>
