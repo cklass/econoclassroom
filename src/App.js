@@ -1329,7 +1329,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                 const newTxLog = [newTx, ...(appState.txLog||[])];
                 setAppState(prev => ({ ...prev, txLog:newTxLog, savings:{ ...(prev.savings||{}), [studentUser.id]:newSavings } }));
                 saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, newTxLog);
-                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings/${studentUser.id}`, newSavings);
+                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings`, { ...(appState.savings||{}), [studentUser.id]: newSavings });
                 document.getElementById("savings-deposit").value = "";
               }} style={{ padding:"8px 14px", background:"#15803d", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Save</button>
             </div>
@@ -1350,7 +1350,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
                 const newTxLog2 = [newTx2, ...(appState.txLog||[])];
                 setAppState(prev => ({ ...prev, txLog:newTxLog2, savings:{ ...(prev.savings||{}), [studentUser.id]:newSavings2 } }));
                 saveToFirebase(`teachers/${studentUser.teacherId}/classroom/txLog`, newTxLog2);
-                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings/${studentUser.id}`, newSavings2);
+                saveToFirebase(`teachers/${studentUser.teacherId}/classroom/savings`, { ...(appState.savings||{}), [studentUser.id]: newSavings2 });
                 document.getElementById("savings-withdraw").value = "";
               }} style={{ padding:"8px 14px", background:"#dc2626", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:700 }}>Withdraw</button>
             </div>
