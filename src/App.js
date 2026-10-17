@@ -701,7 +701,7 @@ function AssistantLoginScreen({ setScreen }) {
         <input value={code} onChange={e => setCode(e.target.value.toUpperCase())}
           placeholder="e.g. ASST-AB12" maxLength={12}
           onKeyDown={e => e.key==="Enter" && findClassroom()}
-          style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:16, fontWeight:800, outline:"none", marginBottom:16, boxSizing:"border-box", textAlign:"center", letterSpacing:2 }}/>
+          style={{ width:"100%", padding:"14px 16px", borderRadius:10, border:"1.5px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.08)", color:"#fff", fontSize:14, fontWeight:600, outline:"none", marginBottom:16, boxSizing:"border-box", textAlign:"center" }}/>
         {error && <div style={{ color:"#f87171", fontSize:13, marginBottom:12 }}>{error}</div>}
         <button onClick={findClassroom} disabled={loading}
           style={{ width:"100%", padding:"14px", background:"linear-gradient(135deg,#15803d,#0f1f3d)", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontSize:17, fontWeight:700, marginBottom:16 }}>
