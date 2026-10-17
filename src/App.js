@@ -1000,9 +1000,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
   const myTx = React.useMemo(() => 
     (appState?.txLog||[]).filter(t => t.studentId === studentUser.id),
   [appState?.txLog]);
-  const savingsBalance = React.useMemo(() => 
-    appState?.savings?.[studentUser.id] || 0,
-  [appState?.savings]);
+  const savingsBalance = appState?.savings?.[studentUser.id] || 0;
   const dino = DINO_OPTIONS.find(d => d.id === studentUser.dinoId) || DINO_OPTIONS[0];
   const [showBirthday, setShowBirthday] = React.useState(false);
 
