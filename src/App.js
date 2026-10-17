@@ -992,11 +992,17 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
     return Object.values(val);
   };
   // Calculate balance from txLog — more secure than reading balances directly
-  const balance = (appState?.txLog||[])
+  const balance = React.useMemo(() => 
+    (appState?.txLog||[])
     .filter(t => t.studentId === studentUser.id)
-    .reduce((sum, t) => sum + t.amount, 0);
-  const myTx = (appState?.txLog||[]).filter(t => t.studentId === studentUser.id);
-  const savingsBalance = appState?.savings?.[studentUser.id] || 0;
+    .reduce((sum, t) => sum + t.amount, 0),
+  [appState?.txLog]);
+  const myTx = React.useMemo(() => 
+    (appState?.txLog||[]).filter(t => t.studentId === studentUser.id),
+  [appState?.txLog]);
+  const savingsBalance = React.useMemo(() => 
+    appState?.savings?.[studentUser.id] || 0,
+  [appState?.savings]);
   const dino = DINO_OPTIONS.find(d => d.id === studentUser.dinoId) || DINO_OPTIONS[0];
   const [showBirthday, setShowBirthday] = React.useState(false);
 
