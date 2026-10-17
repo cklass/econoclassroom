@@ -1007,7 +1007,7 @@ function StudentDashboard({ studentUser, classroom, setScreen }) {
   // Subscribe to live updates
   React.useEffect(() => {
     const unsub = subscribeToFirebase(`teachers/${studentUser.teacherId}/classroom`, data => {
-      if (data) setAppState(data);
+      if (data) setAppState(prev => ({ ...data, savings: { ...(data.savings||{}), ...(prev?.savings||{}) } }));
     });
     return unsub;
   }, [studentUser.teacherId]);
